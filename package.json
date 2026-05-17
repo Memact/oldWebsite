@@ -3,6 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "description": "Memact web portal for permissioned intent, consent, API keys, and data transparency.",
+  "license": "SEE LICENSE IN LICENSE",
   "type": "module",
   "repository": {
     "type": "git",
