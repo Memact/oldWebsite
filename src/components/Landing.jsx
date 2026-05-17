@@ -124,10 +124,10 @@ export function Landing({
           ) : (
             <>
               <h1 className="locked-tagline">
-                <span>Understand users'</span>
-                <span>digital activity.</span>
+                <span>Understand what</span>
+                <span>users are trying to do.</span>
               </h1>
-              <p>Memact turns approved activity into useful context<br className="mobile-subtitle-break" /> and memory without handing apps everything.</p>
+              <p>Memact helps apps predict user intent from approved digital activity<br className="mobile-subtitle-break" /> without raw access to private data.</p>
               {showAuth ? (
                 <div className="landing-actions">
                   <a className="scroll-to-auth" href="/#sign-up" onClick={(event) => handleAuthScroll(event, "sign-up")}>Get started</a>

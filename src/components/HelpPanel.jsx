@@ -5,42 +5,42 @@ import "../faq-chevron.css"
 const BASIC_FAQS = [
   {
     question: "What is Memact?",
-    answer: "Memact helps apps understand users' digital activity, using only the activity and memory permissions they approve."
+    answer: "Memact is permissioned intent infrastructure for apps. It helps apps understand what users are trying to do from approved digital activity."
   },
   {
     question: "Where does Memact run?",
-    answer: "Apps use a small Memact client SDK. Evidence can come from the browser extension and, if enabled, a local helper. Memact turns approved evidence into context, schemas, and memory; apps do not receive a blanket activity feed."
+    answer: "Apps use a small Memact client SDK. Evidence can come from approved browser activity and, if enabled, a local helper. Apps receive scoped intent and context, not raw private data."
   },
   {
-    question: "Does an app get my whole memory graph?",
-    answer: "No. Apps only get the context, summaries, evidence, or graph objects allowed by the permissions and categories you approve. Raw graph access is separate and sensitive."
+    question: "Does an app get my private data?",
+    answer: "No. Apps only get the scoped context or intent signals allowed by the permissions and categories you approve."
   },
   {
     question: "How does consent work?",
-    answer: "It shows what an app wants Memact to understand before anything is connected. You approve or cancel. Apps should link Data Transparency beside consent so you can review the evidence, schemas, memory objects, and context they plan to use."
+    answer: "Consent shows what an app is asking to use before anything is connected. Approval is optional, and you can review Data Transparency first."
   },
   {
     question: "What are activity categories?",
-    answer: "They limit which part of your activity Memact can understand for that app, like research pages, news, AI conversations, developer activity, or media."
+    answer: "They limit which approved activity an app can use, such as research pages, news, AI conversations, developer activity, or media."
   }
 ]
 
-const ACTIVITY_FAQS = [
+const INTENT_FAQS = [
   {
     question: "What activity can be used?",
-    answer: "Memact can use evidence like page titles, URLs, domains, timestamps, selected text, page text, PDF text, captions, transcripts, image context, and optional app/window context from the local helper. That evidence exists to produce understanding, not to sell a raw capture feed."
+    answer: "Only approved activity can be used. That can include page titles, URLs, selected text, captions, transcripts, timestamps, or other disclosed evidence fields."
   },
   {
-    question: "What does Memact turn activity into?",
-    answer: "Memact turns approved activity into context objects: events, sessions, evidence cards, summaries, schema packets, graph links, and patterns that can become memory. The important part is the boundary: an app only sees what its saved permissions allow."
+    question: "What does Memact produce?",
+    answer: "Memact turns approved activity into intent hypotheses, context signals, evidence cards, and scoped summaries. Intent predictions are hypotheses, not facts."
   },
   {
     question: "What does an app receive?",
-    answer: "Only scoped understanding allowed by the app key, your consent, selected scopes, activity categories, and authorized origin. That can include compact summaries, evidence cards, schema packets, memory objects, graph objects when approved, and status signals."
+    answer: "An app receives only what its saved consent allows: scoped context, intent signals, or evidence-backed summaries. Categories and permissions stay as hard boundaries."
   },
   {
-    question: "What is blocked?",
-    answer: "Memact skips sensitive pages like banking, payments, checkout, billing, passwords, logins, OTPs, private inboxes, direct messages, medical portals, and private account/admin pages before they become memory evidence."
+    question: "Can I change what an app uses?",
+    answer: "Yes. You can narrow scopes and categories before approving. Where available, you can revoke access later so future use stops."
   }
 ]
 
@@ -49,16 +49,15 @@ const ADVANCED_FAQS = [
     question: "How do I use the Memact API in an app?",
     answer: (
       <>
-        <p>Use Memact as a permissioned understanding and memory layer, not as a raw capture feed.</p>
+        <p>Use Memact as permissioned intent infrastructure for your app.</p>
         <ol>
           <li>Register your app in Memact and choose the smallest scopes and activity categories your feature needs.</li>
           <li>Add a <strong>Connect Memact</strong> button in your app. Send users to <code>/connect?app_id=...&amp;scopes=...&amp;categories=...&amp;redirect_uri=...</code>.</li>
-          <li>Put a Data Transparency link beside that consent flow. Explain the evidence fields, schema packets, summaries, memory objects, graph packets, retention, and revocation path.</li>
+          <li>Put a Data Transparency link beside that consent flow. Explain the approved activity, evidence fields, intended context, retention, and revocation path.</li>
           <li>After approval, Memact redirects back to your <code>redirect_uri</code> with a <code>connection_id</code>. Store that id for the signed-in user in your app.</li>
           <li>Keep the raw Memact API key in server environment config, such as <code>MEMACT_API_KEY</code> in <code>.env</code> locally and a secret manager in production. Do not ask users to paste it into UI.</li>
-          <li>Your backend calls Memact's verification endpoint with <code>Authorization: Bearer process.env.MEMACT_API_KEY</code>, the stored <code>connection_id</code>, required scopes, and activity categories. If verification fails, do not request context or memory.</li>
-          <li>Read the returned <code>understanding_strategy</code>. It tells your app which category-specific evidence Memact can use, what context it can infer, which schema packets can be formed, and whether summaries, evidence cards, or graph objects may be delivered.</li>
-          <li>Use only the approved understanding. For example, a news article app should follow the news/article strategy for claims, sources, topics, and reading intent instead of asking for a generic activity dump.</li>
+          <li>Your backend calls Memact's verification endpoint with <code>Authorization: Bearer process.env.MEMACT_API_KEY</code>, the stored <code>connection_id</code>, required scopes, and activity categories. If verification fails, do not request context.</li>
+          <li>Use only the approved intent and context returned for that user and app.</li>
         </ol>
       </>
     )
@@ -83,7 +82,7 @@ const ADVANCED_FAQS = [
     question: "What code should I embed?",
     answer: (
       <>
-        Embed only the user-facing connection pieces in the client: the Connect button, the Data Transparency link, and your callback handling. Put verification on your server. The server loads <code>process.env.MEMACT_API_KEY</code>, then sends <code>connection_id</code>, <code>required_scopes</code>, and <code>activity_categories</code> to Memact's verify endpoint. You normally do not set a verify URL; use the default Memact endpoint shown in the generated tutorial. Add <code>MEMACT_VERIFY_URL</code> only if Memact gives you a different verification host. Run your feature only when Memact returns <code>allowed: true</code>, then follow the returned <code>understanding_strategy</code> so your app uses the category-specific context Memact approved for that user.
+        Embed only the user-facing connection pieces in the client: the Connect button, the Data Transparency link, and your callback handling. Put verification on your server. The server loads <code>process.env.MEMACT_API_KEY</code>, then sends <code>connection_id</code>, <code>required_scopes</code>, and <code>activity_categories</code> to Memact's verify endpoint. Run your feature only when Memact returns <code>allowed: true</code>, then use only the approved intent and context for that user.
       </>
     )
   },
@@ -91,17 +90,13 @@ const ADVANCED_FAQS = [
     question: "Is a Data Transparency page required?",
     answer: (
       <>
-        Yes. Any app asking users to consent through Memact should expose Data Transparency next to the consent flow. It must explain the evidence fields, schema packets, summaries, memory objects, graph packets, retention, and revocation path. Categories alone are not enough.
+        Yes. Any app asking users to consent through Memact should expose Data Transparency next to the consent flow. It must explain what approved activity may be used, what intent or context the app wants, retention, and revocation.
       </>
     )
   },
   {
-    question: "What is a schema packet?",
-    answer: "A schema packet is Memact's understanding envelope: evidence, content units, nodes, edges, inferred structure, and a short summary that later layers can decide to keep as memory."
-  },
-  {
-    question: "What is not allowed?",
-    answer: "Apps should only request what they need. Hidden monitoring, selling raw capture or memory, manipulation, and sensitive decision-making are not allowed."
+    question: "Are intent predictions facts?",
+    answer: "No. Intent predictions are hypotheses from approved activity. Apps should treat them as signals and keep user choice in the loop."
   }
 ]
 
@@ -112,9 +107,8 @@ const LEGAL_FAQS = [
       <>
         Memact is a project by{" "}
         <a className="inline-help-link" href="https://github.com/keepsloading" target="_blank" rel="noreferrer">Keeps Loading</a>.
-        Some code may be viewable through the{" "}
-        <a className="inline-help-link" href="https://github.com/Memact" target="_blank" rel="noreferrer">Memact GitHub organization</a>,
-        but it remains proprietary. You may not edit, redistribute, or modify it without permission.
+        Core repos are source-available under their repository licenses, and contributions are accepted under the CLA.
+        Memact branding assets are not licensed with the code.
       </>
     )
   },
@@ -124,7 +118,7 @@ const LEGAL_FAQS = [
       <>
         For access, security, or project questions, contact{" "}
         <a className="inline-help-link" href="mailto:keepsloading@gmail.com">keepsloading@gmail.com.</a>
-        {" "}For safety, do not send secrets, raw memory exports, or API keys by email.
+        {" "}For safety, do not send secrets, private activity exports, or API keys by email.
       </>
     )
   }
@@ -161,8 +155,8 @@ export function HelpPanel() {
       </div>
 
       <div className="faq-section faq-section-advanced">
-        <p className="faq-section-title">Activity and memory</p>
-        {ACTIVITY_FAQS.map((faq) => (
+        <p className="faq-section-title">Intent and controls</p>
+        {INTENT_FAQS.map((faq) => (
           <FaqItem faq={faq} key={faq.question} />
         ))}
       </div>
