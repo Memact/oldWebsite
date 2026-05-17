@@ -62,6 +62,10 @@
         --page-inline: clamp(24px, 5vw, 40px);
         --topbar-height: 74px;
         --topbar-gap: 12px;
+        --topbar-radius: var(--radius-lg);
+        --topbar-safe-top: env(safe-area-inset-top, 0px);
+        --topbar-floating-top: calc(var(--topbar-safe-top) + var(--topbar-gap));
+        --topbar-actual-height: var(--topbar-height);
         color: var(--text);
         background: var(--bg);
         font-family: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
@@ -92,12 +96,12 @@
       .page {
         width: min(1440px, calc(100% - 40px));
         margin: 0 auto;
-        padding: calc(var(--topbar-height) + (var(--topbar-gap) * 2)) 0 56px;
+        padding: calc(var(--topbar-floating-top) + var(--topbar-actual-height) + var(--topbar-gap)) 0 56px;
       }
 
       .topbar {
         position: fixed;
-        top: var(--topbar-gap);
+        top: var(--topbar-floating-top);
         left: 50%;
         z-index: 20;
         margin: 0;
@@ -109,10 +113,11 @@
         align-items: center;
         gap: 16px;
         border: 1px solid var(--border);
-        border-radius: var(--radius-lg);
+        border-radius: var(--topbar-radius);
         padding: 14px var(--page-inline);
         background: rgba(0, 1, 27, 0.98);
         backdrop-filter: blur(18px);
+        overflow: visible;
         transition: box-shadow 180ms ease, background 180ms ease, border-color 180ms ease;
       }
 
@@ -565,13 +570,26 @@
 
     </main>
     <script>
-      (function() {
-        function onScroll() {
-          document.documentElement.classList.toggle('topbar-scrolled', window.scrollY > 2);
-        }
-        onScroll();
-        window.addEventListener("scroll", onScroll, { passive: true });
-      })();
+        (function() {
+          var topbar = document.querySelector(".topbar");
+          function syncTopbarHeight() {
+            if (!topbar) return;
+            var height = Math.ceil(topbar.getBoundingClientRect().height);
+            if (height > 0) {
+              document.documentElement.style.setProperty("--topbar-actual-height", height + "px");
+            }
+          }
+          function onScroll() {
+            document.documentElement.classList.toggle('topbar-scrolled', window.scrollY > 2);
+          }
+          syncTopbarHeight();
+          onScroll();
+          if ("ResizeObserver" in window && topbar) {
+            new ResizeObserver(syncTopbarHeight).observe(topbar);
+          }
+          window.addEventListener("resize", syncTopbarHeight);
+          window.addEventListener("scroll", onScroll, { passive: true });
+        })();
     </script>
   </body>
 </html>

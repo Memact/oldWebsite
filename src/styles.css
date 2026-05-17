@@ -17,6 +17,12 @@
   --page-inline: 24px;
   --topbar-height: 76px;
   --topbar-gap: 12px;
+  --topbar-radius: var(--radius-lg);
+  --topbar-safe-top: env(safe-area-inset-top, 0px);
+  --topbar-floating-top: calc(var(--topbar-safe-top) + var(--topbar-gap));
+  --topbar-actual-height: var(--topbar-height);
+  --status-overlay-gap: 10px;
+  --status-overlay-stack-offset: 68px;
   color: var(--text);
   background: var(--bg);
   font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
@@ -194,7 +200,7 @@ summary:focus-visible {
 
 .topbar {
   position: fixed;
-  top: var(--topbar-gap);
+  top: var(--topbar-floating-top);
   left: 50%;
   z-index: 20;
   margin: 0;
@@ -207,8 +213,9 @@ summary:focus-visible {
   gap: 16px;
   padding: 12px var(--page-inline);
   border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
+  border-radius: var(--topbar-radius);
   background: var(--bg);
+  overflow: visible;
   transition: box-shadow 180ms ease, background 180ms ease, border-color 180ms ease;
 }
 
@@ -354,7 +361,7 @@ details[open]:hover:not(:has(.faq-chevron:hover)) {
   gap: 12px;
   position: fixed;
   z-index: 80;
-  top: calc(var(--topbar-height) + (var(--topbar-gap) * 2));
+  top: calc(var(--topbar-floating-top) + var(--topbar-actual-height) + var(--status-overlay-gap));
   left: 50%;
   width: min(680px, calc(100% - 28px));
   margin: 0;
@@ -428,7 +435,7 @@ button.error-dismiss:focus-visible:not(:disabled) {
   gap: 12px;
   position: fixed;
   z-index: 79;
-  top: calc(var(--topbar-height) + (var(--topbar-gap) * 2));
+  top: calc(var(--topbar-floating-top) + var(--topbar-actual-height) + var(--status-overlay-gap));
   left: 50%;
   width: min(680px, calc(100% - 28px));
   margin: 0;
@@ -438,7 +445,7 @@ button.error-dismiss:focus-visible:not(:disabled) {
 }
 
 .success-overlay.has-error {
-  top: calc(var(--topbar-height) + (var(--topbar-gap) * 2) + 68px);
+  top: calc(var(--topbar-floating-top) + var(--topbar-actual-height) + var(--status-overlay-gap) + var(--status-overlay-stack-offset));
 }
 
 .inline-retry {
@@ -1766,12 +1773,12 @@ input:-webkit-autofill:focus {
     width: min(1440px, calc(100% - 40px));
     max-width: 1440px;
     margin: 0 auto;
-    padding-top: calc(var(--topbar-height) + (var(--topbar-gap) * 2));
+    padding-top: calc(var(--topbar-floating-top) + var(--topbar-actual-height) + var(--topbar-gap));
   }
 
   .page:not(.page-auth) .topbar {
     position: fixed;
-    top: var(--topbar-gap);
+    top: var(--topbar-floating-top);
     left: 50%;
     z-index: 20;
     margin: 0;
@@ -1785,9 +1792,10 @@ input:-webkit-autofill:focus {
     align-items: center;
     gap: 16px;
     border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
+    border-radius: var(--topbar-radius);
     padding: 14px var(--page-inline);
     background: rgba(0, 1, 27, 0.98);
+    overflow: visible;
     box-shadow: 0 18px 52px rgba(0, 0, 0, 0.22);
     backdrop-filter: blur(18px);
     transition: box-shadow 180ms ease, background 180ms ease, border-color 180ms ease;
@@ -1842,7 +1850,7 @@ input:-webkit-autofill:focus {
   }
 
   .page:not(.page-auth) {
-    padding-top: calc(var(--topbar-height) + (var(--topbar-gap) * 2));
+    padding-top: calc(var(--topbar-floating-top) + var(--topbar-actual-height) + var(--topbar-gap));
   }
 
   .page-auth {
@@ -1851,7 +1859,7 @@ input:-webkit-autofill:focus {
 
   .topbar {
     position: fixed;
-    top: var(--topbar-gap);
+    top: var(--topbar-floating-top);
     left: 50%;
     z-index: 20;
     margin: 0;
@@ -1865,6 +1873,7 @@ input:-webkit-autofill:focus {
     border-radius: var(--topbar-radius);
     padding: 10px var(--page-inline) 11px;
     background: rgba(0, 1, 27, 0.98);
+    overflow: visible;
     backdrop-filter: blur(18px);
     transition: box-shadow 180ms ease, background 180ms ease, border-color 180ms ease;
   }

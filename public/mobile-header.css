@@ -207,10 +207,11 @@
     align-items: center !important;
     gap: 10px !important;
     border: 1px solid var(--border) !important;
-    border-radius: var(--radius-lg) !important;
+    border-radius: var(--topbar-radius, var(--radius-lg)) !important;
     padding: 10px 12px 12px !important;
     background: rgba(0, 1, 27, 0.86) !important;
     backdrop-filter: blur(18px) !important;
+    overflow: visible !important;
   }
 
   .page:not(.page-auth) .logo-link {

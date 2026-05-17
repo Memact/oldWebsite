@@ -39,6 +39,27 @@ function App() {
     return () => window.removeEventListener("scroll", onScroll)
   }, [])
 
+  useEffect(() => {
+    const topbar = document.querySelector(".topbar")
+    if (!topbar) return undefined
+
+    const syncTopbarHeight = () => {
+      const height = Math.ceil(topbar.getBoundingClientRect().height)
+      if (height > 0) {
+        document.documentElement.style.setProperty("--topbar-actual-height", `${height}px`)
+      }
+    }
+
+    syncTopbarHeight()
+    const observer = typeof ResizeObserver !== "undefined" ? new ResizeObserver(syncTopbarHeight) : null
+    observer?.observe(topbar)
+    window.addEventListener("resize", syncTopbarHeight)
+    return () => {
+      observer?.disconnect()
+      window.removeEventListener("resize", syncTopbarHeight)
+    }
+  }, [])
+
   const [authSession, setAuthSession] = useState(null)
   const [authUser, setAuthUser] = useState(null)
   const [authChecking, setAuthChecking] = useState(true)
@@ -175,18 +196,18 @@ function App() {
   }, [client])
 
   useEffect(() => {
+    const normalizedPath = normalizePortalPath(window.location.pathname)
+    if (normalizedPath !== window.location.pathname) {
+      window.history.replaceState({}, "", `${normalizedPath}${window.location.search}${window.location.hash}`)
+      const normalizedPage = pageFromLocation()
+      setCurrentPage(normalizedPage)
+      setActiveTab(normalizedPage === "home" ? "login" : normalizedPage)
+    }
+
     if (!isSupabaseConfigured || !supabase) {
       setAuthChecking(false)
       setStatus("Supabase env vars are missing.")
       return undefined
-    }
-
-    const normalizedPath = normalizePortalPath(window.location.pathname)
-    if (normalizedPath !== window.location.pathname) {
-      window.history.replaceState({}, "", normalizedPath)
-      const normalizedPage = pageFromLocation()
-      setCurrentPage(normalizedPage)
-      setActiveTab(normalizedPage === "home" ? "login" : normalizedPage)
     }
 
     let mounted = true
