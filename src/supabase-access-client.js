@@ -557,7 +557,7 @@ function buildBrowserUnderstandingStrategy(scopes = [], categories = []) {
   return {
     id: `browser_understanding_${categories.join("_").replace(/[^a-z0-9_]/gi, "") || "default"}`,
     product: "permissioned_understanding",
-    tagline: "Understand users' digital activity.",
+    tagline: "Understand what users are trying to do.",
     scopes,
     categories,
     capture_plan: {
@@ -581,7 +581,7 @@ function buildBrowserCompiledPolicy({ appId = "", scopes = [], categories = [], 
     id: `browser_policy_${String(appId || "new").replace(/[^a-z0-9]/gi, "").slice(0, 18)}_${categories.join("_").replace(/[^a-z0-9_]/gi, "") || "default"}`,
     app_id: appId,
     product: "permissioned_understanding",
-    tagline: "Understand users' digital activity.",
+    tagline: "Understand what users are trying to do.",
     purpose: String(purpose || "").trim().slice(0, 240),
     scopes,
     categories,

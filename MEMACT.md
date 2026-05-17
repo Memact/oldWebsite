@@ -33,5 +33,5 @@ Avoid:
 - generic AI wrapper language
 - vague memory-plugin language
 - raw-data export framing
-- claims that apps get the whole memory graph
+- claims that apps receive private data by default
 - open-source wording unless the repo license explicitly says so

@@ -2,8 +2,9 @@
 
 Website is the Memact web UI for users and developers.
 
-Memact helps apps understand users' digital activity from approved activity
-and memory while users choose what each app is allowed to know.
+Memact is permissioned intent infrastructure for apps.
+It helps apps predict user intent from approved digital activity while users
+choose what each app is allowed to use.
 
 ```text
 Apps ask for context. Users choose what Memact can understand.
@@ -26,17 +27,19 @@ Website does not capture activity, infer intent, or read memory graphs directly.
 
 ## Product Definition
 
-Memact turns approved digital activity into useful context: what users do,
-what patterns matter, and what memory is safe to reuse for a
-specific app.
+Memact turns approved digital activity into useful context and intent signals:
+what users appear to be doing, what patterns matter, and what each app is
+allowed to use.
 
 Website is not the memory engine. It is the account, app, permission, consent, and API key console.
 
 ```text
-Website -> access layer -> scoped API key -> user consent -> evidence/filtering -> context, schemas, and memory
+Website -> access layer -> scoped API key -> user consent -> evidence/filtering -> intent and context
 ```
 
-Apps use Memact for permissioned understanding, not a raw data feed. They do not get a blanket dump of a user's private graph or captured activity. Each app must stay inside the scopes, categories, consent, and Data Transparency disclosure attached to that app.
+Apps use Memact for permissioned intent and context. Each app must stay inside
+the scopes, categories, consent, and Data Transparency disclosure attached to
+that app.
 
 ## Current UI
 
@@ -285,7 +288,7 @@ ready.
 Website includes a Help tab for non-technical users. It explains:
 
 - what Memact is
-- whether apps get the whole memory graph
+- whether apps receive private data by default
 - how consent works
 - what activity categories are
 - how developers should embed the API safely
