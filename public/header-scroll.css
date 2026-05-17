@@ -1,0 +1,59 @@
+:root {
+  --topbar-radius: var(--radius-lg);
+  --topbar-rest-top: var(--topbar-gap);
+  --topbar-stuck-top: env(safe-area-inset-top, 0px);
+  --topbar-actual-height: var(--topbar-height);
+}
+
+.topbar {
+  top: var(--topbar-rest-top) !important;
+  border-radius: var(--topbar-radius) !important;
+  overflow: visible !important;
+  clip-path: none !important;
+  transform: translateX(-50%) !important;
+}
+
+html.topbar-scrolled .topbar,
+body.topbar-scrolled .topbar {
+  top: var(--topbar-stuck-top) !important;
+  border-top-left-radius: 0 !important;
+  border-top-right-radius: 0 !important;
+  border-top-color: transparent !important;
+  box-shadow: 0 18px 52px rgba(0, 0, 0, 0.32) !important;
+}
+
+.error-overlay,
+.success-overlay {
+  top: calc(var(--topbar-rest-top) + var(--topbar-actual-height) + var(--topbar-gap)) !important;
+}
+
+html.topbar-scrolled .error-overlay,
+html.topbar-scrolled .success-overlay,
+body.topbar-scrolled .error-overlay,
+body.topbar-scrolled .success-overlay {
+  top: calc(var(--topbar-stuck-top) + var(--topbar-actual-height) + var(--topbar-gap)) !important;
+}
+
+.success-overlay.has-error {
+  top: calc(var(--topbar-rest-top) + var(--topbar-actual-height) + var(--topbar-gap) + 68px) !important;
+}
+
+html.topbar-scrolled .success-overlay.has-error,
+body.topbar-scrolled .success-overlay.has-error {
+  top: calc(var(--topbar-stuck-top) + var(--topbar-actual-height) + var(--topbar-gap) + 68px) !important;
+}
+
+@media (max-width: 900px) {
+  .topbar {
+    top: var(--topbar-rest-top) !important;
+    border-radius: var(--topbar-radius) !important;
+    overflow: visible !important;
+  }
+
+  html.topbar-scrolled .topbar,
+  body.topbar-scrolled .topbar {
+    top: var(--topbar-stuck-top) !important;
+    border-top-left-radius: 0 !important;
+    border-top-right-radius: 0 !important;
+  }
+}
