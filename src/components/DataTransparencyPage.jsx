@@ -79,7 +79,7 @@ export function DataTransparencyPage({
           <h3>What the app wants to understand</h3>
           <DisclosureList
             items={intentContext}
-            empty="This app may ask Memact for intent hypotheses based on the activity categories you approve. Predictions are hypotheses, include evidence, and stay inside blocked-action rules."
+            empty="This app may ask Memact for intent hypotheses based on the activity categories you approve. Intent predictions are hypotheses. They include evidence and list actions the app must not take."
           />
         </section>
 
@@ -139,7 +139,7 @@ export function DataTransparencyPage({
         <section className="permission-list transparency-card">
           <p className="eyebrow">Revoke</p>
           <h3>How to stop future access</h3>
-          <p className="muted">{revocation} Removing app access stops future intent predictions where revocation is available.</p>
+          <p className="muted">{revocation} Removing app access stops future intent predictions for this app.</p>
         </section>
       </div>
 

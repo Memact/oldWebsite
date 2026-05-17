@@ -3,8 +3,7 @@ export const DEFAULT_SCOPES = [
   "schema:write",
   "graph:write",
   "memory:write",
-  "memory:read_summary",
-  "intent:predict"
+  "memory:read_summary"
 ]
 
 export const DEFAULT_CATEGORIES = [
