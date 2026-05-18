@@ -7,6 +7,7 @@ export function ConnectPage({ connectRequest, connectDetails, loading, notice, o
   const requestedScopes = connectDetails?.requested_scopes || connectRequest?.scopes || []
   const requestedCategories = connectDetails?.requested_categories || connectRequest?.categories || []
   const appName = app?.name || "this app"
+  const canApprove = Boolean(app?.id && requestedScopes.length && requestedCategories.length && loading !== "approve")
 
   return (
     <section className="connect-shell">
@@ -14,10 +15,9 @@ export function ConnectPage({ connectRequest, connectDetails, loading, notice, o
         <div className="connect-hero">
           <div>
             <p className="eyebrow">Connect app</p>
-            <h1>{appName} wants to connect.</h1>
+            <h2>{appName} wants to connect.</h2>
             <p className="muted">Review how this app wants to use approved activity to understand what you are trying to do.</p>
           </div>
-          <span className="consent-state-pill">User controlled</span>
         </div>
 
         <div className="app-identity connect-identity">
@@ -34,7 +34,10 @@ export function ConnectPage({ connectRequest, connectDetails, loading, notice, o
         {notice ? <p className="notice notice-success" role="status">{notice}</p> : null}
 
         <section className="permission-list consent-summary-card">
-          <p className="eyebrow">Before you approve</p>
+          <div>
+            <p className="eyebrow">Before you approve</p>
+            <h3>What this connection allows</h3>
+          </div>
           <div className="consent-points">
             <div className="mini-row">
               <strong>Approval is optional and scoped.</strong>
@@ -77,7 +80,7 @@ export function ConnectPage({ connectRequest, connectDetails, loading, notice, o
         </div>
 
         <div className="connect-actions">
-          <button type="button" onClick={onApprove} disabled={!app?.id || loading === "approve"}>
+          <button type="button" onClick={onApprove} disabled={!canApprove}>
             {loading === "approve" ? "Connecting..." : "Approve connection"}
           </button>
           <button type="button" className="ghost" onClick={onCancel}>Cancel</button>

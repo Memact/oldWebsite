@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useRef } from "react"
 
 export function DataTransparencyPage({
   app,
@@ -12,6 +12,7 @@ export function DataTransparencyPage({
   onManageConsent
 }) {
   const appName = app?.name || "this app"
+  const optionRef = useStableRequestedOptions(app?.id, requestedScopes, requestedCategories)
   const dataUses = normalizeDisclosureList(transparency?.data_uses || transparency?.dataUses)
   const capturedData = normalizeDisclosureList(transparency?.captured_data || transparency?.capturedData || transparency?.data_collected)
   const intentContext = normalizeDisclosureList(transparency?.intent_context || transparency?.intentContext || transparency?.graph_packets || transparency?.graphPackets || transparency?.memory_packets)
@@ -19,15 +20,16 @@ export function DataTransparencyPage({
   const revocation = transparency?.revocation || transparency?.revocation_policy || "After consent is revoked, new Memact access should stop. Previously copied data must follow the app's own deletion policy."
   const safeRequestedScopes = Array.isArray(requestedScopes) ? requestedScopes : []
   const safeRequestedCategories = Array.isArray(requestedCategories) ? requestedCategories : []
+  const scopeOptions = optionRef.current.scopes
+  const categoryOptions = optionRef.current.categories
+  const hasEnoughSelection = safeRequestedScopes.length > 0 && safeRequestedCategories.length > 0
   const toggleScope = (scope) => {
-    if (safeRequestedScopes.length <= 1 && safeRequestedScopes.includes(scope)) return
     const nextScopes = safeRequestedScopes.includes(scope)
       ? safeRequestedScopes.filter((item) => item !== scope)
       : [...safeRequestedScopes, scope]
     onUpdateSelection?.({ scopes: nextScopes, categories: safeRequestedCategories })
   }
   const toggleCategory = (category) => {
-    if (safeRequestedCategories.length <= 1 && safeRequestedCategories.includes(category)) return
     const nextCategories = safeRequestedCategories.includes(category)
       ? safeRequestedCategories.filter((item) => item !== category)
       : [...safeRequestedCategories, category]
@@ -42,16 +44,6 @@ export function DataTransparencyPage({
           <h2>Control what {appName} can use.</h2>
           <p className="muted">Review the approved activity, scopes, and intent context this app is asking for.</p>
         </div>
-        <div className="transparency-summary" aria-label="Transparency summary">
-          <span>
-            <strong>{safeRequestedScopes.length}</strong>
-            Requested scopes
-          </span>
-          <span>
-            <strong>{safeRequestedCategories.length}</strong>
-            Activity categories
-          </span>
-        </div>
       </div>
 
       <div className="app-identity connect-identity">
@@ -63,6 +55,62 @@ export function DataTransparencyPage({
           ) : <span className="muted">Developer URL not provided.</span>}
         </div>
       </div>
+
+      <section className="permission-list transparency-controls-panel">
+        <div className="transparency-control-head">
+          <div>
+            <p className="eyebrow">Your controls</p>
+            <h3>Choose what is allowed before consent</h3>
+          </div>
+          <div className="transparency-summary" aria-label="Transparency summary">
+            <span><strong>{safeRequestedScopes.length}</strong> Scopes</span>
+            <span><strong>{safeRequestedCategories.length}</strong> Categories</span>
+          </div>
+        </div>
+        {!hasEnoughSelection ? (
+          <p className="notice" role="status">Select at least one permission and one activity category before returning to consent.</p>
+        ) : null}
+        <div className="transparency-choice-grid">
+          <div className="transparency-choice-group">
+            <p className="app-list-label">Allowed permissions</p>
+            <div className="transparency-control-list">
+              {scopeOptions.map((scope) => (
+                <label className="transparency-control" key={scope}>
+                  <input
+                    type="checkbox"
+                    checked={safeRequestedScopes.includes(scope)}
+                    onChange={() => toggleScope(scope)}
+                  />
+                  <span>
+                    <strong>{scopes?.[scope]?.label || scope}</strong>
+                    <small>{scopes?.[scope]?.description || scope}</small>
+                  </span>
+                </label>
+              ))}
+              {!scopeOptions.length ? <p className="muted">No permissions were attached to this transparency link.</p> : null}
+            </div>
+          </div>
+          <div className="transparency-choice-group">
+            <p className="app-list-label">Allowed activity</p>
+            <div className="transparency-control-list">
+              {categoryOptions.map((category) => (
+                <label className="transparency-control" key={category}>
+                  <input
+                    type="checkbox"
+                    checked={safeRequestedCategories.includes(category)}
+                    onChange={() => toggleCategory(category)}
+                  />
+                  <span>
+                    <strong>{categories?.[category]?.label || category}</strong>
+                    <small>{categories?.[category]?.description || category}</small>
+                  </span>
+                </label>
+              ))}
+              {!categoryOptions.length ? <p className="muted">No activity categories were attached to this transparency link.</p> : null}
+            </div>
+          </div>
+        </div>
+      </section>
 
       <div className="transparency-grid">
         <section className="permission-list transparency-card">
@@ -93,44 +141,6 @@ export function DataTransparencyPage({
         </section>
 
         <section className="permission-list transparency-card">
-          <p className="eyebrow">Your controls</p>
-          <h3>Allowed permissions</h3>
-          <div className="transparency-control-list">
-            {safeRequestedScopes.map((scope) => (
-              <label className="transparency-control" key={scope}>
-                <input
-                  type="checkbox"
-                  checked
-                  disabled={safeRequestedScopes.length <= 1}
-                  onChange={() => toggleScope(scope)}
-                />
-                <span>{scopes?.[scope]?.label || scope}</span>
-              </label>
-            ))}
-            {!safeRequestedScopes.length ? <p className="muted">No permissions were attached to this transparency link.</p> : null}
-          </div>
-        </section>
-
-        <section className="permission-list transparency-card">
-          <p className="eyebrow">Your controls</p>
-          <h3>Allowed activity</h3>
-          <div className="transparency-control-list">
-            {safeRequestedCategories.map((category) => (
-              <label className="transparency-control" key={category}>
-                <input
-                  type="checkbox"
-                  checked
-                  disabled={safeRequestedCategories.length <= 1}
-                  onChange={() => toggleCategory(category)}
-                />
-                <span>{categories?.[category]?.label || category}</span>
-              </label>
-            ))}
-            {!safeRequestedCategories.length ? <p className="muted">No activity categories were attached to this transparency link.</p> : null}
-          </div>
-        </section>
-
-        <section className="permission-list transparency-card">
           <p className="eyebrow">Retention</p>
           <h3>How long it keeps data</h3>
           <p className="muted">{retention}</p>
@@ -149,6 +159,26 @@ export function DataTransparencyPage({
       </div>
     </section>
   )
+}
+
+function useStableRequestedOptions(appId, requestedScopes, requestedCategories) {
+  const safeScopes = Array.isArray(requestedScopes) ? requestedScopes : []
+  const safeCategories = Array.isArray(requestedCategories) ? requestedCategories : []
+  const ref = useRef({ appId, scopes: safeScopes, categories: safeCategories })
+  if (ref.current.appId !== appId) {
+    ref.current = { appId, scopes: safeScopes, categories: safeCategories }
+  } else {
+    ref.current = {
+      appId,
+      scopes: mergeUnique(ref.current.scopes, safeScopes),
+      categories: mergeUnique(ref.current.categories, safeCategories)
+    }
+  }
+  return ref
+}
+
+function mergeUnique(first = [], second = []) {
+  return Array.from(new Set([...first, ...second].filter(Boolean)))
 }
 
 function DisclosureList({ items, empty }) {
