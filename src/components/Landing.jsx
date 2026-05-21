@@ -117,17 +117,17 @@ export function Landing({
         <div className="hero-copy hero-copy-compact">
           {isConnecting ? (
             <>
-              <h1>Review app access.</h1>
-              <p>Sign in to review the app, requested scopes, and activity categories before connecting.</p>
+              <h1>Review what this app can use.</h1>
+              <p>Sign in to see what the app wants and choose whether to connect.</p>
               <button type="button" className="learn-more-link" onClick={onLearnMore}>Learn more</button>
             </>
           ) : (
             <>
               <h1 className="locked-tagline">
-                <span>Understand what</span>
-                <span>users are trying to do.</span>
+                <span>Personalization made better</span>
+                <span>with Memact</span>
               </h1>
-              <p>Memact helps apps predict user intent from approved digital activity<br className="mobile-subtitle-break" /> without raw access to private data.</p>
+              <p>Memact helps apps personalize better with context users control.</p>
               {showAuth ? (
                 <div className="landing-actions">
                   <a className="scroll-to-auth" href="/#sign-up" onClick={(event) => handleAuthScroll(event, "sign-up")}>Get started</a>

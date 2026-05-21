@@ -15,7 +15,8 @@ export function DataTransparencyPage({
   const optionRef = useStableRequestedOptions(app?.id, requestedScopes, requestedCategories)
   const dataUses = normalizeDisclosureList(transparency?.data_uses || transparency?.dataUses)
   const capturedData = normalizeDisclosureList(transparency?.captured_data || transparency?.capturedData || transparency?.data_collected)
-  const intentContext = normalizeDisclosureList(transparency?.intent_context || transparency?.intentContext || transparency?.graph_packets || transparency?.graphPackets || transparency?.memory_packets)
+  const createdContext = normalizeDisclosureList(transparency?.created_context || transparency?.intent_context || transparency?.intentContext || transparency?.graph_packets || transparency?.graphPackets || transparency?.memory_packets)
+  const allowedFeatures = normalizeDisclosureList(transparency?.features || transparency?.allowed_features || transparency?.allowedFeatures)
   const retention = transparency?.retention || transparency?.retention_policy || "The app has not provided a specific retention statement yet."
   const revocation = transparency?.revocation || transparency?.revocation_policy || "After consent is revoked, new Memact access should stop. Previously copied data must follow the app's own deletion policy."
   const safeRequestedScopes = Array.isArray(requestedScopes) ? requestedScopes : []
@@ -42,7 +43,7 @@ export function DataTransparencyPage({
         <div>
           <p className="eyebrow">Data transparency</p>
           <h2>Control what {appName} can use.</h2>
-          <p className="muted">Review the approved activity, scopes, and intent context this app is asking for.</p>
+          <p className="muted">See what this app can use, what Memact creates, and what the app may receive back.</p>
         </div>
       </div>
 
@@ -114,42 +115,51 @@ export function DataTransparencyPage({
 
       <div className="transparency-grid">
         <section className="permission-list transparency-card">
-          <p className="eyebrow">Evidence</p>
-          <h3>Approved activity it may use</h3>
+          <p className="eyebrow">What this app can send</p>
+          <h3>Signals and activity fields</h3>
           <DisclosureList
             items={capturedData}
-            empty="This app has not listed exact evidence fields yet. It should disclose fields such as URLs, page titles, selected text, transcripts, snippets, or timestamps."
+            empty="This app has not listed exact fields yet. It should disclose fields such as URLs, page titles, selected text, transcripts, snippets, or timestamps."
           />
         </section>
 
         <section className="permission-list transparency-card">
-          <p className="eyebrow">Intent context</p>
-          <h3>What the app wants to understand</h3>
+          <p className="eyebrow">What Memact may create</p>
+          <h3>Context created from those signals</h3>
           <DisclosureList
-            items={intentContext}
-            empty="This app may ask Memact for intent hypotheses based on the activity categories you approve. Intent predictions are hypotheses. They include evidence and list actions the app must not take."
+            items={createdContext}
+            empty="Memact may create useful context from the categories you allow. The app should explain what kind of context it wants."
           />
         </section>
 
         <section className="permission-list transparency-card">
-          <p className="eyebrow">Purpose</p>
+          <p className="eyebrow">Why the app wants it</p>
           <h3>Why it wants access</h3>
           <DisclosureList
             items={dataUses}
-            empty={app?.description || "This app has not provided a plain-language reason for the intent context it wants from Memact yet."}
+            empty={app?.description || "This app has not provided a plain-language reason for the Memact context it wants yet."}
           />
         </section>
 
         <section className="permission-list transparency-card">
-          <p className="eyebrow">Retention</p>
+          <p className="eyebrow">What this app may use</p>
+          <h3>Features and allowed context</h3>
+          <DisclosureList
+            items={allowedFeatures}
+            empty="No specific feature list was provided. The allowed permissions and categories above still limit what the app can use."
+          />
+        </section>
+
+        <section className="permission-list transparency-card">
+          <p className="eyebrow">How long access lasts</p>
           <h3>How long it keeps data</h3>
           <p className="muted">{retention}</p>
         </section>
 
         <section className="permission-list transparency-card">
-          <p className="eyebrow">Revoke</p>
+          <p className="eyebrow">Stop future access</p>
           <h3>How to stop future access</h3>
-          <p className="muted">{revocation} Removing app access stops future intent predictions for this app.</p>
+          <p className="muted">{revocation} Removing app access stops future Memact access for this app.</p>
         </section>
       </div>
 

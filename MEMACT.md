@@ -1,54 +1,47 @@
-# Memact description
-
-**Permissioned intent infrastructure for apps.**
+# Memact Website Notes
 
 ```text
-Understand what users are trying to do.
+Personalization made better
+with Memact
 ```
 
-Memact is infrastructure that helps apps predict user intent from approved digital activity, without giving them raw access to a user's private data.
+Memact helps apps personalize better with context users control.
 
-This repo is the Memact web portal for sign in, app registration, permissions, API keys, Connect App consent, Data Transparency, help, SEO, and public learn content.
+Website is the Memact portal for users, developers, and apps. It handles sign in,
+app registration, permissions, API keys, consent, Data Transparency, help, SEO,
+and public learn content.
 
-## System position
+## System Position
 
 ```text
-Website manages -> Access gates -> Capture records -> Inference understands -> Schema groups -> Intent predicts -> Memory stores -> Apps consume
+Website manages -> Access checks -> Capture records -> Inference understands -> Schema organizes -> Memory stores -> Studio features run -> Apps and users use results
 ```
 
-Website is not the capture engine, inference engine, memory store, or intent engine. It is the user and developer-facing control surface for permissioned access.
+Website is not the capture engine, inference engine, schema engine, memory
+store, or feature runtime. It is the control surface.
 
-## What this repo owns
+## Copy Rules
 
-- sign-in and account settings
-- app registration and API key management
-- permission, category, consent, and Data Transparency UI
-- Connect App flow
-- help, tutorial, public Learn page, and SEO metadata
+Use simple public copy:
 
-## What this repo does not own
+- "Personalization made better with Memact."
+- "Memact helps apps personalize better with context users control."
+- "You choose what an app can use."
+- "Data Transparency shows what an app can use, what Memact creates, and what the app may receive."
 
-- permission verification internals
-- browser/page capture
-- semantic inference
-- schema grouping
-- intent prediction rules
-- memory storage or retrieval
+Keep technical terms in developer sections:
 
-## Copy rules
-
-Use:
-
-- "Permissioned intent infrastructure for apps."
-- "Understand what users are trying to do."
-- "approved digital activity"
-- "consent and scope boundaries"
-- "intent predictions are hypotheses, not facts"
+- capture events
+- inference
+- schema packets
+- memory records
+- SDK
+- feature runtime
+- scopes and categories
 
 Avoid:
 
-- generic wrapper language
-- vague memory-plugin language
-- raw-data export framing
+- intent-first positioning
+- AI platform hype
+- infra soup in public copy
 - claims that apps receive private data by default
-- open-source wording unless the repo license explicitly says so

@@ -154,7 +154,7 @@ export function Dashboard({
               </div>
               <div className="mini-row">
                 <strong>2. Save permissions</strong>
-                <small>Pick the scopes that match what the app should understand.</small>
+                <small>Pick the scopes that match what the app should use.</small>
               </div>
               <div className="mini-row">
                 <strong>3. Create a key</strong>
@@ -394,7 +394,7 @@ export function Dashboard({
                 </label>
                 <div>
                   <p className="eyebrow">Activity categories</p>
-                  <p className="muted">Pick the kinds of activity this app is allowed to understand. This keeps apps narrow by design.</p>
+                  <p className="muted">Pick the kinds of app signals this app is allowed to use. This keeps access narrow by design.</p>
                   <CategoryGrid
                     categories={categories}
                     selected={newAppCategories}
@@ -424,12 +424,30 @@ export function Dashboard({
             ) : null}
           </section>
 
+          <section className="panel dashboard-surface-grid" aria-label="Memact surfaces">
+            <div className="metric-card">
+              <span>Capture Sources</span>
+              <strong>Optional</strong>
+              <small>Apps can send signals after permission. The browser extension is optional, and nothing automatic happens without integration, import, sharing, or the extension.</small>
+            </div>
+            <div className="metric-card">
+              <span>Features</span>
+              <strong>3 ready paths</strong>
+              <small>User Context Wiki, Cognitive Load, and Research Map are the first Memact feature surfaces.</small>
+            </div>
+            <div className="metric-card">
+              <span>Schemas</span>
+              <strong>Developer view</strong>
+              <small>Schema packets, categories, and source trails are available for technical review when connected.</small>
+            </div>
+          </section>
+
           <div className="access-layout">
             <section id="permissions-panel" className="panel">
               <div className="section-head">
                 <div className="section-copy">
                   <p className="eyebrow">Permissions</p>
-                  <h2>Choose what this app can ask Memact to understand.</h2>
+                  <h2>Choose what this app can ask Memact to use.</h2>
                   <p className="muted">Permissions are saved for this app. Change scopes any time.</p>
                 </div>
                 <div className="actions section-actions">
@@ -634,63 +652,44 @@ function buildEmbedCode(apiKey, scopes = [], categories = [], app = null) {
   const redirectUrl = app?.redirect_urls?.[0] || app?.developer_url || "https://your-app.example.com/memact/callback"
   const connectUrl = buildPortalConnectUrl(appId, scopes, categories, redirectUrl)
   const dataTransparencyUrl = buildPortalDataTransparencyUrl(appId, scopes, categories, redirectUrl)
-  const verifyUrl = getDeveloperVerifyUrl()
-  return `// 1. Add the Connect Memact button.
+  return `import { createMemactClient } from "@memact/sdk";
+
+// 1. Add the Connect Memact button.
 const memactConnectUrl = "${connectUrl}";
 
 // 2. Add the Data Transparency link beside consent.
 const memactDataTransparencyUrl = "${dataTransparencyUrl}";
 
-// 3. After the user approves, Memact redirects back with ?connected=1&connection_id=...
-const memactConnectionId = "connection_id_from_connect_redirect";
+// 3. After approval, store the returned connection id on your server.
+const connectionId = "connection_id_from_connect_redirect";
 
-// 4. Verify access on your server before requesting context.
-// .env on your server:
-// MEMACT_API_KEY=${apiKey || "mka_key_shown_once"}
-// Optional override only if Memact gives you a different verify host:
-// MEMACT_VERIFY_URL=${verifyUrl}
-const memactApiKey = process.env.MEMACT_API_KEY;
-const memactVerifyUrl = process.env.MEMACT_VERIFY_URL || "${verifyUrl}";
-const requiredScopes = ${JSON.stringify(scopes, null, 2)};
-const activityCategories = ${JSON.stringify(categories, null, 2)};
-
-if (!memactApiKey) {
-  throw new Error("Set MEMACT_API_KEY in your server .env or secret manager.");
-}
-if (!memactConnectionId) {
-  throw new Error("Store the connection_id returned by Memact after user approval.");
-}
-
-const response = await fetch(memactVerifyUrl, {
-  method: "POST",
-  headers: {
-    "Authorization": \`Bearer \${memactApiKey}\`,
-    "Content-Type": "application/json"
-  },
-  body: JSON.stringify({
-    connection_id: memactConnectionId,
-    required_scopes: requiredScopes,
-    activity_categories: activityCategories
-  })
+// 4. Keep the raw key in server env only.
+const memact = createMemactClient({
+  baseUrl: "https://api.memact.com",
+  apiKey: process.env.MEMACT_API_KEY || "${apiKey || "mka_key_shown_once"}",
+  appId: "${appId}",
+  connectionId
 });
 
-const access = await response.json();
-if (!access?.allowed) {
-  throw new Error(access?.error?.message || "Memact access denied.");
-}
-
-console.log("Memact access granted", {
-  app: access.app?.name,
-  scopes: access.scopes,
-  categories: access.categories,
-  understanding_strategy: access.understanding_strategy?.id
+await memact.verifyAccess({
+  required_scopes: ${JSON.stringify(scopes, null, 2)},
+  activity_categories: ${JSON.stringify(categories, null, 2)}
 });
 
-// 5. Use only approved understanding.
-// Follow access.understanding_strategy for this exact scope + category combination.
-// Capture: use only the allowed_inputs for the approved activity categories.
-// Schema: write only the listed schema_packets.
-// Memory: request summaries/evidence/graph objects only when delivery_plan allows them.`
+await memact.capture({
+  event_type: "article_read",
+  category: "web:research",
+  payload: {
+    title: "Example article",
+    url: "https://example.com/article"
+  }
+});
+
+const result = await memact.runFeature("user-context-wiki", {
+  schema_packets: []
+});
+
+console.log(result);`
 }
 
 function getDeveloperVerifyUrl() {

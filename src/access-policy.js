@@ -52,7 +52,7 @@ export function suggestedScopesForCategories(policy, categories = []) {
     suggested.add("capture:webpage")
     suggested.add("schema:write")
     suggested.add("memory:read_summary")
-    suggested.add("intent:predict")
+    suggested.add("feature:list")
   }
 
   if (selectedCategories.has("web:news") || selectedCategories.has("web:social") || selectedCategories.has("web:research")) {
@@ -76,7 +76,7 @@ export function permissionSuggestionForCategories(policy, categories = []) {
   const selectedCategories = normalizeSelectedCategories(categories, policy)
   const scopes = suggestedScopesForCategories(policy, selectedCategories)
   return {
-    label: selectedCategories.includes("web:news") ? "Article intent preset" : "Suggested intent preset",
+    label: selectedCategories.includes("web:news") ? "Article context preset" : "Suggested preset",
     description: "Selected from this app's activity categories. You can still adjust it.",
     scopes: normalizeSelectedScopes(scopes, policy),
     categories: selectedCategories
@@ -86,7 +86,7 @@ export function permissionSuggestionForCategories(policy, categories = []) {
 export function presetSuggestionsForPolicy(policy, categories = [], appPurpose = "") {
   const selectedCategories = normalizeSelectedCategories(categories, policy)
   const primary = permissionSuggestionForCategories(policy, selectedCategories)
-  const leanScopes = normalizeSelectedScopes(["capture:webpage", selectedCategories.some((category) => category.startsWith("media:")) ? "capture:media" : "", "schema:write", "memory:read_summary", "intent:predict"], policy)
+  const leanScopes = normalizeSelectedScopes(["capture:webpage", selectedCategories.some((category) => category.startsWith("media:")) ? "capture:media" : "", "schema:write", "memory:read_summary", "feature:list"], policy)
   const explainableScopes = normalizeSelectedScopes([...primary.scopes, "memory:read_evidence"], policy)
   const purpose = String(appPurpose || "").toLowerCase()
   const purposeBoostedScopes = /debug|audit|source|citation|evidence|explain|why/.test(purpose)
@@ -96,20 +96,20 @@ export function presetSuggestionsForPolicy(policy, categories = [], appPurpose =
   return [
     {
       ...primary,
-      label: selectedCategories.includes("web:news") ? "Article intent preset" : primary.label,
+      label: selectedCategories.includes("web:news") ? "Article context preset" : primary.label,
       scopes: purposeBoostedScopes
     },
     {
       id: `lean-${leanScopes.join("-")}`,
       label: "Lean context preset",
-      description: "Smallest useful set for scoped intent context.",
+      description: "Smallest useful set for scoped context.",
       scopes: leanScopes,
       categories: selectedCategories
     },
     {
       id: `explain-${explainableScopes.join("-")}`,
-      label: "Evidence-backed preset",
-      description: "Adds evidence cards for intent hypotheses.",
+      label: "Explainable preset",
+      description: "Adds evidence cards so users can see why context was created.",
       scopes: explainableScopes,
       categories: selectedCategories
     }

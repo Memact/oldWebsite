@@ -3,517 +3,190 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <title>What is Memact? | Understand what users are trying to do</title>
-    <meta name="description" content="Memact is permissioned intent infrastructure for apps. It helps apps predict user intent from approved digital activity without raw access to private data." />
+    <title>Memact | Personalization made better</title>
+    <meta name="description" content="Memact helps apps personalize better with context users control." />
     <meta name="robots" content="index,follow" />
-    <meta name="googlebot" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" />
-    <meta name="referrer" content="strict-origin-when-cross-origin" />
     <meta name="theme-color" content="#00011B" />
     <link rel="canonical" href="https://www.memact.com/learn/" />
     <link rel="home" href="https://www.memact.com/" />
-    <link rel="alternate" type="text/plain" href="https://www.memact.com/llms.txt" title="Memact AI agent and developer notes" />
     <link rel="icon" href="/favicon.ico" sizes="any" />
     <link rel="icon" href="/icon.png" type="image/png" sizes="256x256" />
-    <link rel="shortcut icon" href="/favicon.ico" />
-    <link rel="apple-touch-icon" href="/icon.png" />
-    <meta property="og:site_name" content="Memact" />
-    <meta property="og:locale" content="en_US" />
-    <meta property="og:title" content="What is Memact? | Understand what users are trying to do" />
-    <meta property="og:description" content="Memact turns approved activity into scoped intent and context signals. Users choose what each app can use." />
+    <meta property="og:title" content="Memact | Personalization made better" />
+    <meta property="og:description" content="Memact helps apps personalize better with context users control." />
     <meta property="og:type" content="article" />
     <meta property="og:url" content="https://www.memact.com/learn/" />
     <meta property="og:image" content="https://www.memact.com/seo-logo.png" />
-    <meta property="og:image:secure_url" content="https://www.memact.com/seo-logo.png" />
-    <meta property="og:image:type" content="image/png" />
-    <meta property="og:image:width" content="1024" />
-    <meta property="og:image:height" content="282" />
-    <meta property="og:image:alt" content="Memact wordmark on a dark background" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="What is Memact? | Understand what users are trying to do" />
-    <meta name="twitter:description" content="Memact turns approved activity into scoped intent and context signals. Users choose what each app can use." />
+    <meta name="twitter:title" content="Memact | Personalization made better" />
+    <meta name="twitter:description" content="Memact helps apps personalize better with context users control." />
     <meta name="twitter:image" content="https://www.memact.com/seo-logo.png" />
-    <meta name="twitter:image:alt" content="Memact wordmark on a dark background" />
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
         "@type": "FAQPage",
         "mainEntity": [
-          {"@type":"Question","name":"What is Memact?","acceptedAnswer":{"@type":"Answer","text":"Memact is permissioned intent infrastructure for apps. It helps apps understand what users are trying to do from approved digital activity."}},
-          {"@type":"Question","name":"Does an app get my private data?","acceptedAnswer":{"@type":"Answer","text":"Apps only receive the scoped context or intent signals the user approved for that app."}},
-          {"@type":"Question","name":"What is Data Transparency?","acceptedAnswer":{"@type":"Answer","text":"Data Transparency explains what approved activity may be used, what intent or context the app wants, retention, and revocation."}},
-          {"@type":"Question","name":"How does a developer use the Memact API?","acceptedAnswer":{"@type":"Answer","text":"Register an app, choose scopes and categories, send the user through consent, link Data Transparency, store the returned connection_id, keep the API key server-side, verify access, and request only approved intent or context."}},
-          {"@type":"Question","name":"Are intent predictions facts?","acceptedAnswer":{"@type":"Answer","text":"No. Intent predictions are hypotheses from approved activity."}}
+          {"@type":"Question","name":"What is Memact?","acceptedAnswer":{"@type":"Answer","text":"Memact helps apps personalize better with context users control."}},
+          {"@type":"Question","name":"Does an app get all my data?","acceptedAnswer":{"@type":"Answer","text":"No. An app only gets what the user allows. Access can be reviewed and disconnected later."}},
+          {"@type":"Question","name":"What is Data Transparency?","acceptedAnswer":{"@type":"Answer","text":"It shows what an app can use, what Memact creates from it, and what the app may receive."}},
+          {"@type":"Question","name":"How does an app connect?","acceptedAnswer":{"@type":"Answer","text":"Register an app, use the SDK/API, send capture events, and request features only after access is approved."}}
         ]
       }
     </script>
     <style>
       :root {
         --bg: #00011b;
-        --surface-1: rgba(255, 255, 255, 0.035);
-        --surface-2: rgba(255, 255, 255, 0.055);
-        --surface-3: rgba(255, 255, 255, 0.08);
-        --border: rgba(255, 255, 255, 0.09);
-        --border-strong: rgba(255, 255, 255, 0.16);
-        --text: #ffffff;
-        --muted: rgba(255, 255, 255, 0.64);
-        --soft: rgba(255, 255, 255, 0.42);
-        --radius-md: 14px;
+        --panel: rgba(255,255,255,0.035);
+        --card: rgba(255,255,255,0.055);
+        --border: rgba(255,255,255,0.10);
+        --border-strong: rgba(255,255,255,0.18);
+        --text: #fff;
+        --muted: rgba(255,255,255,0.66);
+        --soft: rgba(255,255,255,0.45);
         --radius-lg: 18px;
-        --page-inline: clamp(24px, 5vw, 40px);
-        --topbar-height: 74px;
-        --topbar-gap: 12px;
-        --topbar-radius: var(--radius-lg);
-        --topbar-rest-top: var(--topbar-gap);
-        --topbar-stuck-top: env(safe-area-inset-top, 0px);
-        color: var(--text);
-        background: var(--bg);
+        --radius-md: 14px;
         font-family: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
-      }
-
-      * { box-sizing: border-box; }
-
-      html,
-      body {
-        min-width: 320px;
-        min-height: 100%;
-        margin: 0;
-        overflow-x: hidden;
         background: var(--bg);
         color: var(--text);
       }
-
-      body {
-        font-size: 16px;
-        line-height: 1.55;
-      }
-
-      a {
-        color: var(--text);
-        text-underline-offset: 0.18em;
-      }
-
-      .page {
-        width: min(1440px, calc(100% - 40px));
-        margin: 0 auto;
-        padding: calc(var(--topbar-height) + (var(--topbar-gap) * 2)) 0 56px;
-      }
-
-      .topbar {
-        position: fixed;
-        top: var(--topbar-rest-top);
-        left: 50%;
-        z-index: 20;
-        margin: 0;
-        width: min(1440px, calc(100% - 40px));
-        min-height: var(--topbar-height);
-        transform: translateX(-50%);
-        display: grid;
-        grid-template-columns: auto minmax(0, 1fr);
-        align-items: center;
-        gap: 16px;
+      * { box-sizing: border-box; }
+      body { margin: 0; min-width: 320px; background: var(--bg); color: var(--text); }
+      .page { width: min(1440px, calc(100% - 40px)); margin: 0 auto; padding: 20px 0 56px; }
+      .topbar, .panel {
         border: 1px solid var(--border);
-        border-radius: var(--topbar-radius);
-        padding: 14px var(--page-inline);
-        background: rgba(0, 1, 27, 0.98);
-        backdrop-filter: blur(18px);
-        transition: top 160ms ease, border-radius 160ms ease, box-shadow 180ms ease, background 180ms ease, border-color 180ms ease;
+        border-radius: var(--radius-lg);
+        background: rgba(255,255,255,0.03);
       }
-
-      .topbar-scrolled .topbar {
-        top: var(--topbar-stuck-top);
-        border-top-left-radius: 0;
-        border-top-right-radius: 0;
-        border-top-color: transparent;
-        box-shadow: 0 18px 52px rgba(0, 0, 0, 0.32);
-      }
-
-      .topbar > a { justify-self: start; padding-left: 0; }
-
-      .logo {
-        display: block;
-        width: 132px;
-        height: auto;
-        transform: translateY(-1px);
-      }
-
-      .nav {
+      .topbar {
+        position: sticky;
+        top: 12px;
+        z-index: 10;
+        min-height: 74px;
         display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-        justify-content: flex-end;
-        justify-self: end;
+        align-items: center;
+        justify-content: space-between;
+        padding: 14px clamp(24px, 5vw, 40px);
+        margin-bottom: 24px;
+        backdrop-filter: blur(18px);
       }
-
-      .button {
+      .logo { width: 186px; max-width: 48vw; height: auto; display: block; }
+      .back {
+        width: 46px;
+        height: 46px;
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        gap: 8px;
-        min-height: 52px;
         border: 1px solid var(--border-strong);
-        border-radius: 14px;
-        padding: 10px 14px;
+        border-radius: 999px;
         color: var(--text);
-        background: var(--surface-2);
-        font-size: 14px;
-        font-weight: 700;
         text-decoration: none;
+        background: rgba(255,255,255,0.055);
       }
-
-      .back-button {
-        width: 46px;
-        min-height: 46px;
-        border-color: transparent;
-        padding: 0;
-        border-radius: 999px;
-        background: transparent;
-      }
-
-      .back-button:hover { background: transparent; }
-
-      .faq-chevron {
-        position: relative;
-        display: grid;
-        place-items: center;
-        width: 38px;
-        height: 38px;
-        border: 1px solid var(--border-strong);
-        border-radius: 999px;
-        padding: 0;
-        justify-self: end;
-        color: var(--muted);
-        background: var(--surface-2);
-        font-size: 0;
-        line-height: 0;
-        text-indent: 0;
-        transition: color 140ms ease, border-color 140ms ease, background 140ms ease;
-      }
-
-      .back-button .faq-chevron {
-        width: 36px;
-        height: 36px;
-        transform: rotate(90deg);
-      }
-
-      .faq-chevron::before {
-        content: "";
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        width: 18px;
-        height: 18px;
-        background: currentColor;
-        mask: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M6.5 9.25L12 14.75L17.5 9.25' fill='none' stroke='black' stroke-width='2.35' stroke-linecap='square' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
-        -webkit-mask: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M6.5 9.25L12 14.75L17.5 9.25' fill='none' stroke='black' stroke-width='2.35' stroke-linecap='square' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
-        transform: translate(-50%, -50%);
-        transition: transform 140ms ease;
-      }
-
-      details:hover:not(:has(.faq-chevron:hover)) {
-        border-color: var(--border-strong);
-        background: var(--surface-2);
-      }
-
-      details[open]:hover:not(:has(.faq-chevron:hover)) {
-        border-color: var(--border-strong);
-        background: var(--surface-3);
-      }
-
-      .faq-chevron:hover,
-      details[open] .faq-chevron {
-        border-color: rgba(255, 255, 255, 0.36);
-        color: var(--text);
-        background: var(--surface-3);
-      }
-
-      details[open] .faq-chevron::before { transform: translate(-50%, -50%) rotate(180deg); }
-
-      .eyebrow,
-      .section-title {
-        margin: 0;
+      .panel { padding: clamp(24px, 4vw, 48px); }
+      .eyebrow {
+        margin: 0 0 16px;
         color: var(--soft);
-        font-size: 12px;
-        font-weight: 700;
-        letter-spacing: 0.08em;
+        font-size: 13px;
+        font-weight: 800;
+        letter-spacing: 0.16em;
         text-transform: uppercase;
       }
-
-      h1,
-      h2,
-      h3,
-      p,
-      li { overflow-wrap: anywhere; }
-
-      h1,
-      h2 {
-        margin: 0;
-        line-height: 1.08;
-        letter-spacing: -0.04em;
-      }
-
-      h1 { max-width: 780px; font-size: clamp(34px, 7vw, 58px); }
-
-      /* Learn body intentionally mirrors the React Help panel rules. Header rules above stay separate. */
-      .panel {
-        border: 1px solid var(--border);
-        border-radius: var(--radius-lg);
-        padding: 24px;
-        background: var(--surface-1);
-        box-shadow: none;
-      }
-
-      .panel h2 {
-        margin: 0;
-        font-size: clamp(20px, 2vw, 22px);
-        line-height: 1.18;
-        letter-spacing: -0.02em;
-      }
-
-      .help-panel {
-        display: grid;
-        gap: 18px;
-      }
-
-      .help-panel > div:first-child {
-        display: grid;
-        gap: 8px;
-      }
-
-      .help-intro {
-        margin: 0;
-        color: var(--muted);
-        line-height: 1.45;
-      }
-
-      .faq-section {
-        display: grid;
-        gap: 10px;
-      }
-
-      .faq-section-title {
-        margin: 0;
-        color: var(--soft);
-        font-size: 12px;
-        font-weight: 700;
-        letter-spacing: 0.06em;
-        text-transform: uppercase;
-      }
-
-      .help-panel details {
+      h1, h2, p { margin-top: 0; }
+      h1 { max-width: 760px; font-size: clamp(42px, 8vw, 92px); line-height: 0.96; letter-spacing: -0.06em; }
+      h2 { font-size: clamp(26px, 4vw, 42px); letter-spacing: -0.04em; }
+      .lead { max-width: 720px; color: var(--muted); font-size: clamp(18px, 2vw, 24px); line-height: 1.55; }
+      .faq-section { margin-top: 42px; }
+      .faq-section-title { color: var(--soft); font-size: 13px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; }
+      details {
         border: 1px solid var(--border);
         border-radius: var(--radius-md);
-        background: var(--surface-1);
-        transition: border-color 140ms ease, background 140ms ease;
+        background: var(--card);
+        margin-top: 12px;
+        overflow: hidden;
       }
-
-      .help-panel details[open] {
-        border-color: rgba(255, 255, 255, 0.18);
-        background: var(--surface-2);
-      }
-
-      .help-panel summary {
-        display: grid;
-        grid-template-columns: minmax(0, 1fr) max-content;
+      summary {
+        min-height: 76px;
+        padding: 22px 28px;
+        display: flex;
         align-items: center;
-        gap: 16px;
-        box-sizing: border-box;
-        width: 100%;
-        min-height: 60px;
-        padding: 12px 16px;
-        color: var(--text);
+        justify-content: space-between;
+        gap: 18px;
         cursor: pointer;
-        font-weight: 700;
         list-style: none;
-        list-style-position: outside;
+        font-weight: 800;
+        font-size: 18px;
       }
-
-      .help-panel summary::-webkit-details-marker { display: none; }
-      .help-panel summary::marker { content: ""; }
-
-      .faq-question {
-        display: block;
-        min-width: 0;
-        margin: 0;
-        padding: 0;
+      summary::-webkit-details-marker { display: none; }
+      .chev {
+        width: 46px;
+        height: 46px;
+        flex: 0 0 auto;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid var(--border-strong);
+        border-radius: 999px;
+        background: rgba(255,255,255,0.055);
       }
-
-      .faq-answer {
-        padding: 0 16px 16px;
-      }
-
-      .faq-answer p,
-      .faq-answer {
-        margin: 0;
-        color: var(--muted);
-        line-height: 1.45;
-      }
-
-      .faq-answer ol {
-        display: grid;
-        gap: 8px;
-        margin: 0;
-        padding-left: 20px;
-      }
-
-      .faq-answer li {
-        padding-left: 2px;
-      }
-
+      .chev svg { width: 18px; height: 18px; transition: transform 150ms ease; }
+      details[open] .chev svg { transform: rotate(180deg); }
+      .answer { padding: 0 28px 26px; color: var(--muted); font-size: 18px; line-height: 1.6; }
+      code { color: var(--text); }
       @media (max-width: 720px) {
-        .page {
-          --page-inline: 22px;
-          --topbar-height: 74px;
-          --topbar-gap: 14px;
-          width: min(100% - 24px, 720px);
-        }
-        .topbar {
-          grid-template-columns: auto minmax(0, 1fr);
-          width: min(100% - 24px, 720px);
-          align-items: center;
-          padding: 10px var(--page-inline) 11px;
-        }
-        .logo { width: 120px; }
-        .topbar > a { padding-left: 3px; }
-        .button {
-          min-height: 46px;
-          padding: 8px 10px;
-          font-size: 13px;
-        }
-        .back-button { padding: 0; }
-        .faq-chevron {
-          width: 36px;
-          height: 36px;
-        }
-        .faq-chevron::before { width: 17px; height: 17px; }
-        .panel { padding: 16px; }
-        .help-panel summary {
-          min-height: 52px;
-          padding: 13px 14px;
-        }
-        .faq-question {
-          padding-left: 0;
-        }
-        .faq-answer {
-          padding: 0 14px 14px;
-        }
-      }
-
-      @media (max-width: 520px) {
-        .page { width: min(100% - 20px, 720px); }
-        .topbar { width: min(100% - 20px, 720px); }
-        .logo { width: 112px; }
+        .page { width: min(100% - 28px, 720px); padding-top: 14px; }
+        .topbar { top: 10px; padding: 12px 18px; min-height: 66px; margin-bottom: 20px; }
+        .logo { width: 154px; }
+        .panel { padding: 28px 20px; }
+        summary { padding: 20px 18px; font-size: 17px; }
+        .answer { padding: 0 18px 22px; font-size: 16px; }
       }
     </style>
   </head>
   <body>
     <main class="page">
       <header class="topbar">
-        <a href="/" aria-label="Go to Memact"><img class="logo" src="/logo.png" alt="Memact" /></a>
-        <nav class="nav" aria-label="Public navigation">
-          <a class="button back-button" href="/" aria-label="Back to Memact"><span class="faq-chevron" aria-hidden="true">v</span></a>
-        </nav>
+        <img class="logo" src="/logo.png" alt="Memact" />
+        <a class="back" href="/" aria-label="Back to Memact">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M15 6l-6 6 6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="square" stroke-linejoin="round"/></svg>
+        </a>
       </header>
 
-      <section class="panel help-panel" aria-label="Learn more about Memact">
-        <div>
-          <p class="eyebrow">Learn More</p>
-          <h2>Frequently asked questions</h2>
-          <p class="help-intro">Answers about how Memact works, what apps can see, and how consent is controlled.</p>
-        </div>
+      <section class="panel">
+        <p class="eyebrow">Learn More</p>
+        <h1>Personalization made better<br />with Memact</h1>
+        <p class="lead">Memact helps apps personalize better with context users control.</p>
 
         <div class="faq-section">
           <p class="faq-section-title">Basics</p>
           <details open>
-            <summary><span class="faq-question">What is Memact?</span><span class="faq-chevron" aria-hidden="true">v</span></summary>
-            <div class="faq-answer"><p>Memact is permissioned intent infrastructure for apps. It helps apps understand what users are trying to do from approved digital activity.</p></div>
+            <summary>What is Memact?<span class="chev"><svg viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.4" stroke-linecap="square" stroke-linejoin="round"/></svg></span></summary>
+            <div class="answer">Memact lets apps remember useful context with your permission, instead of each app guessing silently.</div>
           </details>
           <details>
-            <summary><span class="faq-question">Where does Memact run?</span><span class="faq-chevron" aria-hidden="true">v</span></summary>
-            <div class="faq-answer"><p>Apps use a small Memact client SDK. Evidence can come from approved browser activity and, if enabled, a local helper. Apps receive scoped intent and context, not raw private data.</p></div>
+            <summary>Why would an app use Memact?<span class="chev"><svg viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.4" stroke-linecap="square" stroke-linejoin="round"/></svg></span></summary>
+            <div class="answer">Apps use Memact to send useful signals, save context, and run features that make the app feel more personal.</div>
           </details>
           <details>
-            <summary><span class="faq-question">Does an app get my private data?</span><span class="faq-chevron" aria-hidden="true">v</span></summary>
-            <div class="faq-answer"><p>No. Apps only get the scoped context or intent signals allowed by the permissions and categories you approve.</p></div>
-          </details>
-          <details>
-            <summary><span class="faq-question">How does consent work?</span><span class="faq-chevron" aria-hidden="true">v</span></summary>
-            <div class="faq-answer"><p>You see what an app wants to use before anything is connected. Approval is optional. Data Transparency lets you review details first.</p></div>
-          </details>
-          <details>
-            <summary><span class="faq-question">What are activity categories?</span><span class="faq-chevron" aria-hidden="true">v</span></summary>
-            <div class="faq-answer"><p>They limit which approved activity an app can use, like research pages, news, AI conversations, developer activity, or media.</p></div>
+            <summary>What can users control?<span class="chev"><svg viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.4" stroke-linecap="square" stroke-linejoin="round"/></svg></span></summary>
+            <div class="answer">Users choose which apps connect, what those apps can use, and whether access continues.</div>
           </details>
         </div>
 
         <div class="faq-section">
-          <p class="faq-section-title">Intent and controls</p>
+          <p class="faq-section-title">Developers</p>
           <details>
-            <summary><span class="faq-question">What activity can be used?</span><span class="faq-chevron" aria-hidden="true">v</span></summary>
-            <div class="faq-answer"><p>Only approved activity can be used. That can include page titles, URLs, selected text, captions, transcripts, timestamps, or other disclosed evidence fields.</p></div>
+            <summary>How does an app connect?<span class="chev"><svg viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.4" stroke-linecap="square" stroke-linejoin="round"/></svg></span></summary>
+            <div class="answer">Register an app, keep the API key on your server, add Connect Memact, then use the SDK/API to send capture events and run features after access is approved.</div>
           </details>
           <details>
-            <summary><span class="faq-question">What does Memact produce?</span><span class="faq-chevron" aria-hidden="true">v</span></summary>
-            <div class="faq-answer"><p>Memact turns approved activity into intent hypotheses, context signals, evidence cards, and scoped summaries. Intent predictions are hypotheses, not facts.</p></div>
+            <summary>What does the SDK do?<span class="chev"><svg viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.4" stroke-linecap="square" stroke-linejoin="round"/></svg></span></summary>
+            <div class="answer">The SDK helps apps verify access, send capture events, list features, run features, and retrieve permitted schema or memory summaries.</div>
           </details>
           <details>
-            <summary><span class="faq-question">What does an app receive?</span><span class="faq-chevron" aria-hidden="true">v</span></summary>
-            <div class="faq-answer"><p>Only scoped intent or context allowed by the app key, your consent, selected scopes, and activity categories.</p></div>
-          </details>
-          <details>
-            <summary><span class="faq-question">Can I change what an app uses?</span><span class="faq-chevron" aria-hidden="true">v</span></summary>
-            <div class="faq-answer"><p>Yes. You can narrow scopes and categories before approving. Where available, you can revoke access later so future use stops.</p></div>
-          </details>
-        </div>
-
-        <div class="faq-section">
-          <p class="faq-section-title">For developers</p>
-          <details>
-            <summary><span class="faq-question">How does a developer use the Memact API?</span><span class="faq-chevron" aria-hidden="true">v</span></summary>
-            <div class="faq-answer">
-              <p>Use Memact as permissioned intent infrastructure for your app.</p>
-              <ol>
-                <li>Register your app in Memact and choose the scopes and categories your feature needs.</li>
-                <li>Add a <strong>Connect Memact</strong> button. Send users to the consent page.</li>
-                <li>Link a Data Transparency page beside consent to explain approved activity, intended context, retention, and revocation.</li>
-                <li>After approval, store the returned connection id for the user.</li>
-                <li>Keep the API key in server environment config, not in client code.</li>
-                <li>Verify before requesting intent or context.</li>
-                <li>For intent predictions, call the backend intent endpoint with the connection id, required scopes, approved categories, and approved activity.</li>
-                <li>Use only the evidence-backed hypotheses Memact returns.</li>
-              </ol>
-            </div>
-          </details>
-          <details>
-            <summary><span class="faq-question">Where should the API key be stored?</span><span class="faq-chevron" aria-hidden="true">v</span></summary>
-            <div class="faq-answer"><p>Treat the API key like a server-side secret. It starts with <code>mka_</code>. Keep it in server environment config or a secret manager. Never put it in browser code, public repos, or user-facing settings.</p></div>
-          </details>
-          <details>
-            <summary><span class="faq-question">Is a Data Transparency page required?</span><span class="faq-chevron" aria-hidden="true">v</span></summary>
-            <div class="faq-answer"><p>Yes. Any app using Memact consent must link a Data Transparency page. It explains what approved activity may be used, what intent or context the app wants, retention, and revocation.</p></div>
-          </details>
-        </div>
-
-        <div class="faq-section">
-          <p class="faq-section-title">Legal and contact</p>
-          <details>
-            <summary><span class="faq-question">Who runs Memact?</span><span class="faq-chevron" aria-hidden="true">v</span></summary>
-            <div class="faq-answer"><p>Memact is a project by <a href="https://github.com/keepsloading" target="_blank" rel="noreferrer">Keeps Loading</a>. Core repos are source-available under their repository licenses, and contributions are accepted under the CLA. Memact branding assets are not licensed with the code.</p></div>
-          </details>
-          <details>
-            <summary><span class="faq-question">How can I contact Memact?</span><span class="faq-chevron" aria-hidden="true">v</span></summary>
-            <div class="faq-answer"><p>For access, security, or project questions, contact <a href="mailto:keepsloading@gmail.com">keepsloading@gmail.com</a>. Do not send secrets or API keys by email.</p></div>
+            <summary>What is Studio?<span class="chev"><svg viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.4" stroke-linecap="square" stroke-linejoin="round"/></svg></span></summary>
+            <div class="answer">Studio is the open-source feature space where contributors can add Memact features inside the SDK and Contracts boundaries.</div>
           </details>
         </div>
       </section>
     </main>
-    <script>
-      (function() {
-        function onScroll() {
-          document.documentElement.classList.toggle('topbar-scrolled', window.scrollY > 2);
-        }
-        onScroll();
-        window.addEventListener("scroll", onScroll, { passive: true });
-      })();
-    </script>
   </body>
 </html>

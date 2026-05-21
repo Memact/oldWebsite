@@ -16,7 +16,7 @@ export function ConnectPage({ connectRequest, connectDetails, loading, notice, o
           <div>
             <p className="eyebrow">Connect app</p>
             <h2>{appName} wants to connect.</h2>
-            <p className="muted">Review how this app wants to use approved activity to understand what you are trying to do.</p>
+            <p className="muted">Review what this app wants to use before you connect it.</p>
           </div>
         </div>
 
@@ -44,12 +44,12 @@ export function ConnectPage({ connectRequest, connectDetails, loading, notice, o
               <small>Permissions and categories limit what this app can use.</small>
             </div>
             <div className="mini-row">
-              <strong>Raw private data is not shared by default.</strong>
-              <small>Data Transparency shows the activity and intent context the app is asking for.</small>
+              <strong>Data Transparency explains the details.</strong>
+              <small>It shows what the app can send, what Memact may create, and what the app may receive.</small>
             </div>
             <div className="mini-row">
-              <strong>Intent predictions are hypotheses.</strong>
-              <small>After consent, the app can ask Memact for evidence-backed intent signals only inside approved scopes and categories.</small>
+              <strong>You can disconnect later.</strong>
+              <small>Removing access stops future Memact access for this app.</small>
             </div>
           </div>
           <div className="connect-link-row">
