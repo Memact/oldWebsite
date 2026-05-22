@@ -146,7 +146,7 @@ export function DataTransparencyPage({
           <h3>Features and allowed memory</h3>
           <DisclosureList
             items={allowedFeatures}
-            empty="No specific feature list was provided. The allowed permissions and categories above still limit what the app can use."
+            empty="No specific feature list was provided. Article apps may request features such as Adaptive Article Overview only inside the permissions and categories above."
           />
         </section>
 

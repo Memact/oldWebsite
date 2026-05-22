@@ -443,7 +443,7 @@ export function Dashboard({
               </div>
               <div className="playground-row">
                 <span>Studio features</span>
-                <strong>Memory Wiki, Cognitive Load, Research Map</strong>
+                <strong>Memory Wiki, Cognitive Load, Research Map, Adaptive Article Overview</strong>
                 <small>These match the current Studio feature registry and can run through Access when the runtime is connected.</small>
               </div>
               <div className="playground-row">
@@ -452,6 +452,37 @@ export function Dashboard({
                 <small>Schema packets, categories, and source trails are shown for technical review when connected.</small>
               </div>
             </div>
+            <section className="adaptive-feature-card" aria-label="Adaptive Article Overview demo">
+              <div className="section-copy">
+                <p className="eyebrow">Studio feature · local example</p>
+                <h3>Adaptive Article Overview</h3>
+                <p className="muted">A real Studio feature that helps article apps create summaries based on approved reading memory.</p>
+              </div>
+              <div className="adaptive-flow">
+                <span>Article app sends approved reading activity.</span>
+                <span>Memact turns it into reading memory.</span>
+                <span>Studio chooses the overview style.</span>
+                <span>User can see connected apps and remove access.</span>
+              </div>
+              <div className="adaptive-demo-grid">
+                <div className="mini-row">
+                  <strong>Example memory</strong>
+                  <small>Average read time, scroll depth, preferred topics, skipped topics, article length, and summary style.</small>
+                </div>
+                <div className="mini-row">
+                  <strong>Schema</strong>
+                  <small>reading_preferences with preferred_topics, skipped_topics, article_length_preference, summary_style_preference, and engagement_pattern.</small>
+                </div>
+                <div className="mini-row">
+                  <strong>Feature output</strong>
+                  <small>summary_style, overview, why_this_style, follow_up_suggestions, confidence, and signals_used.</small>
+                </div>
+                <div className="mini-row">
+                  <strong>Data Transparency</strong>
+                  <small>Connected app: article app. Allowed activity: article reading behavior. Memory created: reading preference memory. Feature used: Adaptive Article Overview. User control: remove access.</small>
+                </div>
+              </div>
+            </section>
           </section>
 
           <div className="access-layout">
