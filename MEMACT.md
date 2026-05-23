@@ -5,7 +5,7 @@ Personalization made better
 with Memact
 ```
 
-Memact is a playground where apps personalize based on what users choose to share.
+Memact is a playground where apps personalize around what users choose.
 
 Website is the Memact portal for users, developers, and apps. It handles sign in,
 app registration, permissions, API keys, consent, Wiki, Playground, help, SEO,
@@ -25,7 +25,7 @@ store, or feature runtime. It is the control surface.
 Use simple public copy:
 
 - "Personalization made better with Memact."
-- "Memact is a playground where apps personalize based on what users choose to share."
+- "Memact is a playground where apps personalize around what users choose."
 - "You choose what an app can use."
 - "Wiki shows what an app can add, what Memact may create, and what the app may receive."
 

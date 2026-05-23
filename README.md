@@ -2,7 +2,7 @@
 
 Website is the public site and portal for Memact.
 
-Memact is a playground where apps personalize based on what users choose to share.
+Memact is a playground where apps personalize around what users choose.
 
 ```text
 Personalization made better

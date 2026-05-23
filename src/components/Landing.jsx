@@ -223,16 +223,22 @@ export function Landing({
                     className={signupAccountType === "user" ? "account-type-card is-active" : "account-type-card"}
                     onClick={() => setSignupAccountType("user")}
                   >
-                    <strong>User</strong>
-                    <span>I want to manage my Wiki and connected apps.</span>
+                    <span className="account-type-card-marker" aria-hidden="true" />
+                    <span className="account-type-card-copy">
+                      <strong>User</strong>
+                      <span>I want to manage my Wiki and connected apps.</span>
+                    </span>
                   </button>
                   <button
                     type="button"
                     className={signupAccountType === "developer" ? "account-type-card is-active" : "account-type-card"}
                     onClick={() => setSignupAccountType("developer")}
                   >
-                    <strong>Developer</strong>
-                    <span>I want to build apps or Playground features.</span>
+                    <span className="account-type-card-marker" aria-hidden="true" />
+                    <span className="account-type-card-copy">
+                      <strong>Developer</strong>
+                      <span>I want to build apps or Playground features.</span>
+                    </span>
                   </button>
                 </div>
               ) : null}

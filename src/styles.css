@@ -604,23 +604,54 @@ p { margin-top: 0; }
 }
 
 .account-type-card {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  align-items: center;
   width: 100%;
-  justify-content: flex-start;
-  gap: 6px;
-  padding: 16px;
+  gap: 14px;
+  padding: 17px 18px;
   color: var(--text);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   background: var(--surface-1);
   text-align: left;
+  min-height: 92px;
+  transition: border-color 160ms ease, background 160ms ease, transform 160ms ease;
 }
 
-.account-type-card strong,
-.account-type-card span {
+.account-type-card:hover,
+.account-type-card:focus-visible {
+  border-color: rgba(255, 255, 255, 0.42);
+  background: rgba(255, 255, 255, 0.065);
+}
+
+.account-type-card-marker {
+  display: inline-flex;
+  width: 28px;
+  height: 28px;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.035);
+  box-shadow: inset 0 0 0 7px var(--surface-1);
+}
+
+.account-type-card-copy {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+}
+
+.account-type-card-copy strong,
+.account-type-card-copy span {
   display: block;
 }
 
-.account-type-card span {
+.account-type-card-copy strong {
+  font-size: 18px;
+  line-height: 1.12;
+}
+
+.account-type-card-copy span {
   color: var(--muted);
   font-size: 14px;
   line-height: 1.45;
@@ -629,6 +660,12 @@ p { margin-top: 0; }
 .account-type-card.is-active {
   border-color: rgba(255, 255, 255, 0.55);
   background: rgba(255, 255, 255, 0.08);
+}
+
+.account-type-card.is-active .account-type-card-marker {
+  border-color: rgba(255, 255, 255, 0.62);
+  background: #ffffff;
+  box-shadow: inset 0 0 0 8px rgba(0, 1, 27, 0.88);
 }
 
 .verification-code-input::placeholder {
