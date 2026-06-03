@@ -74,10 +74,10 @@
 }
 
 .locked-tagline .tagline-with {
-  font-size: 0.68em;
+  font-size: 1em;
   line-height: 1.02;
   letter-spacing: -0.052em;
-  margin-top: 10px;
+  margin-top: 6px;
 }
 
 .page-auth .hero-copy p:not(.eyebrow) {
