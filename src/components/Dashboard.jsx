@@ -404,7 +404,7 @@ export function Dashboard({
                 </label>
                 <div>
                   <p className="eyebrow">Activity categories</p>
-                  <p className="muted">Pick the kinds of app signals this app is allowed to use. This keeps access narrow by design.</p>
+                  <p className="muted">Pick the kinds of memory this app is allowed to ask for or suggest. This keeps access narrow by design.</p>
                   <CategoryGrid
                     categories={categories}
                     selected={newAppCategories}
@@ -638,7 +638,7 @@ function getUsageStats(selectedApp, selectedKeys = [], apps = []) {
     exposureDetail: exposedKey
       ? "A public exposure signal was reported for this key. Revoke it and create a replacement after removing the leak."
       : unknownExposure
-        ? `Memact can show exposure signals when the access layer reports them. Until then, keep ${appName}'s raw key server-side and out of public code.`
+        ? `Memact can show exposure checks when the access layer reports them. Until then, keep ${appName}'s raw key server-side and out of public code.`
         : "",
     lastUsedLabel: lastUsedAt ? formatDate(lastUsedAt) : "No use yet"
   }
@@ -684,29 +684,23 @@ await memact.verifyAccess({
   activity_categories: ${JSON.stringify(categories, null, 2)}
 });
 
-await memact.capture({
-  event_type: "article_read",
-  category: "web:research",
-  payload: {
-    title: "Example article",
-    url: "https://example.com/article"
+await memact.suggestMemory({
+  category: "reading",
+  title: "Prefers short article summaries",
+  context: {
+    preferred_summary_style: "short"
+  },
+  evidence: {
+    reason: "The user chose short summaries in this app."
   }
 });
 
-const result = await memact.runFeature("adaptive-article-overview", {
-  article: {
-    title: "Example article",
-    excerpt: "A short article excerpt",
-    topic: "technology"
-  },
-  reading_memory: {
-    preferred_summary_style: "key_points",
-    preferred_topics: ["technology"]
-  },
-  recent_events: []
+const memory = await memact.getMemory({
+  connection_id: connectionId,
+  activity_categories: ["reading"]
 });
 
-console.log(result);`
+console.log(memory);`
 }
 
 function getDeveloperVerifyUrl() {

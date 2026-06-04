@@ -1,7 +1,7 @@
 export const DEFAULT_SCOPES = [
-  "capture:webpage",
+  "context:write",
+  "context:read",
   "schema:write",
-  "graph:write",
   "memory:write",
   "memory:read_summary"
 ]
@@ -49,18 +49,17 @@ export function suggestedScopesForCategories(policy, categories = []) {
   }
 
   if (selectedCategories.size) {
-    suggested.add("capture:webpage")
+    suggested.add("context:write")
+    suggested.add("context:read")
     suggested.add("schema:write")
     suggested.add("memory:read_summary")
-    suggested.add("feature:list")
   }
 
   if (selectedCategories.has("web:news") || selectedCategories.has("web:social") || selectedCategories.has("web:research")) {
-    suggested.add("graph:write")
     suggested.add("memory:write")
   }
   if (selectedCategories.has("media:video") || selectedCategories.has("media:audio")) {
-    suggested.add("capture:media")
+    suggested.add("context:write")
   }
   if (selectedCategories.has("dev:code") || selectedCategories.has("ai:assistant") || selectedCategories.has("work:docs")) {
     suggested.add("memory:write")
@@ -77,7 +76,7 @@ export function permissionSuggestionForCategories(policy, categories = []) {
   const scopes = suggestedScopesForCategories(policy, selectedCategories)
   return {
     label: selectedCategories.includes("web:news") ? "Article personalization preset" : "Suggested preset",
-    description: "Selected from this app's activity categories. You can still adjust it.",
+    description: "Selected from the memory categories this app asks for. You can still adjust it.",
     scopes: normalizeSelectedScopes(scopes, policy),
     categories: selectedCategories
   }
@@ -86,7 +85,7 @@ export function permissionSuggestionForCategories(policy, categories = []) {
 export function presetSuggestionsForPolicy(policy, categories = [], appPurpose = "") {
   const selectedCategories = normalizeSelectedCategories(categories, policy)
   const primary = permissionSuggestionForCategories(policy, selectedCategories)
-  const leanScopes = normalizeSelectedScopes(["capture:webpage", selectedCategories.some((category) => category.startsWith("media:")) ? "capture:media" : "", "schema:write", "memory:read_summary", "feature:list"], policy)
+  const leanScopes = normalizeSelectedScopes(["context:write", "context:read", "schema:write", "memory:read_summary"], policy)
   const explainableScopes = normalizeSelectedScopes([...primary.scopes, "memory:read_evidence"], policy)
   const purpose = String(appPurpose || "").toLowerCase()
   const purposeBoostedScopes = /debug|audit|source|citation|evidence|explain|why/.test(purpose)
@@ -109,7 +108,7 @@ export function presetSuggestionsForPolicy(policy, categories = [], appPurpose =
     {
       id: `explain-${explainableScopes.join("-")}`,
       label: "Explainable preset",
-      description: "Adds evidence cards so users can see why a feature returned something.",
+      description: "Adds evidence cards so users can see why an app suggestion exists.",
       scopes: explainableScopes,
       categories: selectedCategories
     }

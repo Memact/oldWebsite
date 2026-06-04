@@ -24,7 +24,7 @@ Memact helps users see what apps know about them and control it.
 - Keep the Memact API key on the server.
 - Add a Connect Memact flow and Wiki link.
 - Store the returned `connection_id` for the signed-in user.
-- Use the SDK/API to propose context or read allowed memory after access is approved.
+- Use the SDK/API to suggest memory or read allowed memory after access is approved.
 - Scopes and categories are permission boundaries.
 
 ## SDK Example

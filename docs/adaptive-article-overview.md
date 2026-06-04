@@ -1,15 +1,15 @@
 # Adaptive Article Overview
 
-This feature helps article apps show better summaries based on approved reading memory.
+This example shows how an article app can ask Memact for allowed reading memory instead of making the user repeat preferences.
 
 ## How it works
 
-1. User allows an article app to use reading activity.
-2. App sends approved article activity.
-3. Memact turns it into reading memory.
-4. Playground feature chooses a summary style.
-5. App shows a better article overview.
-6. User can see what is connected and remove access.
+1. User allows an article app to use reading memory.
+2. App suggests reading memory or sends specific article details for review.
+3. Context organizes the input into readable memory suggestions.
+4. Yourself shows the suggestion to the user.
+5. Memory stores what the user accepts.
+6. The app can read only the allowed reading memory.
 
 ## Example stats
 
@@ -28,4 +28,4 @@ This feature helps article apps show better summaries based on approved reading 
 - deep dive
 - simple explainer
 
-This feature is not the whole product. It is one real Playground feature that proves how Memact personalization services can work.
+This is not the whole product. It is one example of how Memact can reduce repeated onboarding while keeping the user in control.

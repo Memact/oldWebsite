@@ -18,13 +18,13 @@ test("defaultScopesForPolicy keeps existing defaults when policy is unavailable"
 test("defaultScopesForPolicy filters defaults to scopes published by Access", () => {
   const policy = {
     scopes: {
-      "capture:webpage": {},
+      "context:write": {},
       "memory:read_summary": {},
       "experimental:only": {}
     }
   }
 
-  assert.deepEqual(defaultScopesForPolicy(policy), ["capture:webpage", "memory:read_summary"])
+  assert.deepEqual(defaultScopesForPolicy(policy), ["context:write", "memory:read_summary"])
 })
 
 test("defaultScopesForPolicy falls back to Access scopes when no default is available", () => {
@@ -86,8 +86,8 @@ test("normalizeSelectedCategories removes duplicates and unknown categories", ()
 test("permissionSuggestionForCategories creates category-specific selected scopes", () => {
   const policy = {
     scopes: {
-      "capture:webpage": {},
-      "capture:media": {},
+      "context:write": {},
+      "context:read": {},
       "schema:write": {},
       "graph:write": {},
       "memory:write": {},
@@ -103,8 +103,8 @@ test("permissionSuggestionForCategories creates category-specific selected scope
   const suggestion = permissionSuggestionForCategories(policy, ["web:news", "media:video"])
 
   assert.equal(suggestion.label, "Article personalization preset")
-  assert.ok(suggestion.scopes.includes("capture:webpage"))
-  assert.ok(suggestion.scopes.includes("capture:media"))
+  assert.ok(suggestion.scopes.includes("context:write"))
+  assert.ok(suggestion.scopes.includes("context:read"))
   assert.ok(suggestion.scopes.includes("memory:write"))
 })
 

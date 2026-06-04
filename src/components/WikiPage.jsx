@@ -8,7 +8,7 @@ const WIKI_CATEGORIES = [
   "Collaboration",
   "Dietary restrictions",
   "Creator profile",
-  "Project context",
+  "Project notes",
   "Personal preferences",
   "Other"
 ]
@@ -41,7 +41,7 @@ export function WikiPage({
   const hasEnoughSelection = safeRequestedScopes.length > 0 && safeRequestedCategories.length > 0
   const [manualEntries, setManualEntries] = useState([])
   const [draft, setDraft] = useState(defaultDraft())
-  const [showAddContext, setShowAddContext] = useState(false)
+  const [showAddMemory, setShowAddMemory] = useState(false)
   const [acceptedProposals, setAcceptedProposals] = useState([])
   const [rejectedProposals, setRejectedProposals] = useState([])
   const [wikiSearch, setWikiSearch] = useState("")
@@ -82,7 +82,7 @@ export function WikiPage({
     if (!entry.title || !entry.value) return
     setManualEntries((current) => [entry, ...current])
     setDraft(defaultDraft())
-    setShowAddContext(false)
+    setShowAddMemory(false)
   }
   const updateDraft = (key, value) => setDraft((current) => ({ ...current, [key]: value }))
   const changeEntryVisibility = (id, visibility) => {
@@ -110,10 +110,10 @@ export function WikiPage({
         <div>
           <p className="eyebrow">Yourself</p>
           <h2>{app?.id ? `${appName}'s access to Yourself` : "What apps know about you"}</h2>
-          <p className="muted">A private, searchable memory page you can inspect, edit, and share only when you choose.</p>
+          <p className="muted">A private, searchable memory page you can review, edit, and share only when you choose.</p>
         </div>
-        <button type="button" className="button wiki-add-button" onClick={() => setShowAddContext((value) => !value)}>
-          Add context
+        <button type="button" className="button wiki-add-button" onClick={() => setShowAddMemory((value) => !value)}>
+          Add memory
         </button>
       </div>
 
@@ -138,11 +138,11 @@ export function WikiPage({
         </section>
       )}
 
-      {showAddContext ? (
+      {showAddMemory ? (
         <form className="permission-list wiki-add-form" onSubmit={submitManualEntry}>
           <div>
             <p className="eyebrow">Manual memory</p>
-            <h3>Add context yourself</h3>
+            <h3>Add memory yourself</h3>
             <p className="muted">User-added memory starts private, accepted, and verified by you.</p>
           </div>
           <div className="wiki-form-grid">
@@ -178,8 +178,8 @@ export function WikiPage({
             </label>
           </div>
           <div className="connect-actions">
-            <button type="button" className="ghost" onClick={() => setShowAddContext(false)}>Cancel</button>
-            <button type="submit">Save context</button>
+            <button type="button" className="ghost" onClick={() => setShowAddMemory(false)}>Cancel</button>
+            <button type="submit">Save memory</button>
           </div>
         </form>
       ) : null}
@@ -270,7 +270,7 @@ export function WikiPage({
               </div>
             </section>
           ))}
-          {!visibleEntries.length ? <p className="muted">No accepted memory yet. Add context yourself or approve a proposed memory when one appears.</p> : null}
+          {!visibleEntries.length ? <p className="muted">No accepted memory yet. Add memory yourself or approve a proposed memory when one appears.</p> : null}
           {visibleEntries.length > 0 && !filteredEntries.length ? <p className="muted">No memory matches that search.</p> : null}
         </div>
       </section>
@@ -299,10 +299,10 @@ export function WikiPage({
 
       {app?.id ? (
         <div className="transparency-grid">
-          <WikiDisclosure title="What this app can send" eyebrow="App can add" items={capturedData} empty="This app has not listed exact fields yet." />
-          <WikiDisclosure title="What Memact may create" eyebrow="Yourself may contain" items={createdMemory} empty="Memact may create useful memory from what you allow." />
+          <WikiDisclosure title="Details this app can send" eyebrow="App can add" items={capturedData} empty="This app has not listed exact fields yet." />
+          <WikiDisclosure title="Memory Memact may save" eyebrow="Yourself may contain" items={createdMemory} empty="Memact may create useful memory from what you allow." />
           <WikiDisclosure title="Why it wants access" eyebrow="Why" items={dataUses} empty={app?.description || "This app has not provided a plain-language reason yet."} />
-          <WikiDisclosure title="What this app may use" eyebrow="Features" items={allowedFeatures} empty="No feature list was provided." />
+          <WikiDisclosure title="Memory this app may use" eyebrow="Allowed memory" items={allowedFeatures} empty="No allowed memory list was provided." />
           <section className="permission-list transparency-card">
             <p className="eyebrow">Access</p>
             <h3>How long access lasts</h3>
@@ -531,20 +531,21 @@ function groupEntriesByCategory(entries) {
 }
 
 function normalizeSourceType(value) {
-  return ["user", "app", "memact", "playground_feature"].includes(value) ? value : "app"
+  if (value === "playground_feature") return "memact_feature"
+  return ["user", "app", "memact", "memact_feature"].includes(value) ? value : "app"
 }
 
 function sourceLabel(sourceType, appName) {
   if (sourceType === "user") return "Added by you"
   if (sourceType === "memact") return "Created by Memact"
-  if (sourceType === "playground_feature") return "Proposed by Memact feature"
+  if (sourceType === "memact_feature") return "Proposed by Memact feature"
   return `Proposed by ${appName}`
 }
 
 function sourceDetail(sourceType) {
   if (sourceType === "user") return "Source: User-added"
   if (sourceType === "memact") return "Source: Memact-created"
-  if (sourceType === "playground_feature") return "Source: Memact feature"
+  if (sourceType === "memact_feature") return "Source: Memact feature"
   return "Source: App-proposed"
 }
 

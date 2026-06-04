@@ -10,7 +10,6 @@ test("portal routes map clean URL pages", () => {
   assert.equal(pageFromLocation({ pathname: "/access" }), "access")
   assert.equal(pageFromLocation({ pathname: "/Account" }), "account")
   assert.equal(pageFromLocation({ pathname: "/Settings" }), "account")
-  assert.equal(pageFromLocation({ pathname: "/Playground" }), "access")
   assert.equal(pageFromLocation({ pathname: "/Wiki" }), "wiki")
   assert.equal(pageFromLocation({ pathname: "/Yourself" }), "wiki")
   assert.equal(pageFromLocation({ pathname: "/Ourselves" }), "ourselves")
@@ -31,7 +30,7 @@ test("legacy dashboard and login paths normalize to current routes", () => {
   assert.equal(normalizePortalPath("/data-transparency"), "/Yourself")
   assert.equal(normalizePortalPath("/ourselves"), "/Ourselves")
   assert.equal(normalizePortalPath("/learn"), "/Learn")
-  assert.equal(normalizePortalPath("/playground"), "/Dashboard")
+  assert.equal(normalizePortalPath("/playground"), "/playground")
 })
 
 test("route metadata keeps help public and account/wiki protected", () => {

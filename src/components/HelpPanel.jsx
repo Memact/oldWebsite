@@ -13,8 +13,8 @@ const USER_BASIC_FAQS = [
     answer: "Yourself is your editable memory page. You can add things yourself, approve what apps suggest, edit entries, delete them, or share selected parts later."
   },
   {
-    question: "What does user context include?",
-    answer: "It can include preferences, projects, reading habits, shopping interests, learning topics, work style, accessibility needs, and anything else you add or approve."
+    question: "What can Yourself include?",
+    answer: "It can include preferences, projects, reading habits, shopping interests, learning topics, work style, accessibility needs, usernames you prefer, and anything else you add or approve."
   },
   {
     question: "Why do apps ask first?",
@@ -40,7 +40,7 @@ const USER_CONTROL_FAQS = [
     answer: "Only if you allow it. Important entries can stay pending until you accept, edit, or reject them."
   },
   {
-    question: "Can I add my own context?",
+    question: "Can I add my own memory?",
     answer: "Yes. You can add entries like \"I prefer short summaries\" or \"I am working on Memact.\" User-added entries are treated as stronger than app guesses."
   },
   {
@@ -60,7 +60,7 @@ const DEVELOPER_BASIC_FAQS = [
   },
   {
     question: "How does an app connect to Memact?",
-    answer: "Register an app, ask the user for access, keep the API key on your server, then use the SDK/API to propose context or read allowed memory."
+    answer: "Register an app, ask the user for access, keep the API key on your server, then use the SDK/API to suggest memory or read allowed memory."
   },
   {
     question: "What can my app see?",
@@ -68,17 +68,17 @@ const DEVELOPER_BASIC_FAQS = [
   },
   {
     question: "How do scopes and categories work?",
-    answer: "Scopes say what your app can do. Categories say what kind of activity or memory your app is asking to use."
+    answer: "Scopes say what your app can do. Categories say what kind of memory your app is asking to use."
   }
 ]
 
 const DEVELOPER_CONTEXT_FAQS = [
   {
     question: "What is Context?",
-    answer: "Context is the open-source category system. It helps turn app input into readable memory proposals a user can accept, edit, reject, or delete."
+    answer: "Context is the open-source category system developers use. It helps turn app input into readable memory suggestions a user can accept, edit, reject, or delete."
   },
   {
-    question: "Can my app propose memory entries?",
+    question: "Can my app suggest memory entries?",
     answer: "Yes, if the user allows it. Important writes should stay pending until the user accepts, edits, or rejects them."
   },
   {

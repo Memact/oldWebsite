@@ -14,7 +14,7 @@ const START_FAQS = [
   },
   {
     question: "What is the basic flow?",
-    answer: "An app asks first. If the user allows it, the app can send signals or propose memory. Context organizes it, Yourself shows it, and the user decides what stays."
+    answer: "An app asks first. If the user allows it, the app can suggest memory or send specific app details for review. Context organizes those details, Yourself shows them, and the user decides what stays."
   }
 ]
 
@@ -28,8 +28,8 @@ const YOURSELF_FAQS = [
     answer: "It gives users a readable place to see and correct what apps know. Without it, personalization stays hidden inside each app."
   },
   {
-    question: "What counts as user context?",
-    answer: "User context is useful memory for personalization: preferences, interests, projects, repeated topics, skipped topics, work style, shopping patterns, and user-written notes."
+    question: "What counts as user memory?",
+    answer: "User memory can include preferences, interests, projects, repeated topics, skipped topics, work style, shopping patterns, preferred usernames, public contact details the user approves, and user-written notes."
   },
   {
     question: "Can users edit app-added memory?",
@@ -48,18 +48,18 @@ const APP_FAQS = [
   },
   {
     question: "What does Context do?",
-    answer: "Context is the open-source category system. It helps turn messy app input into readable memory proposals, like fitness preferences, shopping habits, media taste, or chat-app settings."
+    answer: "Context is the open-source category system for developers. It helps turn messy app input into readable memory suggestions, like fitness preferences, shopping habits, media taste, or chat-app settings."
   },
   {
-    question: "Can apps send context directly?",
-    answer: "Yes. Apps can propose context directly if they include evidence. They can also send raw signals and let Memact organize them before the user reviews the result."
+    question: "Can apps suggest memory directly?",
+    answer: "Yes. Apps can suggest memory directly if they include evidence. They can also send specific app details and let Memact organize them before the user reviews the result."
   }
 ]
 
 const DEVELOPER_FAQS = [
   {
     question: "What should developers build first?",
-    answer: "Start with one app category. Define what context matters, what evidence is safe, what should be blocked, and how the proposal should appear to the user."
+    answer: "Start with one app category. Define what memory matters, what evidence is safe, what should be blocked, and how the suggestion should appear to the user."
   },
   {
     question: "What should developers avoid?",
@@ -67,7 +67,7 @@ const DEVELOPER_FAQS = [
   },
   {
     question: "What happened to Schema?",
-    answer: "Schema is now Context. Older issues and PRs may still say Schema, but the job is the same: organize app signals into safe, readable context proposals."
+    answer: "Schema is now Context. Older issues and PRs may still say Schema, but the job is the same: organize app input into safe, readable memory suggestions."
   },
   {
     question: "Does Memact need a separate install?",

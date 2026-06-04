@@ -16,8 +16,6 @@ const LEGACY_ROUTES = new Map([
   ["/Dashboard", ROUTES.access],
   ["/stats", ROUTES.stats],
   ["/Stats", ROUTES.stats],
-  ["/playground", ROUTES.access],
-  ["/Playground", ROUTES.access],
   ["/wiki", ROUTES.wiki],
   ["/Wiki", ROUTES.wiki],
   ["/yourself", ROUTES.wiki],
