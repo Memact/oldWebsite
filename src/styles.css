@@ -2900,7 +2900,6 @@ input:-webkit-autofill:focus {
   .access-layout,
   .grid,
   .account-type-switcher,
-  .wiki-overview-grid,
   .connect-grid,
   .transparency-grid,
   .transparency-choice-grid {
@@ -2950,17 +2949,8 @@ input:-webkit-autofill:focus {
 
   .connect-hero,
   .transparency-hero,
-  .wiki-hero-panel,
   .transparency-control-head {
     display: grid;
-  }
-
-  .wiki-hero-actions {
-    justify-content: stretch;
-  }
-
-  .wiki-hero-actions button {
-    width: 100%;
   }
 
   .connect-link-row {
@@ -3174,6 +3164,24 @@ input:-webkit-autofill:focus {
   .category-grid { grid-template-columns: 1fr; }
 
   .usage-kpis { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 640px) {
+  .wiki-hero-panel {
+    display: grid;
+  }
+
+  .wiki-hero-actions {
+    justify-content: stretch;
+  }
+
+  .wiki-hero-actions button {
+    width: 100%;
+  }
+
+  .wiki-overview-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .usage-overview {
