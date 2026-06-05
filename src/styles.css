@@ -2401,6 +2401,10 @@ input:-webkit-autofill:focus {
   gap: 10px;
 }
 
+.wiki-hero-actions button {
+  flex: 0 0 152px;
+}
+
 .wiki-add-button {
   width: auto;
   white-space: nowrap;
