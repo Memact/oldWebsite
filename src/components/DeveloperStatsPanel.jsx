@@ -31,7 +31,6 @@ export function DeveloperStatsPanel({
       <section className="panel">
         <p className="eyebrow">Stats</p>
         <h2>App-level activity.</h2>
-        <p className="muted">Only stats for your own apps appear here. Memact does not show a user's full Yourself page to developers.</p>
 
         <div className="stats-card-grid">
           {cards.map((card) => (
@@ -69,7 +68,6 @@ export function DeveloperStatsPanel({
             <small>Entries users rejected or deleted.</small>
           </article>
         </div>
-        <p className="muted stats-note">Detailed proposal telemetry needs the memory event stream. This panel is app-scoped and intentionally does not expose private entries.</p>
       </section>
     </section>
   )

@@ -9,7 +9,6 @@ export function UserDashboard({ consents = [], apps = [], onRevokeConsent, isCon
       <section className="panel">
         <p className="eyebrow">Dashboard</p>
         <h2>Your connected apps.</h2>
-        <p className="muted">Apps ask first. You can review what each app can use and remove access later.</p>
         {isConsentShell ? (
           <p className="notice" role="status">This is a lightweight consent account. Finish account setup later to manage Yourself and settings.</p>
         ) : null}
@@ -22,7 +21,7 @@ export function UserDashboard({ consents = [], apps = [], onRevokeConsent, isCon
                 <div>
                   <p className="eyebrow">Connected app</p>
                   <h3>{app?.name || "Connected app"}</h3>
-                  <p className="muted">{app?.description || "This app has approved access through Memact."}</p>
+                  {app?.description ? <p className="muted">{app.description}</p> : null}
                 </div>
                 <div className="consent-chip-row">
                   {(consent.scopes || []).slice(0, 4).map((scope) => <span className="badge" key={scope}>{scope}</span>)}
@@ -37,16 +36,10 @@ export function UserDashboard({ consents = [], apps = [], onRevokeConsent, isCon
           {!activeConsents.length ? (
             <section className="permission-list">
               <h3>No connected apps yet.</h3>
-              <p className="muted">When an app asks to use Memact, you can approve or deny it from the consent page.</p>
+              <p className="muted">Open Connect Memact from an app to approve or deny access.</p>
             </section>
           ) : null}
         </div>
-      </section>
-
-      <section className="panel">
-        <p className="eyebrow">Pending memory</p>
-        <h2>Important writes wait for you.</h2>
-        <p className="muted">When an app wants to remember something important, it should appear as a memory proposal you can accept, edit, or reject.</p>
       </section>
 
       {revokedConsents.length ? (

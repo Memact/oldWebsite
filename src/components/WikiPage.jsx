@@ -132,7 +132,6 @@ export function WikiPage({
         <div>
           <p className="eyebrow">Yourself</p>
           <h2>{app?.id ? `${appName}'s access to Yourself` : "What apps know about you"}</h2>
-          <p className="muted">A private page for memory about you. Add what is true, approve what apps suggest, and delete what should not stay.</p>
         </div>
         <div className="wiki-hero-actions">
           <button type="button" className="button wiki-add-button" onClick={openAddMemory}>
@@ -180,7 +179,6 @@ export function WikiPage({
           <div>
             <p className="eyebrow">Add context</p>
             <h3>Add something apps should know.</h3>
-            <p className="muted">What you add starts private, accepted, and verified by you.</p>
           </div>
           <div className="wiki-form-grid">
             <label>
@@ -373,7 +371,6 @@ export function WikiPage({
       {hasShareableEntries ? <section className="panel wiki-share-card">
         <p className="eyebrow">Sharing</p>
         <h3>Private unless you create a share link.</h3>
-        <p className="muted">A share link should only show entries you explicitly make shareable.</p>
       </section> : null}
     </section>
   )

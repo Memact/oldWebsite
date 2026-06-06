@@ -136,7 +136,6 @@ export function HelpPanel({ accountType = "developer" }) {
       <div>
         <p className="eyebrow">Help</p>
         <h2>Frequently asked questions</h2>
-        <p className="muted">{isUser ? "Common questions about consent, Yourself, connected apps, and account controls." : "Common questions about apps, API keys, consent, Context, and safe memory writes."}</p>
       </div>
 
       <div className="faq-section">

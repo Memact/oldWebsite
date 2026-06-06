@@ -95,7 +95,6 @@ export function LearnPanel() {
       <div>
         <p className="eyebrow">Learn More</p>
         <h2>See what apps know about you.</h2>
-        <p className="muted">A simple overview of how apps, Context, Yourself, and Memory fit together.</p>
       </div>
 
       <div className="faq-section">

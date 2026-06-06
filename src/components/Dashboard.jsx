@@ -106,9 +106,6 @@ export function Dashboard({
   const appHeading = isCreatingApp
     ? hasApps ? "Create a new app." : "Create your first app."
     : selectedApp?.name || "Select an app."
-  const appDescription = !isCreatingApp && selectedApp
-    ? selectedApp.description || "No description added."
-    : "Each app gets its own permissions and API keys."
 
   const provider = getUserProvider(user, authUser)
   const isUserAccount = accountType === "user"
@@ -142,7 +139,7 @@ export function Dashboard({
         <div className="dashboard-head dashboard-overview panel slim-panel">
           <div>
             <p className="eyebrow">Dashboard</p>
-            <h2>{`Welcome${displayName ? `, ${displayName}` : ""}!`}</h2>
+            <h2>{hasApps ? "Build with Memact" : "Create your first app"}</h2>
           </div>
           <details
             className="dashboard-tutorial-panel settings-details"
@@ -179,7 +176,10 @@ export function Dashboard({
       ) : activeTab === "account" ? (
         <section className="panel account-panel">
           <div className="account-panel-head">
-            <p className="eyebrow">Account</p>
+            <div>
+              <p className="eyebrow">Account</p>
+              <h2>Your Memact account</h2>
+            </div>
             <button type="button" className="ghost subtle-danger sign-out-button" onClick={onSignOut}>Sign out</button>
           </div>
           {isConsentShell ? (
@@ -198,7 +198,6 @@ export function Dashboard({
             <div>
               <p className="eyebrow">Portal</p>
               <h2>Choose how you use Memact.</h2>
-              <p className="muted">Switching only changes which portal opens. Your apps, keys, connected apps, and Yourself entries stay as they are.</p>
             </div>
             {accountTypeSuccess ? <p className="notice notice-success" role="status">{accountTypeSuccess}</p> : null}
             <div className="account-type-switcher" role="group" aria-label="Account type">
@@ -257,7 +256,6 @@ export function Dashboard({
               <div>
                 <p className="eyebrow">Display name</p>
                 <h2>{hasDisplayName ? "Change your name." : "Set your display name."}</h2>
-                <p className="muted">This is the name shown across your dashboard.</p>
               </div>
               {displayNameSuccess ? <p className="notice notice-success" role="status">{displayNameSuccess}</p> : null}
               <form className="form compact-form" onSubmit={onUpdateDisplayName}>
@@ -332,9 +330,6 @@ export function Dashboard({
               <div>
                 <p className="eyebrow">Email</p>
                 <h2>Change your email.</h2>
-                <p className="muted">
-                  Supabase will send a Memact-native verification email before this change is saved.
-                </p>
               </div>
               {emailChangeSuccess ? <p className="notice notice-success" role="status">{emailChangeSuccess}</p> : null}
               <form className="form compact-form" onSubmit={onChangeEmail}>
@@ -361,7 +356,6 @@ export function Dashboard({
               <div>
                 <p className="eyebrow">Invite</p>
                 <h2>Invite someone to Memact.</h2>
-                <p className="muted">Send an email invitation so they can create their own Memact account and manage their apps.</p>
               </div>
               {inviteSuccess ? <p className="notice notice-success" role="status">{inviteSuccess}</p> : null}
               <form className="form compact-form" onSubmit={onInviteUser}>
@@ -397,7 +391,6 @@ export function Dashboard({
             <div>
               <p className="eyebrow">Delete account</p>
               <h2>Delete your Memact account.</h2>
-              <p className="muted">This needs a secure server function. Browser code cannot safely delete Supabase Auth users by itself.</p>
             </div>
             {deleteAccountSuccess ? <p className="notice notice-success" role="status">{deleteAccountSuccess}</p> : null}
             <button
@@ -418,7 +411,6 @@ export function Dashboard({
               <div>
                 <p className="eyebrow">App</p>
                 <h2>{appHeading}</h2>
-                <p className="muted">{appDescription}</p>
               </div>
             </div>
 
@@ -489,7 +481,6 @@ export function Dashboard({
                 <div className="section-copy">
                   <p className="eyebrow">Permissions</p>
                   <h2>Choose what this app can ask Memact to use.</h2>
-                  <p className="muted">Permissions are saved for this app. Change scopes any time.</p>
                 </div>
                 <div className="actions section-actions">
                   <span className="tooltip-wrap" title={permissionsHint || undefined}>
@@ -557,7 +548,6 @@ export function Dashboard({
                         <div>
                           <p className="eyebrow">Yourself link</p>
                           <h3>Review this app's memory access.</h3>
-                          <p className="muted">Use this beside consent so users can see what the app can add and use.</p>
                         </div>
                         <a className="button wiki-link-button" href={buildPortalWikiUrl(selectedAppId, selectedScopes, selectedAppCategories, selectedApp?.redirect_urls?.[0] || selectedApp?.developer_url || "")}>Open Yourself link</a>
                       </section>
@@ -774,19 +764,10 @@ function UserSettingsSections({ apps = [], consents = [], onRevokeConsent }) {
   return (
     <div className="user-settings-stack">
       <section className="user-settings-card">
-        <div>
-          <p className="eyebrow">Profile</p>
-          <h3>Your profile starts private.</h3>
-          <p className="muted">Use display name settings below. Your profile stays private until you choose otherwise.</p>
-        </div>
-      </section>
-
-      <section className="user-settings-card">
         <div className="wiki-section-head">
           <div>
             <p className="eyebrow">Apps</p>
             <h3>Connected apps</h3>
-            <p className="muted">Apps can only use access you approved. Revoke access when an app should stop.</p>
           </div>
           <span className="badge">{activeConsents.length}</span>
         </div>
@@ -805,7 +786,6 @@ function UserSettingsSections({ apps = [], consents = [], onRevokeConsent }) {
             )
           })}
           {!activeConsents.length ? <p className="muted">No connected apps yet.</p> : null}
-          {revokedConsents.length ? <p className="muted">Revoked apps stay in history so you can see what changed.</p> : null}
         </div>
       </section>
 

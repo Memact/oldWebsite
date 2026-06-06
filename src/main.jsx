@@ -88,6 +88,7 @@ function App() {
   const [authMode, setAuthMode] = useState(() => authModeFromLocation())
   const [lastAuthMethod, setLastAuthMethod] = useState(() => readLastAuthMethod())
   const [dashboard, dashboardActions] = useDashboardState()
+  const [portalLoading, setPortalLoading] = useState(true)
   const [policy, setPolicy] = useState(null)
   const [newAppName, setNewAppName] = useState("")
   const [newAppDescription, setNewAppDescription] = useState("")
@@ -361,8 +362,20 @@ function App() {
   }, [accountType, currentPage, session])
 
   useEffect(() => {
-    if (authChecking || !session) return
+    if (authChecking) return
+    if (!session) {
+      setPortalLoading(false)
+      return
+    }
+    let cancelled = false
+    setPortalLoading(true)
     refreshDashboard(client, session, dashboardActions, statusForAccessError)
+      .finally(() => {
+        if (!cancelled) setPortalLoading(false)
+      })
+    return () => {
+      cancelled = true
+    }
   }, [authChecking, client, session])
 
   useEffect(() => {
@@ -851,6 +864,7 @@ function App() {
       return
     }
     setAuthLoading("account-type")
+    setPortalLoading(true)
     setStatus("Switching portal.")
     try {
       const auth = requireSupabase()
@@ -865,6 +879,9 @@ function App() {
       if (updateError) throw updateError
       const nextUser = data?.user || authUser
       if (nextUser) setAuthUser(nextUser)
+      if (session) {
+        await refreshDashboard(client, session, dashboardActions, statusForAccessError)
+      }
       setAccountTypeSuccess(`Switched to ${nextAccountType === ACCOUNT_TYPES.user ? "user" : "developer"} portal. Existing data was kept.`)
       setStatus("Portal switched.")
       navigateToPage(defaultPageForAccountType(nextAccountType), { replace: true })
@@ -872,6 +889,7 @@ function App() {
       setError(formatAuthErrorMessage(switchError, "Account type did not change."))
       setStatus(authStatusMessage(switchError))
     } finally {
+      setPortalLoading(false)
       setAuthLoading("")
     }
   }
@@ -1407,7 +1425,7 @@ function App() {
   const isPublicLearnPage = currentPage === "learn"
   const isPublicWikiPage = currentPage === "publicWiki"
   const showAuth = !session && !authChecking && !isPublicLearnPage && !isPublicWikiPage
-  const isInitialLoading = authChecking && !session
+  const showMemactLoading = (authChecking && !session) || Boolean(session && portalLoading)
   const statusNeedsAttention = /missing|failed|offline/i.test(status)
   const showStatusPill = !showAuth && Boolean(error || statusNeedsAttention)
   const showExternalBackHeader = session && currentPage === "connect"
@@ -1441,7 +1459,7 @@ function App() {
     return () => document.removeEventListener("pointerdown", handlePointerDown)
   }, [isMobileTabsOpen])
 
-  if (isInitialLoading) {
+  if (showMemactLoading) {
     return (
       <div className="loading-screen">
         <div className="loading-screen-inner">
@@ -1488,7 +1506,7 @@ function App() {
         {showStatusPill ? <span className="status-pill" aria-live="polite">{status}</span> : null}
       </header>
 
-      {error && !isInitialLoading ? (
+      {error && !showMemactLoading ? (
         <div id="error-message" className="notice notice-danger error-overlay" role="alert">
           <span>{error}</span>
           <div className="error-overlay-actions">
@@ -1497,7 +1515,7 @@ function App() {
           </div>
         </div>
       ) : null}
-      {authNotice && !isInitialLoading ? (
+      {authNotice && !showMemactLoading ? (
         <div className={error ? "notice notice-success success-overlay has-error" : "notice notice-success success-overlay"} role="status">
           <span>{authNotice}</span>
           <button type="button" className="error-dismiss" onClick={() => setAuthNotice("")} aria-label="Dismiss notice">x</button>
