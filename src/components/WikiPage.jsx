@@ -178,7 +178,7 @@ export function WikiPage({
         <form className="wiki-add-form" ref={addMemoryRef} onSubmit={submitManualEntry}>
           <div>
             <p className="eyebrow">Add context</p>
-            <h3>Add something apps should know.</h3>
+            <h3>Add something apps should know</h3>
           </div>
           <div className="wiki-form-grid">
             <label>
@@ -370,7 +370,7 @@ export function WikiPage({
 
       {hasShareableEntries ? <section className="wiki-share-card">
         <p className="eyebrow">Sharing</p>
-        <h3>Private unless you create a share link.</h3>
+        <h3>Private unless you create a share link</h3>
       </section> : null}
     </section>
   )

@@ -189,9 +189,10 @@ summary:focus-visible {
 }
 
 .sign-out-button {
-  min-height: 36px;
-  padding: 7px 10px;
-  font-size: 13px;
+  justify-self: end;
+  min-height: 46px;
+  padding: 10px 16px;
+  font-size: 15px;
   font-weight: 650;
 }
 
@@ -1666,6 +1667,13 @@ input:-webkit-autofill:focus {
 .identity-card > div {
   display: grid;
   gap: 6px;
+}
+
+.account-action-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) max-content;
+  align-items: center;
+  gap: 16px;
 }
 
 .identity-card h2 {
@@ -3366,9 +3374,13 @@ input:-webkit-autofill:focus {
     hyphens: none;
   }
 
-  .dashboard-head .sign-out-button {
-    align-self: flex-start;
-    width: auto;
+  .account-action-panel {
+    grid-template-columns: 1fr;
+  }
+
+  .account-action-panel .sign-out-button {
+    justify-self: stretch;
+    width: 100%;
   }
 
   .dashboard-tutorial-steps {

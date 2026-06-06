@@ -144,7 +144,6 @@ export function Dashboard({
               <p className="eyebrow">Account</p>
               <h2>Your Memact account</h2>
             </div>
-            <button type="button" className="ghost subtle-danger sign-out-button" onClick={onSignOut}>Sign out</button>
           </div>
           {isConsentShell ? (
             <p className="notice" role="status">We found approved app access for this email. Set a password to open your Memact account.</p>
@@ -158,10 +157,17 @@ export function Dashboard({
               </p>
             </div>
           </div>
+          <section className="password-panel account-editor-panel account-action-panel">
+            <div>
+              <p className="eyebrow">Session</p>
+              <h2>Sign out</h2>
+            </div>
+            <button type="button" className="ghost subtle-danger sign-out-button" onClick={onSignOut}>Sign out</button>
+          </section>
           <section className="password-panel account-editor-panel account-type-panel">
             <div>
               <p className="eyebrow">Portal</p>
-              <h2>Choose how you use Memact.</h2>
+              <h2>Choose how you use Memact</h2>
             </div>
             {accountTypeSuccess ? <p className="notice notice-success" role="status">{accountTypeSuccess}</p> : null}
             <div className="account-type-switcher" role="group" aria-label="Account type">
@@ -219,7 +225,7 @@ export function Dashboard({
             <section className="password-panel account-editor-panel display-name-panel">
               <div>
                 <p className="eyebrow">Display name</p>
-                <h2>{hasDisplayName ? "Change your name." : "Set your display name."}</h2>
+                <h2>{hasDisplayName ? "Change your name" : "Set your display name"}</h2>
               </div>
               {displayNameSuccess ? <p className="notice notice-success" role="status">{displayNameSuccess}</p> : null}
               <form className="form compact-form" onSubmit={onUpdateDisplayName}>
@@ -245,7 +251,7 @@ export function Dashboard({
             <section className="password-panel account-editor-panel">
               <div>
                 <p className="eyebrow">Password</p>
-                <h2>{authFlow === "recovery" ? "Reset your password." : needsPasswordSetup ? "Set a password." : "Update your password."}</h2>
+                <h2>{authFlow === "recovery" ? "Reset your password" : needsPasswordSetup ? "Set a password" : "Update your password"}</h2>
                 <p className="muted">
                   {authFlow === "recovery"
                     ? "Your recovery link worked. Choose a new password to finish getting back into Memact."
@@ -293,7 +299,7 @@ export function Dashboard({
             <section className="password-panel account-editor-panel email-panel">
               <div>
                 <p className="eyebrow">Email</p>
-                <h2>Change your email.</h2>
+                <h2>Change your email</h2>
               </div>
               {emailChangeSuccess ? <p className="notice notice-success" role="status">{emailChangeSuccess}</p> : null}
               <form className="form compact-form" onSubmit={onChangeEmail}>
@@ -319,7 +325,7 @@ export function Dashboard({
             <section className="password-panel account-editor-panel invite-panel">
               <div>
                 <p className="eyebrow">Invite</p>
-                <h2>Invite someone to Memact.</h2>
+                <h2>Invite someone to Memact</h2>
               </div>
               {inviteSuccess ? <p className="notice notice-success" role="status">{inviteSuccess}</p> : null}
               <form className="form compact-form" onSubmit={onInviteUser}>
@@ -354,7 +360,7 @@ export function Dashboard({
           <section className="password-panel account-editor-panel danger-zone-panel">
             <div>
               <p className="eyebrow">Delete account</p>
-              <h2>Delete your Memact account.</h2>
+              <h2>Delete your Memact account</h2>
             </div>
             {deleteAccountSuccess ? <p className="notice notice-success" role="status">{deleteAccountSuccess}</p> : null}
             <button
@@ -477,7 +483,7 @@ export function Dashboard({
               <div className="section-head">
                 <div className="section-copy">
                   <p className="eyebrow">Permissions</p>
-                  <h2>Choose what this app can ask Memact to use.</h2>
+                  <h2>Choose what this app can ask Memact to use</h2>
                 </div>
                 <div className="actions section-actions">
                   <span className="tooltip-wrap" title={permissionsHint || undefined}>
@@ -569,7 +575,7 @@ export function Dashboard({
                           <small>{key.key_prefix}...</small>
                         </span>
                         <span className="badge badge-success">active</span>
-                        <button type="button" className="ghost" onClick={() => onRevokeKey(key.id)}>Revoke</button>
+                        <button type="button" className="ghost danger" onClick={() => onRevokeKey(key.id)}>Revoke</button>
                       </div>
                     )) : null}
 

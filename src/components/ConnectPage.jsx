@@ -21,7 +21,7 @@ export function ConnectPage({ connectRequest, connectDetails, loading, notice, s
         <div className="connect-hero">
           <div>
             <p className="eyebrow">Connect app</p>
-            <h2>{appName} wants to connect.</h2>
+            <h2>{appName} wants to connect</h2>
             <p className="muted">Choose what this app can use before you connect it.</p>
           </div>
         </div>

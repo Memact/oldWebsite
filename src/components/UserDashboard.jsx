@@ -8,7 +8,7 @@ export function UserDashboard({ consents = [], apps = [], onRevokeConsent, isCon
     <section className="dashboard user-dashboard">
       <section className="panel">
         <p className="eyebrow">Dashboard</p>
-        <h2>Your connected apps.</h2>
+        <h2>Your connected apps</h2>
         {isConsentShell ? (
           <p className="notice" role="status">This is a lightweight consent account. Finish account setup later to manage Yourself and settings.</p>
         ) : null}
@@ -35,7 +35,7 @@ export function UserDashboard({ consents = [], apps = [], onRevokeConsent, isCon
           })}
           {!activeConsents.length ? (
             <section className="permission-list">
-              <h3>No connected apps yet.</h3>
+              <h3>No connected apps yet</h3>
               <p className="muted">Open Connect Memact from an app to approve or deny access.</p>
             </section>
           ) : null}
@@ -43,7 +43,7 @@ export function UserDashboard({ consents = [], apps = [], onRevokeConsent, isCon
       {revokedConsents.length ? (
         <section className="user-dashboard-subsection">
           <p className="eyebrow">History</p>
-          <h2>Removed app access.</h2>
+          <h2>Removed app access</h2>
           <div className="user-consent-list">
             {revokedConsents.map((consent) => (
               <article className="permission-list user-consent-card" key={consent.id}>

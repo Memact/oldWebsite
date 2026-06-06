@@ -135,7 +135,7 @@ export function Landing({
         <div className="hero-copy hero-copy-compact">
           {isConnecting ? (
             <>
-              <h1>Review what this app can use.</h1>
+              <h1>Review what this app can use</h1>
               <p>Sign in to see what the app wants and choose whether to connect.</p>
               <button type="button" className="learn-more-link" onClick={onLearnMore}>Learn more</button>
             </>
