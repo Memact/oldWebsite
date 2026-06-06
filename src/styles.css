@@ -2313,12 +2313,6 @@ input:-webkit-autofill:focus {
   margin: 16px 0;
 }
 
-.user-settings-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
-}
-
 .user-settings-card {
   display: grid;
   gap: 8px;
@@ -2340,8 +2334,16 @@ input:-webkit-autofill:focus {
 }
 
 .user-settings-app {
+  display: grid;
   grid-template-columns: minmax(0, 1fr) max-content;
   align-items: center;
+  gap: 14px;
+}
+
+.user-settings-app button {
+  width: 104px;
+  min-height: 44px;
+  padding-inline: 12px;
 }
 
 .consent-chip-row {
@@ -2673,7 +2675,7 @@ input:-webkit-autofill:focus {
 .memact-select-menu button:hover,
 .memact-select-menu button:focus-visible,
 .memact-select-menu button.is-active {
-  border-color: var(--border);
+  border-color: transparent;
   color: var(--text);
   background: var(--surface-3);
 }
@@ -2694,49 +2696,53 @@ input:-webkit-autofill:focus {
 
 .memact-date-picker {
   position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 48px;
+  align-items: center;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-1);
   z-index: 2;
   min-width: 0;
 }
 
-.memact-date-picker[open] {
+.memact-date-picker:focus-within,
+.memact-date-picker:has(.memact-date-popover[open]) {
+  border-color: var(--border-strong);
+  background: var(--surface-2);
+}
+
+.memact-date-picker:has(.memact-date-popover[open]) {
   z-index: 12;
 }
 
-.memact-date-trigger {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) max-content;
-  align-items: center;
-  gap: 12px;
+.memact-date-picker input {
   min-height: 56px;
-  border: 1px solid var(--border);
+  border: 0;
   border-radius: var(--radius-sm);
-  padding: 8px 10px 8px 20px;
-  color: var(--text);
-  background: var(--surface-1);
-  cursor: pointer;
-  list-style: none;
-  transition: border-color 140ms ease, background 140ms ease;
+  padding-left: 20px;
+  background: transparent;
 }
 
-.memact-date-trigger::-webkit-details-marker {
+.memact-date-popover {
+  position: static;
+}
+
+.memact-date-toggle {
+  display: grid;
+  place-items: center;
+  min-height: 56px;
+  padding: 0 9px 0 0;
+  cursor: pointer;
+  list-style: none;
+}
+
+.memact-date-toggle::-webkit-details-marker {
   display: none;
 }
 
-.memact-date-trigger::marker {
+.memact-date-toggle::marker {
   content: "";
-}
-
-.memact-date-trigger span:first-child {
-  color: var(--text);
-  font-size: 16px;
-  font-weight: 650;
-}
-
-.memact-date-trigger:hover,
-.memact-date-picker[open] .memact-date-trigger,
-.memact-date-trigger:focus-visible {
-  border-color: var(--border-strong);
-  background: var(--surface-2);
 }
 
 .memact-calendar-icon {
@@ -2764,12 +2770,12 @@ input:-webkit-autofill:focus {
   position: absolute;
   top: calc(100% + 6px);
   right: 0;
-  left: 0;
   display: grid;
-  gap: 10px;
+  width: min(100%, 304px);
+  gap: 8px;
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-sm);
-  padding: 12px;
+  padding: 10px;
   background: rgba(0, 1, 27, 0.98);
   box-shadow: 0 18px 42px rgba(0, 0, 0, 0.34);
   backdrop-filter: blur(18px);
@@ -2777,9 +2783,9 @@ input:-webkit-autofill:focus {
 
 .memact-date-head {
   display: grid;
-  grid-template-columns: 38px minmax(0, 1fr) 38px;
+  grid-template-columns: 34px minmax(0, 1fr) 34px;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 
 .memact-date-head strong {
@@ -2790,18 +2796,18 @@ input:-webkit-autofill:focus {
 }
 
 .memact-date-head button {
-  width: 38px;
-  min-height: 38px;
+  width: 34px;
+  min-height: 34px;
   padding: 0;
   border-radius: 999px;
-  font-size: 18px;
+  font-size: 16px;
 }
 
 .memact-date-weekdays,
 .memact-date-grid {
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
-  gap: 5px;
+  gap: 4px;
 }
 
 .memact-date-weekdays span {
@@ -2814,8 +2820,8 @@ input:-webkit-autofill:focus {
 
 .memact-date-grid button,
 .memact-date-grid span {
-  min-height: 34px;
-  border-radius: 9px;
+  min-height: 28px;
+  border-radius: 8px;
 }
 
 .memact-date-grid button {
@@ -2829,7 +2835,7 @@ input:-webkit-autofill:focus {
 .memact-date-grid button:hover,
 .memact-date-grid button:focus-visible,
 .memact-date-grid button.is-active {
-  border-color: var(--border);
+  border-color: transparent;
   color: var(--text);
   background: var(--surface-3);
 }
@@ -3365,12 +3371,12 @@ input:-webkit-autofill:focus {
 
   .account-grid { grid-template-columns: 1fr; }
 
-  .user-settings-grid {
+  .user-settings-app {
     grid-template-columns: 1fr;
   }
 
-  .user-settings-app {
-    grid-template-columns: 1fr;
+  .user-settings-app button {
+    width: 100%;
   }
 
   .key-box code { white-space: pre; }

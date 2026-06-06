@@ -124,6 +124,7 @@ export function WikiPage({
   const visibleEntries = [...manualEntries, ...acceptedProposals]
   const filteredEntries = filterWikiEntries(visibleEntries, wikiSearch)
   const groupedEntries = groupEntriesByCategory(filteredEntries)
+  const hasShareableEntries = visibleEntries.some((entry) => entry.visibility === "shareable")
 
   return (
     <section className="wiki-page">
@@ -322,27 +323,28 @@ export function WikiPage({
         </div>
       </section>
 
-      <section className="panel wiki-entry-panel wiki-main-panel">
-        <div className="wiki-section-head">
-          <div>
-            <p className="eyebrow">Review</p>
-            <h3>Suggestions from apps</h3>
+      {visibleProposals.length ? (
+        <section className="panel wiki-entry-panel wiki-main-panel">
+          <div className="wiki-section-head">
+            <div>
+              <p className="eyebrow">Review</p>
+              <h3>Suggestions from apps</h3>
+            </div>
+            <span className="badge">{visibleProposals.length}</span>
           </div>
-          <span className="badge">{visibleProposals.length}</span>
-        </div>
-        <div className="wiki-entry-list">
-          {visibleProposals.map((entry) => (
-            <WikiProposalCard
-              key={entry.id}
-              entry={entry}
-              onAccept={() => acceptProposal(entry)}
-              onReject={() => rejectProposal(entry.id)}
-              onEdit={() => acceptProposal({ ...entry, source_label: "Edited and accepted by you" })}
-            />
-          ))}
-          {!visibleProposals.length ? <p className="muted">No app suggestions are waiting right now.</p> : null}
-        </div>
-      </section>
+          <div className="wiki-entry-list">
+            {visibleProposals.map((entry) => (
+              <WikiProposalCard
+                key={entry.id}
+                entry={entry}
+                onAccept={() => acceptProposal(entry)}
+                onReject={() => rejectProposal(entry.id)}
+                onEdit={() => acceptProposal({ ...entry, source_label: "Edited and accepted by you" })}
+              />
+            ))}
+          </div>
+        </section>
+      ) : null}
 
       {app?.id ? (
         <div className="transparency-grid">
@@ -368,11 +370,11 @@ export function WikiPage({
         <button type="button" className="ghost" onClick={onManageConsent}>Open Settings</button>
       </div> : null}
 
-      <section className="panel wiki-share-card">
+      {hasShareableEntries ? <section className="panel wiki-share-card">
         <p className="eyebrow">Sharing</p>
         <h3>Private unless you create a share link.</h3>
         <p className="muted">A share link should only show entries you explicitly make shareable.</p>
-      </section>
+      </section> : null}
     </section>
   )
 }
@@ -447,6 +449,7 @@ function MemactSelect({ label, value, options, onChange, compact = false }) {
 
 function MemactDatePicker({ value, onChange }) {
   const detailsRef = useRef(null)
+  const [typedValue, setTypedValue] = useState(formatDateLabel(value))
   const selectedDate = parseIsoDate(value)
   const initialMonth = selectedDate || new Date()
   const [viewYear, setViewYear] = useState(initialMonth.getFullYear())
@@ -454,54 +457,93 @@ function MemactDatePicker({ value, onChange }) {
   const days = buildCalendarDays(viewYear, viewMonth)
   const monthLabel = new Intl.DateTimeFormat("en", { month: "long", year: "numeric" }).format(new Date(viewYear, viewMonth, 1))
 
+  useEffect(() => {
+    setTypedValue(formatDateLabel(value))
+    const nextDate = parseIsoDate(value)
+    if (!nextDate) return
+    setViewYear(nextDate.getFullYear())
+    setViewMonth(nextDate.getMonth())
+  }, [value])
+
   const moveMonth = (amount) => {
     const next = new Date(viewYear, viewMonth + amount, 1)
     setViewYear(next.getFullYear())
     setViewMonth(next.getMonth())
   }
   const chooseDate = (day) => {
-    onChange(toIsoDate(new Date(viewYear, viewMonth, day)))
+    const isoDate = toIsoDate(new Date(viewYear, viewMonth, day))
+    onChange(isoDate)
+    setTypedValue(formatDateLabel(isoDate))
     detailsRef.current?.removeAttribute("open")
   }
   const clearDate = () => {
     onChange("")
+    setTypedValue("")
     detailsRef.current?.removeAttribute("open")
+  }
+  const commitTypedDate = () => {
+    const trimmed = typedValue.trim()
+    if (!trimmed) {
+      onChange("")
+      return
+    }
+    const parsed = parseTypedDate(trimmed)
+    if (!parsed) {
+      setTypedValue(formatDateLabel(value))
+      return
+    }
+    onChange(toIsoDate(parsed))
+  }
+  const handleTypedDate = (event) => {
+    const nextValue = event.target.value
+    setTypedValue(nextValue)
+    const parsed = parseTypedDate(nextValue)
+    if (parsed) onChange(toIsoDate(parsed))
   }
 
   return (
-    <details className="memact-date-picker" ref={detailsRef}>
-      <summary className="memact-date-trigger" aria-label="Choose optional expiry date">
-        <span>{value ? formatDateLabel(value) : "dd-mm-yyyy"}</span>
-        <span className="memact-calendar-icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24" focusable="false">
-            <path d="M7 3.75v3M17 3.75v3M4.75 9.25h14.5M6.25 5.75h11.5c.83 0 1.5.67 1.5 1.5v10.5c0 .83-.67 1.5-1.5 1.5H6.25c-.83 0-1.5-.67-1.5-1.5V7.25c0-.83.67-1.5 1.5-1.5Z" />
-          </svg>
-        </span>
-      </summary>
-      <div className="memact-date-menu">
-        <div className="memact-date-head">
-          <button type="button" className="ghost" onClick={() => moveMonth(-1)} aria-label="Previous month">&lt;</button>
-          <strong>{monthLabel}</strong>
-          <button type="button" className="ghost" onClick={() => moveMonth(1)} aria-label="Next month">&gt;</button>
+    <div className="memact-date-picker">
+      <input
+        value={typedValue}
+        inputMode="numeric"
+        placeholder="dd-mm-yyyy"
+        aria-label="Optional expiry date"
+        onBlur={commitTypedDate}
+        onChange={handleTypedDate}
+      />
+      <details className="memact-date-popover" ref={detailsRef}>
+        <summary className="memact-date-toggle" aria-label="Open calendar">
+          <span className="memact-calendar-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" focusable="false">
+              <path d="M7 3.75v3M17 3.75v3M4.75 9.25h14.5M6.25 5.75h11.5c.83 0 1.5.67 1.5 1.5v10.5c0 .83-.67 1.5-1.5 1.5H6.25c-.83 0-1.5-.67-1.5-1.5V7.25c0-.83.67-1.5 1.5-1.5Z" />
+            </svg>
+          </span>
+        </summary>
+        <div className="memact-date-menu">
+          <div className="memact-date-head">
+            <button type="button" className="ghost" onClick={() => moveMonth(-1)} aria-label="Previous month">&lt;</button>
+            <strong>{monthLabel}</strong>
+            <button type="button" className="ghost" onClick={() => moveMonth(1)} aria-label="Next month">&gt;</button>
+          </div>
+          <div className="memact-date-weekdays" aria-hidden="true">
+            {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((day) => <span key={day}>{day}</span>)}
+          </div>
+          <div className="memact-date-grid">
+            {days.map((day, index) => day ? (
+              <button
+                type="button"
+                className={isSameIsoDate(value, viewYear, viewMonth, day) ? "is-active" : ""}
+                key={`${day}-${index}`}
+                onClick={() => chooseDate(day)}
+              >
+                {day}
+              </button>
+            ) : <span key={`empty-${index}`} aria-hidden="true" />)}
+          </div>
+          <button type="button" className="ghost memact-date-clear" onClick={clearDate}>Clear date</button>
         </div>
-        <div className="memact-date-weekdays" aria-hidden="true">
-          {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((day) => <span key={day}>{day}</span>)}
-        </div>
-        <div className="memact-date-grid">
-          {days.map((day, index) => day ? (
-            <button
-              type="button"
-              className={isSameIsoDate(value, viewYear, viewMonth, day) ? "is-active" : ""}
-              key={`${day}-${index}`}
-              onClick={() => chooseDate(day)}
-            >
-              {day}
-            </button>
-          ) : <span key={`empty-${index}`} aria-hidden="true" />)}
-        </div>
-        <button type="button" className="ghost memact-date-clear" onClick={clearDate}>Clear date</button>
-      </div>
-    </details>
+      </details>
+    </div>
   )
 }
 
@@ -520,6 +562,22 @@ function buildCalendarDays(year, month) {
 function parseIsoDate(value) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(String(value || ""))) return null
   const [year, month, day] = value.split("-").map(Number)
+  const date = new Date(year, month - 1, day)
+  if (date.getFullYear() !== year || date.getMonth() !== month - 1 || date.getDate() !== day) return null
+  return date
+}
+
+function parseTypedDate(value) {
+  const raw = String(value || "").trim()
+  if (!raw) return null
+  const isoDate = parseIsoDate(raw)
+  if (isoDate) return isoDate
+  const match = raw.match(/^(\d{1,2})-(\d{1,2})-(\d{4})$/)
+  if (!match) return null
+  const [, dayText, monthText, yearText] = match
+  const day = Number(dayText)
+  const month = Number(monthText)
+  const year = Number(yearText)
   const date = new Date(year, month - 1, day)
   if (date.getFullYear() !== year || date.getMonth() !== month - 1 || date.getDate() !== day) return null
   return date

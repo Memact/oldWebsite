@@ -809,23 +809,6 @@ function UserSettingsSections({ apps = [], consents = [], onRevokeConsent }) {
         </div>
       </section>
 
-      <section className="user-settings-grid">
-        <div className="user-settings-card">
-          <p className="eyebrow">Privacy</p>
-          <h3>Private by default.</h3>
-          <p className="muted">Yourself entries stay private unless you make them shareable.</p>
-        </div>
-        <div className="user-settings-card">
-          <p className="eyebrow">Sharing</p>
-          <h3>You choose what leaves Yourself.</h3>
-          <p className="muted">Sharing stays off until you explicitly make an entry shareable.</p>
-        </div>
-        <div className="user-settings-card">
-          <p className="eyebrow">Account</p>
-          <h3>Email, password, sign out.</h3>
-          <p className="muted">Use the account controls below for login and identity settings.</p>
-        </div>
-      </section>
     </div>
   )
 }
