@@ -3390,7 +3390,14 @@ input:-webkit-autofill:focus {
   .section-toolbar,
   .actions,
   .key-actions,
-  .connect-actions {
+  .connect-actions,
+  .embed-actions,
+  .app-actions,
+  .wiki-hero-actions,
+  .connect-link-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+    width: 100%;
     justify-content: stretch;
   }
 
@@ -3402,15 +3409,6 @@ input:-webkit-autofill:focus {
   .transparency-hero,
   .transparency-control-head {
     display: grid;
-  }
-
-  .connect-link-row {
-    display: grid;
-    grid-template-columns: 1fr;
-  }
-
-  .app-actions {
-    justify-content: stretch;
   }
 
   .account-quick-actions {
@@ -3428,7 +3426,9 @@ input:-webkit-autofill:focus {
   .compact-form,
   .compact-form button,
   .key-actions button,
+  .embed-actions button,
   .connect-link-row button,
+  .wiki-hero-actions button,
   .connect-actions button {
     width: 100%;
   }
