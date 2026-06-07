@@ -134,7 +134,7 @@ export function WikiPage({
         </div>
         <div className="wiki-hero-actions">
           <button type="button" className="button wiki-add-button" onClick={openAddMemory}>
-            Add context
+            Add about me
           </button>
           <button type="button" className="ghost" onClick={onManageConsent}>Settings</button>
         </div>
@@ -157,26 +157,25 @@ export function WikiPage({
 
       <section className="wiki-overview-grid" aria-label="Yourself overview">
         <div className="wiki-overview-card">
-          <span>Accepted</span>
+          <span>Saved</span>
           <strong>{visibleEntries.length}</strong>
-          <small>entries you approved or added</small>
+          <small>things you added or approved</small>
         </div>
         <div className="wiki-overview-card">
-          <span>Waiting</span>
+          <span>Review</span>
           <strong>{visibleProposals.length}</strong>
-          <small>app suggestions to review</small>
+          <small>app suggestions waiting</small>
         </div>
         <div className="wiki-overview-card">
-          <span>Default</span>
+          <span>Sharing</span>
           <strong>Private</strong>
-          <small>shareable only when you choose</small>
+          <small>only shared when you choose</small>
         </div>
       </section>
 
       {showAddMemory ? (
         <form className="wiki-add-form" ref={addMemoryRef} onSubmit={submitManualEntry}>
           <div>
-            <p className="eyebrow">Add context</p>
             <h3>Add something apps should know</h3>
           </div>
           <div className="wiki-form-grid">
@@ -217,7 +216,7 @@ export function WikiPage({
           </div>
           <div className="connect-actions">
             <button type="button" className="ghost" onClick={() => setShowAddMemory(false)}>Cancel</button>
-            <button type="submit">Save memory</button>
+            <button type="submit">Save about me</button>
           </div>
         </form>
       ) : null}
@@ -275,18 +274,18 @@ export function WikiPage({
       <section className="wiki-entry-panel wiki-main-panel">
         <div className="wiki-section-head">
           <div>
-            <p className="eyebrow">Your entries</p>
-            <h3>Accepted context</h3>
+            <h3>Things saved about you</h3>
+            <p className="wiki-section-help">Apps can use these only when you allow them.</p>
           </div>
-          <span className="wiki-count-badge" aria-label={`${visibleEntries.length} accepted entries`}>{visibleEntries.length}</span>
+          <span className="wiki-count-badge" aria-label={`${visibleEntries.length} saved things`}>{visibleEntries.length}</span>
         </div>
         <label className="wiki-search">
-          Search Yourself
+          Find something
           <span className="wiki-search-field">
             <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
               <path d="M10.5 17a6.5 6.5 0 1 1 0-13a6.5 6.5 0 0 1 0 13Zm5-1.5 4 4" />
             </svg>
-            <input value={wikiSearch} type="search" placeholder="Search memory, category, source..." onChange={(event) => setWikiSearch(event.target.value)} />
+            <input value={wikiSearch} type="search" placeholder="Search name, food, study, project..." onChange={(event) => setWikiSearch(event.target.value)} />
           </span>
         </label>
         <div className="wiki-index">
@@ -310,13 +309,12 @@ export function WikiPage({
           ))}
           {!visibleEntries.length ? (
             <div className="wiki-empty-state">
-              <p className="eyebrow">Nothing accepted yet</p>
-              <h4>Add your first entry.</h4>
-              <p className="muted">Try a simple one: preferred name, dietary restriction, study goal, project note, or shopping preference.</p>
-              <button type="button" className="ghost" onClick={openAddMemory}>Add context</button>
+              <h4>Nothing is saved yet</h4>
+              <p className="muted">Add one thing apps should remember, like your preferred name, food restriction, study goal, project note, or shopping preference.</p>
+              <button type="button" className="ghost" onClick={openAddMemory}>Add something about me</button>
             </div>
           ) : null}
-          {visibleEntries.length > 0 && !filteredEntries.length ? <p className="muted">No entry matches that search.</p> : null}
+          {visibleEntries.length > 0 && !filteredEntries.length ? <p className="muted">Nothing saved matches that search.</p> : null}
         </div>
       </section>
 
@@ -324,8 +322,8 @@ export function WikiPage({
         <section className="wiki-entry-panel wiki-main-panel">
           <div className="wiki-section-head">
             <div>
-              <p className="eyebrow">Review</p>
-              <h3>Suggestions from apps</h3>
+              <h3>Apps want to add these</h3>
+              <p className="wiki-section-help">Keep, edit, or reject each suggestion.</p>
             </div>
             <span className="wiki-count-badge" aria-label={`${visibleProposals.length} app suggestions`}>{visibleProposals.length}</span>
           </div>
