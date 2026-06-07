@@ -104,7 +104,7 @@ export function Dashboard({
         ? "Save permissions first."
         : ""
   const appHeading = isCreatingApp
-    ? hasApps ? "Create a new app" : "App setup"
+    ? hasApps ? "Create a new app" : "Start by naming your app and choosing what it can ask for"
     : selectedApp?.name || "Select an app"
 
   const provider = getUserProvider(user, authUser)
@@ -339,16 +339,6 @@ export function Dashboard({
               </form>
             </section>
           ) : null}
-          {!isUserAccount ? <div className="account-grid">
-            <div className="metric-card">
-              <span>Registered apps</span>
-              <strong>{apps.length}</strong>
-            </div>
-            <div className="metric-card">
-              <span>Active API keys</span>
-              <strong>{apiKeys.filter((key) => !key.revoked_at).length}</strong>
-            </div>
-          </div> : null}
           <section className="password-panel account-editor-panel danger-zone-panel">
             <div>
               <h2>Delete your Memact account</h2>
@@ -372,9 +362,9 @@ export function Dashboard({
             </div>
           </div>
           <section id="app-panel" className="panel app-workspace">
-            <div className="current-app-block">
+            <div className={hasApps ? "current-app-block" : "current-app-note"}>
               <div>
-                <h2>{appHeading}</h2>
+                {hasApps ? <h2>{appHeading}</h2> : <p>{appHeading}</p>}
               </div>
             </div>
 
