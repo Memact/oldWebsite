@@ -10,7 +10,7 @@ import {
 } from "./memact-access-client.js"
 import { getAuthRedirectUrl, isSupabaseConfigured, requireSupabase, supabase } from "./supabase-client.js"
 import { hasDuplicateAppName } from "./app-name.js"
-import { defaultCategoriesForPolicy, defaultScopesForPolicy, normalizeSelectedCategories, normalizeSelectedScopes, permissionSuggestionForCategories } from "./access-policy.js"
+import { defaultCategoriesForPolicy, defaultScopesForPolicy, normalizeSelectedCategories, normalizeSelectedScopes } from "./access-policy.js"
 import { ConnectPage } from "./components/ConnectPage.jsx"
 import { Chevron } from "./components/Chevron.jsx"
 import { WikiPage } from "./components/WikiPage.jsx"
@@ -24,6 +24,13 @@ import { refreshDashboard, useDashboardState } from "./hooks/useDashboardState.j
 import { isConnectPage, isProtectedPage, normalizePortalPath, pageFromLocation, routeForPage } from "./portal-routes.js"
 import { getDisplayName, getUserEmail } from "./user-display.js"
 import { ACCOUNT_TYPES, defaultPageForAccountType, getAccountType, isConsentShellAccount, tabsForAccountType } from "./account-type.js"
+import {
+  detectAuthFlowFromUrl,
+  getAuthEmailTypeFromUrl,
+  getAuthTokenHashFromUrl,
+  getAuthCodeFromUrl,
+  shouldCheckSessionOnLoad
+} from "./auth-flow-utils.js"
 
 const AUTH_INIT_TIMEOUT_MS = 12000
 const AUTH_CODE_EXCHANGE_TIMEOUT_MS = 9000
@@ -84,6 +91,7 @@ function App() {
   const [authLoading, setAuthLoading] = useState("")
   const [authNotice, setAuthNotice] = useState("")
   const [authFlow, setAuthFlow] = useState(() => detectAuthFlowFromUrl())
+  const initialAuthFlowRef = useRef(detectAuthFlowFromUrl())
   const [authMode, setAuthMode] = useState(() => authModeFromLocation())
   const [lastAuthMethod, setLastAuthMethod] = useState(() => readLastAuthMethod())
   const [dashboard, dashboardActions] = useDashboardState()
@@ -181,13 +189,9 @@ function App() {
   }
 
   async function finishEmailVerification(nextSession) {
-    if (nextSession) {
-      try {
-        await requireSupabase().auth.signOut()
-      } catch {
-        // The verification is already complete; a local sign-out failure should not block the handoff.
-      }
-    }
+    // Clear session state BEFORE signing out so the dashboard refresh
+    // effect (which depends on `session`) never fires with a stale token
+    // that would immediately 401 and show "Please sign in again."
     setAuthSession(null)
     setAuthUser(null)
     setAuthFlow("default")
@@ -198,9 +202,18 @@ function App() {
     setVerificationCode("")
     setPendingSignInVerificationEmail("")
     setSignInVerificationCode("")
+    setError("")
     setAuthNotice("Email verified. Sign in with your email and password.")
     setStatus("Email verified.")
     navigateToPage("home", { replace: true, hash: "#sign-in" })
+
+    if (nextSession) {
+      try {
+        await requireSupabase().auth.signOut()
+      } catch {
+        // The verification is already complete; a local sign-out failure should not block the handoff.
+      }
+    }
   }
 
   useEffect(() => {
@@ -249,7 +262,7 @@ function App() {
             }
           }
           const nextSession = data?.session || null
-          const detectedFlow = detectAuthFlowFromUrl()
+          const detectedFlow = initialAuthFlowRef.current
           if (detectedFlow === "verified") {
             await finishEmailVerification(nextSession)
             return
@@ -290,15 +303,15 @@ function App() {
         if (authEventGuardRef.current === "password-login" || authEventGuardRef.current === "signin-code") {
           return
         }
-        if (detectAuthFlowFromUrl() === "verified") {
+        if (initialAuthFlowRef.current === "verified") {
           finishEmailVerification(nextSession)
           return
         }
-        setAuthFlow(detectAuthFlowFromUrl())
+        setAuthFlow(initialAuthFlowRef.current)
       } else if (event === "SIGNED_OUT") {
         setAuthFlow("default")
       }
-      applySession(nextSession, event === "PASSWORD_RECOVERY" ? "recovery" : detectAuthFlowFromUrl())
+      applySession(nextSession, event === "PASSWORD_RECOVERY" ? "recovery" : initialAuthFlowRef.current)
       if (!nextSession && event === "SIGNED_OUT") {
         if (isProtectedPage(pageFromLocation())) {
           navigateToPage("home", { replace: true, hash: "#sign-up" })
@@ -443,9 +456,10 @@ function App() {
     if (!selectedAppId) return
     const appConsent = consents.find((consent) => consent.app_id === selectedAppId && !consent.revoked_at)
     const selectedApp = apps.find((app) => app.id === selectedAppId)
-    const appCategories = selectedApp?.default_categories?.length ? selectedApp.default_categories : defaultCategoriesForPolicy(policy)
-    const suggestedScopes = permissionSuggestionForCategories(policy, appCategories).scopes
-    const nextScopes = appConsent?.scopes?.length ? appConsent.scopes : suggestedScopes.length ? suggestedScopes : defaultScopesForPolicy(policy)
+    const defaultScopes = (selectedApp?.default_scopes?.length ? selectedApp.default_scopes : defaultScopesForPolicy(policy))
+      .filter((scope) => !scope.startsWith("capture:") && !scope.startsWith("feature:") && !scope.startsWith("platform:") && !scope.startsWith("schema:") && !scope.startsWith("graph:"))
+    const nextScopes = (appConsent?.scopes?.length ? appConsent.scopes : defaultScopes)
+      .filter((scope) => !scope.startsWith("capture:") && !scope.startsWith("feature:") && !scope.startsWith("platform:") && !scope.startsWith("schema:") && !scope.startsWith("graph:"))
     setSelectedScopes(normalizeSelectedScopes(nextScopes, policy))
   }, [apps, consents, policy, selectedAppId])
 
@@ -568,7 +582,7 @@ function App() {
         setSignupDisplayName("")
         setSignupAccountType("")
         navigateToPage("home", { replace: true, hash: "#sign-in" })
-        setError("This email may already have a Memact account. Sign in instead, or use forgot password if you do not remember it.")
+        setError("Email address already registered. Try signing in.")
         setStatus("Account already exists.")
         return
       }
@@ -592,8 +606,21 @@ function App() {
         setStatus("Confirmation code sent.")
       }
     } catch (authError) {
-      setError(formatAuthErrorMessage(authError, "Account creation did not finish."))
-      setStatus(authStatusMessage(authError))
+      const isAlreadyRegistered = /already registered|already exists/i.test(authError?.message || "")
+      if (isAlreadyRegistered) {
+        setAuthMode("sign-in")
+        setEmail(cleanEmail)
+        setPassword("")
+        setPasswordConfirm("")
+        setSignupDisplayName("")
+        setSignupAccountType("")
+        navigateToPage("home", { replace: true, hash: "#sign-in" })
+        setError("Email address already registered. Try signing in.")
+        setStatus("Account already exists.")
+      } else {
+        setError(formatAuthErrorMessage(authError, "Account creation did not finish."))
+        setStatus(authStatusMessage(authError))
+      }
     } finally {
       setAuthLoading("")
     }
@@ -1124,6 +1151,50 @@ function App() {
     }
   }
 
+  async function handleUpdateApp(appId, fields) {
+    setError("")
+    setCanRetryDashboard(false)
+    const cleanName = (fields.name || "").trim()
+    if (!cleanName) {
+      setError("App name is required.")
+      scrollElementIntoView("error-message")
+      return
+    }
+    const duplicate = apps.some((other) => (
+      other.id !== appId &&
+      other.name.trim().toLowerCase() === cleanName.toLowerCase()
+    ))
+    if (duplicate) {
+      setError("You already have an app with this name.")
+      scrollElementIntoView("error-message")
+      return
+    }
+    if (!normalizeSelectedCategories(fields.categories, policy).length) {
+      setError("Choose at least one activity category before saving the app.")
+      scrollElementIntoView("error-message")
+      return
+    }
+    try {
+      const developerUrl = normalizeOptionalHttpUrl(fields.developer_url, "Developer website")
+      const redirectUrl = normalizeOptionalHttpUrl(fields.redirect_url, "Connect redirect URL")
+      await client.updateApp(session, appId, {
+        name: cleanName,
+        description: (fields.description || "").trim(),
+        developer_url: developerUrl,
+        redirect_urls: redirectUrl ? [redirectUrl] : [],
+        categories: normalizeSelectedCategories(fields.categories, policy)
+      })
+      await refreshDashboard(client, session, dashboardActions, statusForAccessError)
+      setStatus("App updated.")
+      scrollElementIntoView("app-panel")
+    } catch (appError) {
+      setError(appError.message)
+      setStatus(statusForAccessError(appError).status)
+      scrollElementIntoView("error-message")
+      throw appError
+    }
+  }
+
   async function handleRetryDashboard() {
     if (authChecking || !session) return
     await refreshDashboard(client, session, dashboardActions, statusForAccessError)
@@ -1605,6 +1676,7 @@ function App() {
           setNewAppCategories={setNewAppCategories}
           setShowAppForm={setShowAppForm}
           onCreateApp={handleCreateApp}
+          onUpdateApp={handleUpdateApp}
           onDeleteApp={handleDeleteApp}
           onGrantConsent={handleGrantConsent}
           onCreateKey={handleCreateKey}
@@ -1785,36 +1857,9 @@ function shouldOpenAccountTab(user, isRecoveryFlow) {
   return isRecoveryFlow || shouldOfferPasswordSetup(user)
 }
 
-function detectAuthFlowFromUrl() {
-  if (typeof window === "undefined") return "default"
-  const path = window.location.pathname.toLowerCase()
-  const query = `${window.location.search || ""}${window.location.hash || ""}`.toLowerCase()
-  if (query.includes("type=invite")) return "invite"
-  if (path === "/auth/confirm" || query.includes("type=signup")) return "verified"
-  if (query.includes("type=recovery")) return "recovery"
-  return "default"
-}
-
 function authModeFromLocation() {
   if (typeof window === "undefined") return "sign-up"
   return String(window.location.hash || "").toLowerCase().includes("sign-in") ? "sign-in" : "sign-up"
-}
-
-function shouldCheckSessionOnLoad() {
-  if (typeof window === "undefined") return false
-  const page = pageFromLocation(window.location)
-  const path = window.location.pathname.toLowerCase()
-  const authPayload = `${window.location.search || ""}${window.location.hash || ""}`.toLowerCase()
-  return page === "home" ||
-    isProtectedPage(page) ||
-    path === "/auth/confirm" ||
-    authPayload.includes("code=") ||
-    authPayload.includes("token_hash=") ||
-    authPayload.includes("access_token=") ||
-    authPayload.includes("type=signup") ||
-    authPayload.includes("type=invite") ||
-    authPayload.includes("type=recovery") ||
-    authPayload.includes("type=magiclink")
 }
 
 async function resolveInitialSession(authClient) {
@@ -1848,26 +1893,6 @@ async function resolveInitialSession(authClient) {
   }
 
   return withAuthTimeout(authClient.auth.getSession(), AUTH_SESSION_CHECK_TIMEOUT_MS)
-}
-
-function getAuthCodeFromUrl() {
-  if (typeof window === "undefined") return ""
-  return new URLSearchParams(window.location.search || "").get("code") || ""
-}
-
-function getAuthTokenHashFromUrl() {
-  if (typeof window === "undefined") return ""
-  const hashParams = new URLSearchParams(String(window.location.hash || "").replace(/^#/, ""))
-  return new URLSearchParams(window.location.search || "").get("token_hash") || hashParams.get("token_hash") || ""
-}
-
-function getAuthEmailTypeFromUrl() {
-  if (typeof window === "undefined") return "signup"
-  const searchParams = new URLSearchParams(window.location.search || "")
-  const hashParams = new URLSearchParams(String(window.location.hash || "").replace(/^#/, ""))
-  const requestedType = String(searchParams.get("type") || hashParams.get("type") || "signup").toLowerCase()
-  const allowedTypes = new Set(["signup", "magiclink", "recovery", "invite", "email_change", "email"])
-  return allowedTypes.has(requestedType) ? requestedType : "signup"
 }
 
 function withAuthTimeout(promise, timeoutMs) {
