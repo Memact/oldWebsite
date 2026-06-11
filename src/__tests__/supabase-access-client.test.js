@@ -352,3 +352,62 @@ test("connectApp fallback lets a signed-in user approve an app they do not own",
   assert.equal(result.consent.user_id, connectingUserId)
   assert.equal(result.connected, true)
 })
+
+test("updateApp updates default_categories and fields with browser-safe table writes", async () => {
+  let updatedPayload = null
+  let updatedId = null
+  const fakeSupabase = {
+    auth: {
+      getUser: async () => ({ data: { user: { id: "user-123" } }, error: null })
+    },
+    from(table) {
+      if (table === "memact_apps") {
+        return {
+          select() {
+            return {
+              eq() { return this },
+              neq() { return this },
+              is() { return this },
+              maybeSingle: async () => ({ data: null, error: null })
+            }
+          },
+          update(payload) {
+            updatedPayload = payload
+            return {
+              eq(column, value) {
+                if (column === "id") updatedId = value
+                return this
+              },
+              select() {
+                return {
+                  single: async () => ({
+                    data: {
+                      id: "app-123",
+                      ...updatedPayload
+                    },
+                    error: null
+                  })
+                }
+              }
+            }
+          }
+        }
+      }
+      throw new Error(`Unexpected table ${table}`)
+    }
+  }
+
+  const client = new SupabaseAccessClient(fakeSupabase)
+  const result = await client.updateApp(null, "app-123", {
+    name: "Updated Name",
+    description: "Updated description",
+    categories: ["fitness"]
+  })
+
+  assert.equal(result.app.id, "app-123")
+  assert.equal(updatedId, "app-123")
+  assert.equal(updatedPayload.name, "Updated Name")
+  assert.equal(updatedPayload.slug, "updated-name")
+  assert.equal(updatedPayload.description, "Updated description")
+  assert.deepEqual(updatedPayload.default_categories, ["fitness"])
+})

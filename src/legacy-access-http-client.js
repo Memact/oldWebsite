@@ -60,6 +60,10 @@ export class HttpAccessClient {
     return this.post("/v1/apps", body, session)
   }
 
+  updateApp(session, appId, body) {
+    return this.post(`/v1/apps/${encodeURIComponent(appId)}`, body, session)
+  }
+
   deleteApp(session, appId) {
     return this.delete(`/v1/apps/${encodeURIComponent(appId)}`, session)
   }

@@ -3,7 +3,6 @@ import { CategoryGrid } from "./CategoryGrid.jsx"
 import { Chevron } from "./Chevron.jsx"
 import { HelpPanel } from "./HelpPanel.jsx"
 import { PasswordField } from "./PasswordField.jsx"
-import { presetSuggestionsForPolicy } from "../access-policy.js"
 import { getAvatarUrl, getInitials, getUserEmail, getUserProvider } from "../user-display.js"
 import { MemactSelect } from "./WikiPage.jsx"
 
@@ -40,6 +39,7 @@ export function Dashboard({
   setNewAppCategories,
   setShowAppForm,
   onCreateApp,
+  onUpdateApp,
   onDeleteApp,
   onGrantConsent,
   onCreateKey,
@@ -77,14 +77,14 @@ export function Dashboard({
   onInviteUser
 }) {
   const hasApps = apps.length > 0
-  const isCreatingApp = showAppForm || !hasApps
+  const [isEditingApp, setIsEditingApp] = useState(false)
+  const isCreatingApp = (showAppForm || !hasApps) && !isEditingApp
   const selectedApp = hasApps ? apps.find((app) => app.id === selectedAppId) : null
-  const selectedAppCategories = selectedApp?.default_categories || []
+  const selectedAppCategories = (selectedApp?.default_categories || []).filter((cat) => !cat.includes(":"))
   const selectedKeys = apiKeys.filter((key) => key.app_id === selectedAppId)
   const activeKeys = selectedKeys.filter((key) => !key.revoked_at)
   const revokedKeys = selectedKeys.filter((key) => key.revoked_at)
   const usageStats = getUsageStats(selectedApp, selectedKeys, apps)
-  const presetSuggestions = presetSuggestionsForPolicy(policy, selectedAppCategories, selectedApp?.description || selectedApp?.name || "")
   const selectedConsent = consents.find((consent) => consent.app_id === selectedAppId && !consent.revoked_at)
   const scopesChanged = selectedConsent ? !sameValues(selectedScopes, selectedConsent.scopes) : true
   const categoriesChanged = selectedConsent ? !sameValues(selectedAppCategories, selectedConsent.categories || []) : true
@@ -106,7 +106,22 @@ export function Dashboard({
         : ""
   const appHeading = isCreatingApp
     ? hasApps ? "Create a new app" : "Start by naming your app and choosing what it can ask for"
+    : isEditingApp && selectedApp
+    ? `Edit settings for ${selectedApp.name}`
     : selectedApp?.name || "Select an app"
+
+  const filteredCategories = Object.fromEntries(
+    Object.entries(categories || {}).filter(([key]) => !key.includes(":"))
+  )
+  const filteredScopes = Object.fromEntries(
+    Object.entries(scopes || {}).filter(([key]) => {
+      return !key.startsWith("capture:") &&
+             !key.startsWith("feature:") &&
+             !key.startsWith("platform:") &&
+             !key.startsWith("schema:") &&
+             !key.startsWith("graph:")
+    })
+  )
 
   const provider = getUserProvider(user, authUser)
   const isUserAccount = accountType === "user"
@@ -114,7 +129,22 @@ export function Dashboard({
   const displayEmail = getUserEmail(user, authUser)
   const initials = getInitials(displayName, displayEmail)
   const [accountEditor, setAccountEditor] = useState(authFlow === "recovery" || needsPasswordSetup ? "password" : "")
-  const [selectedPresetId, setSelectedPresetId] = useState("")
+  const [editAppName, setEditAppName] = useState("")
+  const [editAppDescription, setEditAppDescription] = useState("")
+  const [editAppDeveloperUrl, setEditAppDeveloperUrl] = useState("")
+  const [editAppRedirectUrl, setEditAppRedirectUrl] = useState("")
+  const [editAppCategories, setEditAppCategories] = useState([])
+
+  const startEditingApp = () => {
+    if (!selectedApp) return
+    setEditAppName(selectedApp.name || "")
+    setEditAppDescription(selectedApp.description || "")
+    setEditAppDeveloperUrl(selectedApp.developer_url || "")
+    setEditAppRedirectUrl(selectedApp.redirect_urls?.[0] || "")
+    setEditAppCategories((selectedApp.default_categories || []).filter((cat) => !cat.includes(":")))
+    setIsEditingApp(true)
+  }
+
   const showDisplayNameEditor = accountEditor === "display-name"
   const showPasswordEditor = accountEditor === "password"
   const showEmailEditor = accountEditor === "email"
@@ -362,11 +392,21 @@ export function Dashboard({
 
             {hasApps ? (
               <div className="app-actions" aria-label="App actions">
-                <button type="button" className="new-app-button" aria-label={isCreatingApp ? "Cancel app creation" : "Create app"} onClick={() => setShowAppForm((current) => !current)}>
-                  {isCreatingApp ? "Cancel" : "New app"}
+                <button type="button" className="new-app-button" aria-label={(isCreatingApp || isEditingApp) ? "Cancel app operation" : "Create app"} onClick={() => {
+                  if (isCreatingApp || isEditingApp) {
+                    setShowAppForm(false);
+                    setIsEditingApp(false);
+                  } else {
+                    setShowAppForm(true);
+                  }
+                }}>
+                  {(isCreatingApp || isEditingApp) ? "Cancel" : "New app"}
                 </button>
-                {!isCreatingApp && selectedApp ? (
-                  <button type="button" className="ghost danger app-delete-button" onClick={onDeleteApp}>Delete app</button>
+                {!isCreatingApp && !isEditingApp && selectedApp ? (
+                  <>
+                    <button type="button" className="edit-app-button" onClick={startEditingApp}>Edit settings</button>
+                    <button type="button" className="ghost danger app-delete-button" onClick={onDeleteApp}>Delete app</button>
+                  </>
                 ) : null}
               </div>
             ) : null}
@@ -390,14 +430,61 @@ export function Dashboard({
                   <textarea value={newAppDescription} placeholder="Optional: What will this app use Memact for?" onChange={(event) => setNewAppDescription(event.target.value)} />
                 </label>
                 <div>
-                  <h3 className="form-subheader">Memory this app can ask for</h3>
+                  <h3 className="form-subheader">Context this app can request</h3>
                   <CategoryGrid
-                    categories={categories}
+                    categories={filteredCategories}
                     selected={newAppCategories}
                     onToggle={(category) => toggleValue(setNewAppCategories, category)}
                   />
                 </div>
                 <button type="submit">Create app</button>
+              </form>
+            ) : null}
+
+            {isEditingApp && selectedApp ? (
+              <form className="form app-create-form" onSubmit={async (e) => {
+                e.preventDefault();
+                try {
+                  await onUpdateApp(selectedApp.id, {
+                    name: editAppName,
+                    description: editAppDescription,
+                    developer_url: editAppDeveloperUrl,
+                    redirect_url: editAppRedirectUrl,
+                    categories: editAppCategories
+                  });
+                  setIsEditingApp(false);
+                } catch (err) {
+                  // Handled by main.jsx error display
+                }
+              }}>
+                <label>
+                  App name
+                  <input value={editAppName} placeholder="Example: Reading assistant" onChange={(event) => setEditAppName(event.target.value)} required />
+                </label>
+                <label>
+                  Developer website
+                  <input value={editAppDeveloperUrl} type="url" placeholder="Optional: https://example.com" onChange={(event) => setEditAppDeveloperUrl(event.target.value)} />
+                </label>
+                <label>
+                  Connect redirect URL
+                  <input value={editAppRedirectUrl} type="url" placeholder="Optional: where users return after connecting" onChange={(event) => setEditAppRedirectUrl(event.target.value)} />
+                </label>
+                <label>
+                  Purpose
+                  <textarea value={editAppDescription} placeholder="Optional: What will this app use Memact for?" onChange={(event) => setEditAppDescription(event.target.value)} />
+                </label>
+                <div>
+                  <h3 className="form-subheader">Context this app can request</h3>
+                  <CategoryGrid
+                    categories={filteredCategories}
+                    selected={editAppCategories}
+                    onToggle={(category) => toggleValue(setEditAppCategories, category)}
+                  />
+                </div>
+                <div style={{ display: "flex", gap: "12px" }}>
+                  <button type="submit">Save settings</button>
+                  <button type="button" className="ghost" onClick={() => setIsEditingApp(false)}>Cancel</button>
+                </div>
               </form>
             ) : null}
 
@@ -410,7 +497,7 @@ export function Dashboard({
                       key={app.id}
                       type="button"
                       className={`app-chip ${selectedAppId === app.id ? "is-active" : ""}`}
-                      onClick={() => setSelectedAppId(app.id)}
+                      onClick={() => { setSelectedAppId(app.id); setIsEditingApp(false); }}
                     >
                       {app.name}
                     </button>
@@ -436,7 +523,7 @@ export function Dashboard({
                 </div>
               </div>
               <div className="scope-grid">
-                {Object.entries(scopes).map(([scope, definition]) => {
+                {Object.entries(filteredScopes).map(([scope, definition]) => {
                   const inputId = `scope-${scope.replace(/[^a-z0-9_-]/gi, "-")}`
                   return (
                     <label key={scope} className="scope-card" htmlFor={inputId}>
@@ -458,27 +545,6 @@ export function Dashboard({
                   )
                 })}
               </div>
-
-              {presetSuggestions.length > 0 ? (
-                <div className="presets-section">
-                  <h3 className="form-subheader presets-label">Quick presets</h3>
-                  <div className="presets-inline">
-                    {presetSuggestions.map((preset) => (
-                      <button
-                        key={preset.id}
-                        type="button"
-                        className={`permission-suggestion-chip ${selectedPresetId === preset.id ? "is-active" : ""}`}
-                        disabled={!selectedAppId || !preset.scopes.length}
-                        title={preset.description}
-                        onClick={() => { setSelectedScopes(preset.scopes); setSelectedPresetId(preset.id) }}
-                      >
-                        <span>{preset.label}</span>
-                        <strong>{preset.scopes.length} selected</strong>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              ) : null}
             </section>
 
             <section id="api-keys-panel" className="panel api-keys-panel">

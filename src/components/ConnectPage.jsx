@@ -4,8 +4,10 @@ export function ConnectPage({ connectRequest, connectDetails, loading, notice, s
   const app = connectDetails?.app
   const scopes = connectDetails?.scopes || {}
   const categories = connectDetails?.activity_categories || {}
-  const requestedScopes = connectDetails?.requested_scopes || connectRequest?.scopes || []
-  const requestedCategories = connectDetails?.requested_categories || connectRequest?.categories || []
+  const requestedScopes = (connectDetails?.requested_scopes || connectRequest?.scopes || [])
+    .filter((scope) => !scope.startsWith("capture:") && !scope.startsWith("feature:") && !scope.startsWith("platform:") && !scope.startsWith("schema:") && !scope.startsWith("graph:"))
+  const requestedCategories = (connectDetails?.requested_categories || connectRequest?.categories || [])
+    .filter((category) => !category.includes(":"))
   const allowedScopes = selectedScopes.length ? selectedScopes : []
   const allowedCategories = selectedCategories.length ? selectedCategories : []
   const appName = app?.name || "this app"

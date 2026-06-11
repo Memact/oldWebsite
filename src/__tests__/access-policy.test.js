@@ -6,9 +6,7 @@ import {
   defaultCategoriesForPolicy,
   defaultScopesForPolicy,
   normalizeSelectedCategories,
-  normalizeSelectedScopes,
-  permissionSuggestionForCategories,
-  presetSuggestionsForPolicy
+  normalizeSelectedScopes
 } from "../access-policy.js"
 
 test("defaultScopesForPolicy keeps existing defaults when policy is unavailable", () => {
@@ -59,83 +57,27 @@ test("defaultCategoriesForPolicy keeps category defaults when policy is unavaila
 test("defaultCategoriesForPolicy respects Access category defaults", () => {
   const policy = {
     activity_categories: {
-      "web:news": {},
-      "ai:assistant": {},
-      "work:docs": {}
+      "fitness": {},
+      "preferences": {},
+      "dietary_preferences": {}
     },
-    default_app_categories: ["ai:assistant", "work:docs"]
+    default_app_categories: ["preferences", "dietary_preferences"]
   }
 
-  assert.deepEqual(defaultCategoriesForPolicy(policy), ["ai:assistant", "work:docs"])
+  assert.deepEqual(defaultCategoriesForPolicy(policy), ["preferences", "dietary_preferences"])
 })
 
 test("normalizeSelectedCategories removes duplicates and unknown categories", () => {
   const policy = {
     activity_categories: {
-      "web:news": {},
-      "ai:assistant": {}
+      "fitness": {},
+      "preferences": {}
     }
   }
 
   assert.deepEqual(
-    normalizeSelectedCategories(["web:news", "unknown", "ai:assistant", "web:news"], policy),
-    ["web:news", "ai:assistant"]
+    normalizeSelectedCategories(["fitness", "unknown", "preferences", "fitness"], policy),
+    ["fitness", "preferences"]
   )
 })
 
-test("permissionSuggestionForCategories creates category-specific selected scopes", () => {
-  const policy = {
-    scopes: {
-      "context:write": {},
-      "context:read": {},
-      "schema:write": {},
-      "graph:write": {},
-      "memory:write": {},
-      "memory:read_summary": {},
-      "memory:read_evidence": {}
-    },
-    activity_categories: {
-      "web:news": {},
-      "media:video": {}
-    }
-  }
-
-  const suggestion = permissionSuggestionForCategories(policy, ["web:news", "media:video"])
-
-  assert.equal(suggestion.label, "Article personalization preset")
-  assert.ok(suggestion.scopes.includes("context:write"))
-  assert.ok(suggestion.scopes.includes("context:read"))
-  assert.ok(suggestion.scopes.includes("memory:write"))
-})
-
-test("presetSuggestionsForPolicy creates clickable generated presets", () => {
-  const policy = {
-    scopes: {
-      "capture:webpage": {},
-      "schema:write": {},
-      "graph:write": {},
-      "memory:write": {},
-      "memory:read_summary": {},
-      "memory:read_evidence": {}
-    },
-    activity_categories: {
-      "web:news": {}
-    },
-    category_permission_matrix: {
-      "web:news": {
-        "capture:webpage": "recommended",
-        "schema:write": "recommended",
-        "graph:write": "recommended",
-        "memory:write": "recommended",
-        "memory:read_summary": "recommended",
-        "memory:read_evidence": "allowed"
-      }
-    }
-  }
-
-  const presets = presetSuggestionsForPolicy(policy, ["web:news"], "explain article sources")
-
-  assert.ok(presets.length >= 2)
-  assert.equal(presets[0].label, "Article personalization preset")
-  assert.ok(presets[0].scopes.includes("memory:read_evidence"))
-})

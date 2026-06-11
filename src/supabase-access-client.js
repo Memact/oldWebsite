@@ -56,6 +56,10 @@ export class SupabaseAccessClient {
     return this.createAppFallback(body)
   }
 
+  async updateApp(_session, appId, body) {
+    return this.updateAppFallback(appId, body)
+  }
+
   async deleteApp(_session, appId) {
     return this.deleteAppFallback(appId)
   }
@@ -368,6 +372,64 @@ export class SupabaseAccessClient {
     return { app: createdApp }
   }
 
+  async updateAppFallback(appId, body) {
+    const { data: userData, error: userError } = await this.supabase.auth.getUser()
+    if (userError) throw mapSupabaseRpcError(userError)
+    const user = userData?.user
+    if (!user?.id) throw new AccessApiError(401, "Please sign in again.", "invalid_session")
+
+    const updatePayload = {}
+
+    if (body.name !== undefined) {
+      const cleanedName = String(body.name || "").trim().slice(0, 80)
+      const slug = normalizeAppName(cleanedName)
+      if (cleanedName.length < 2) throw new AccessApiError(400, "App name must be at least 2 characters.", "invalid_app_name")
+      if (!slug) throw new AccessApiError(400, "App name needs letters or numbers.", "invalid_app_name")
+
+      const { data: existingApp, error: duplicateError } = await this.supabase
+        .from("memact_apps")
+        .select("id")
+        .eq("owner_user_id", user.id)
+        .eq("slug", slug)
+        .neq("id", appId)
+        .is("revoked_at", null)
+        .maybeSingle()
+
+      if (duplicateError) throw new AccessApiError(500, duplicateError.message || "Could not check existing apps.", "app_lookup_failed", duplicateError)
+      if (existingApp?.id) throw new AccessApiError(409, "You already have an app with this name.", "duplicate_app_name")
+
+      updatePayload.name = cleanedName
+      updatePayload.slug = slug
+    }
+
+    if (body.description !== undefined) {
+      updatePayload.description = String(body.description || "").trim().slice(0, 240)
+    }
+
+    if (body.developer_url !== undefined) {
+      updatePayload.developer_url = String(body.developer_url || "").trim().slice(0, 300)
+    }
+
+    if (body.redirect_urls !== undefined) {
+      updatePayload.redirect_urls = Array.isArray(body.redirect_urls) ? body.redirect_urls : []
+    }
+
+    if (body.categories !== undefined) {
+      updatePayload.default_categories = Array.isArray(body.categories) ? body.categories : []
+    }
+
+    const { data: updatedApp, error: updateError } = await this.supabase
+      .from("memact_apps")
+      .update(updatePayload)
+      .eq("id", appId)
+      .eq("owner_user_id", user.id)
+      .select("id, owner_user_id, name, slug, description, developer_url, redirect_urls, default_scopes, default_categories, created_at, revoked_at")
+      .single()
+
+    if (updateError) throw new AccessApiError(500, updateError.message || "Could not update the app.", "app_update_failed", updateError)
+    return { app: updatedApp }
+  }
+
   async deleteAppFallback(appId) {
     const { data: userData, error: userError } = await this.supabase.auth.getUser()
     if (userError) throw mapSupabaseRpcError(userError)
@@ -670,9 +732,12 @@ function denied(code, message) {
 function buildBrowserUnderstandingStrategy(scopes = [], categories = []) {
   const categorySet = new Set(categories)
   const outputs = []
-  if (categorySet.has("web:news")) outputs.push("main claim", "supporting evidence", "reading preference")
-  if (categorySet.has("web:social")) outputs.push("topics followed", "creator affinity", "community signal")
-  if (categorySet.has("dev:code")) outputs.push("implementation goal", "bug detail", "next debugging step")
+  if (categorySet.has("fitness")) outputs.push("fitness goal", "activity level", "routine preference")
+  if (categorySet.has("dietary_preferences")) outputs.push("diet choice", "food allergy", "nutrition preference")
+  if (categorySet.has("preferences")) outputs.push("user choice", "likes", "dislikes", "personalization preference")
+  if (categorySet.has("shopping")) outputs.push("laptop needs", "budget range", "brands")
+  if (categorySet.has("learning")) outputs.push("study style", "learning goal", "study schedule")
+  if (categorySet.has("productivity")) outputs.push("tasks", "workflows", "calendars")
   if (!outputs.length) outputs.push("user goal", "topic", "memory", "next action")
 
   return {
@@ -686,13 +751,11 @@ function buildBrowserUnderstandingStrategy(scopes = [], categories = []) {
     },
     understanding_plan: {
       outputs,
-      graph_write: scopes.includes("graph:write"),
       memory_write: scopes.includes("memory:write")
     },
     delivery_plan: {
       summaries: scopes.includes("memory:read_summary"),
-      evidence_cards: scopes.includes("memory:read_evidence"),
-      graph_objects: scopes.includes("memory:read_graph")
+      evidence_cards: scopes.includes("memory:read_evidence")
     }
   }
 }
@@ -707,9 +770,7 @@ function buildBrowserCompiledPolicy({ appId = "", scopes = [], categories = [], 
     scopes,
     categories,
     strategy: buildBrowserUnderstandingStrategy(scopes, categories),
-    warnings: scopes.includes("memory:read_graph") || scopes.includes("capture:device")
-      ? ["This policy includes sensitive permissions. Explain why users need them."]
-      : [],
+    warnings: [],
     storage: {
       default: { id: "local-first-memory", label: "Local-first memory" },
       future_user_cloud: { id: "user-owned-cloud-memory", label: "User-owned cloud memory", status: "planned", purpose: "cross-platform sync to user-owned storage" }

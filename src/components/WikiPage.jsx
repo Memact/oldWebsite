@@ -199,8 +199,17 @@ export function WikiPage({
   }, [isFirstTimeUser, app?.id])
 
   const handleGoalKeyDown = (event) => {
+    // Support BOTH standard Enter and Alt + Enter key submissions
     if (event.key === "Enter") {
       findGoalContext(event)
+    }
+  }
+
+  const handleSearchKeyDown = (event) => {
+    // Support BOTH standard Enter and Alt + Enter key submissions
+    if (event.key === "Enter") {
+      event.preventDefault()
+      event.currentTarget.blur()
     }
   }
 
@@ -458,6 +467,7 @@ export function WikiPage({
               type="text"
               placeholder="Search name, food, study, project..."
               onChange={(event) => setWikiSearch(event.target.value)}
+              onKeyDown={handleSearchKeyDown}
               style={wikiSearch.trim().length > 0 ? { paddingRight: "46px" } : {}}
             />
             {wikiSearch.trim().length > 0 ? (
@@ -862,8 +872,10 @@ function defaultDraft() {
 }
 
 function useStableRequestedOptions(appId, requestedScopes, requestedCategories) {
-  const safeScopes = Array.isArray(requestedScopes) ? requestedScopes : []
-  const safeCategories = Array.isArray(requestedCategories) ? requestedCategories : []
+  const safeScopes = (Array.isArray(requestedScopes) ? requestedScopes : [])
+    .filter((scope) => !scope.startsWith("capture:") && !scope.startsWith("feature:") && !scope.startsWith("platform:") && !scope.startsWith("schema:") && !scope.startsWith("graph:"))
+  const safeCategories = (Array.isArray(requestedCategories) ? requestedCategories : [])
+    .filter((category) => !category.includes(":"))
   const ref = useRef({ appId, scopes: safeScopes, categories: safeCategories })
   if (ref.current.appId !== appId) {
     ref.current = { appId, scopes: safeScopes, categories: safeCategories }

@@ -47,6 +47,10 @@ export class AccessClient {
     return this.impl.createApp(...args)
   }
 
+  updateApp(...args) {
+    return this.impl.updateApp(...args)
+  }
+
   deleteApp(...args) {
     return this.impl.deleteApp(...args)
   }

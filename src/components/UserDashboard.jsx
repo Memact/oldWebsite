@@ -22,8 +22,14 @@ export function UserDashboard({ consents = [], apps = [], onRevokeConsent, isCon
                   {app?.description ? <p className="muted">{app.description}</p> : null}
                 </div>
                 <div className="consent-chip-row">
-                  {(consent.scopes || []).slice(0, 4).map((scope) => <span className="badge" key={scope}>{scope}</span>)}
-                  {(consent.categories || []).slice(0, 4).map((category) => <span className="badge" key={category}>{category}</span>)}
+                  {(consent.scopes || [])
+                    .filter((scope) => !scope.startsWith("capture:") && !scope.startsWith("feature:") && !scope.startsWith("platform:") && !scope.startsWith("schema:") && !scope.startsWith("graph:"))
+                    .slice(0, 4)
+                    .map((scope) => <span className="badge" key={scope}>{scope}</span>)}
+                  {(consent.categories || [])
+                    .filter((category) => !category.includes(":"))
+                    .slice(0, 4)
+                    .map((category) => <span className="badge" key={category}>{category}</span>)}
                 </div>
                 <div className="connect-actions">
                   <button type="button" className="ghost subtle-danger" onClick={() => onRevokeConsent?.(consent.id)}>Remove access</button>
