@@ -547,65 +547,63 @@ export function Dashboard({
               </div>
             </section>
 
-            <section id="api-keys-panel" className="panel api-keys-panel">
-              <h2>API keys</h2>
-              <div className="stack">
-                {selectedAppId ? (
-                  <>
-                    <section className="usage-overview" aria-label="Usage statistics">
-                      <div className="usage-overview-head">
-                        <h3>Key binding and exposure checks</h3>
+            {selectedKeys.length > 0 && (
+              <section id="api-keys-panel" className="panel api-keys-panel">
+                <h2>API keys</h2>
+                <div className="stack">
+                  <section className="usage-overview" aria-label="Usage statistics">
+                    <div className="usage-overview-head">
+                      <h3>Key binding and exposure checks</h3>
+                    </div>
+                    <div className="usage-kpis">
+                      <div className="usage-kpi">
+                        <p>Apps using this key</p>
+                        <strong>{usageStats.appsUsingSameKey}</strong>
                       </div>
-                      <div className="usage-kpis">
-                        <div className="usage-kpi">
-                          <p>Apps using this key</p>
-                          <strong>{usageStats.appsUsingSameKey}</strong>
-                        </div>
-                        <div className="usage-kpi">
-                          <p>Public exposure</p>
-                          <strong>{usageStats.exposureLabel}</strong>
-                        </div>
-                        <div className="usage-kpi">
-                          <p>Last key use</p>
-                          <strong>{usageStats.lastUsedLabel}</strong>
-                        </div>
+                      <div className="usage-kpi">
+                        <p>Public exposure</p>
+                        <strong>{usageStats.exposureLabel}</strong>
                       </div>
-                    </section>
+                      <div className="usage-kpi">
+                        <p>Last key use</p>
+                        <strong>{usageStats.lastUsedLabel}</strong>
+                      </div>
+                    </div>
+                  </section>
 
-                    {activeKeys.length ? activeKeys.map((key) => (
-                      <div className="list-card api-key-row" key={key.id}>
-                        <span>
-                          <strong>{key.name}</strong>
-                          <small>{key.key_prefix}...</small>
-                        </span>
-                        <span className="badge badge-success">active</span>
-                        <button type="button" className="ghost danger" onClick={() => onRevokeKey(key.id)}>Revoke</button>
-                      </div>
-                    )) : null}
+                  {activeKeys.length ? activeKeys.map((key) => (
+                    <div className="list-card api-key-row" key={key.id}>
+                      <span>
+                        <strong>{key.name}</strong>
+                        <small>{key.key_prefix}...</small>
+                      </span>
+                      <span className="badge badge-success">active</span>
+                      <button type="button" className="ghost danger" onClick={() => onRevokeKey(key.id)}>Revoke</button>
+                    </div>
+                  )) : null}
 
-                    {revokedKeys.length ? (
-                      <details className="revoked-history">
-                        <summary>
-                          <span>Revoked history ({revokedKeys.length})</span>
-                          <Chevron className="revoked-chevron" />
-                        </summary>
-                        <div className="revoked-history-list">
-                          {revokedKeys.map((key) => (
-                            <div className="list-card api-key-row revoked-key-row" key={key.id}>
-                              <span>
-                                <strong>{key.name}</strong>
-                                <small>{key.key_prefix}...</small>
-                              </span>
-                              <span className="badge badge-danger">revoked</span>
-                            </div>
-                          ))}
-                        </div>
-                      </details>
-                    ) : null}
-                  </>
-                ) : <p className="muted">Select an app to view API keys.</p>}
-              </div>
-            </section>
+                  {revokedKeys.length ? (
+                    <details className="revoked-history">
+                      <summary>
+                        <span>Revoked history ({revokedKeys.length})</span>
+                        <Chevron className="revoked-chevron" />
+                      </summary>
+                      <div className="revoked-history-list">
+                        {revokedKeys.map((key) => (
+                          <div className="list-card api-key-row revoked-key-row" key={key.id}>
+                            <span>
+                              <strong>{key.name}</strong>
+                              <small>{key.key_prefix}...</small>
+                            </span>
+                            <span className="badge badge-danger">revoked</span>
+                          </div>
+                        ))}
+                      </div>
+                    </details>
+                  ) : null}
+                </div>
+              </section>
+            )}
           </div>
 
           {oneTimeKey ? (
