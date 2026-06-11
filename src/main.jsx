@@ -119,7 +119,7 @@ function App() {
   const [newAppDescription, setNewAppDescription] = useState("")
   const [newAppDeveloperUrl, setNewAppDeveloperUrl] = useState("")
   const [newAppRedirectUrl, setNewAppRedirectUrl] = useState("")
-  const [newAppCategories, setNewAppCategories] = useState([])
+  const [selectedCategories, setSelectedCategories] = useState(() => defaultCategoriesForPolicy(null))
   const [selectedAppId, setSelectedAppId] = useState("")
   const [selectedScopes, setSelectedScopes] = useState(() => defaultScopesForPolicy(null))
   const [oneTimeKey, setOneTimeKey] = useState("")
@@ -484,6 +484,9 @@ function App() {
     const nextScopes = (appConsent?.scopes?.length ? appConsent.scopes : defaultScopes)
       .filter((scope) => !scope.startsWith("capture:") && !scope.startsWith("feature:") && !scope.startsWith("platform:") && !scope.startsWith("schema:") && !scope.startsWith("graph:"))
     setSelectedScopes(normalizeSelectedScopes(nextScopes, policy))
+
+    const nextCategories = appConsent?.categories?.length ? appConsent.categories : defaultCategoriesForPolicy(policy)
+    setSelectedCategories(normalizeSelectedCategories(nextCategories, policy))
   }, [apps, consents, policy, selectedAppId])
 
   useEffect(() => {
@@ -1137,11 +1140,6 @@ function App() {
       scrollElementIntoView("error-message")
       return
     }
-    if (!normalizeSelectedCategories(newAppCategories, policy).length) {
-      setError("Choose at least one activity category before creating the app.")
-      scrollElementIntoView("error-message")
-      return
-    }
     try {
       const developerUrl = normalizeOptionalHttpUrl(newAppDeveloperUrl, "Developer website")
       const redirectUrl = normalizeOptionalHttpUrl(newAppRedirectUrl, "Connect redirect URL")
@@ -1150,7 +1148,7 @@ function App() {
         description: newAppDescription.trim(),
         developer_url: developerUrl,
         redirect_urls: redirectUrl ? [redirectUrl] : [],
-        categories: normalizeSelectedCategories(newAppCategories, policy)
+        categories: []
       })
       await refreshDashboard(client, session, dashboardActions, statusForAccessError)
       setSelectedAppId(result.app.id)
@@ -1159,7 +1157,6 @@ function App() {
       setNewAppDescription("")
       setNewAppDeveloperUrl("")
       setNewAppRedirectUrl("")
-      setNewAppCategories([])
       setOneTimeKey("")
       setOneTimeKeyId("")
       setOneTimeKeyScopes([])
@@ -1192,11 +1189,6 @@ function App() {
       scrollElementIntoView("error-message")
       return
     }
-    if (!normalizeSelectedCategories(fields.categories, policy).length) {
-      setError("Choose at least one activity category before saving the app.")
-      scrollElementIntoView("error-message")
-      return
-    }
     try {
       const developerUrl = normalizeOptionalHttpUrl(fields.developer_url, "Developer website")
       const redirectUrl = normalizeOptionalHttpUrl(fields.redirect_url, "Connect redirect URL")
@@ -1204,8 +1196,7 @@ function App() {
         name: cleanName,
         description: (fields.description || "").trim(),
         developer_url: developerUrl,
-        redirect_urls: redirectUrl ? [redirectUrl] : [],
-        categories: normalizeSelectedCategories(fields.categories, policy)
+        redirect_urls: redirectUrl ? [redirectUrl] : []
       })
       await refreshDashboard(client, session, dashboardActions, statusForAccessError)
       setStatus("App updated.")
@@ -1256,7 +1247,7 @@ function App() {
       await client.grantConsent(session, {
         app_id: selectedAppId,
         scopes: normalizeSelectedScopes(selectedScopes, policy),
-        categories: getSelectedAppCategories()
+        categories: normalizeSelectedCategories(selectedCategories, policy)
       })
       await refreshDashboard(client, session, dashboardActions, statusForAccessError)
       setStatus("Permissions saved.")
@@ -1289,7 +1280,7 @@ function App() {
     setOneTimeKeyScopes([])
     setOneTimeKeyCategories([])
     const keyScopes = normalizeSelectedScopes(selectedScopes, policy)
-    const permissionCategories = getSelectedAppCategories()
+    const permissionCategories = normalizeSelectedCategories(selectedCategories, policy)
     try {
       const result = await client.createApiKey(session, {
         app_id: selectedAppId,
@@ -1308,12 +1299,6 @@ function App() {
       setError(keyError.message)
       scrollElementIntoView("error-message")
     }
-  }
-
-  function getSelectedAppCategories() {
-    const selectedApp = apps.find((app) => app.id === selectedAppId)
-    const appCategories = selectedApp?.default_categories?.length ? selectedApp.default_categories : defaultCategoriesForPolicy(policy)
-    return normalizeSelectedCategories(appCategories, policy)
   }
 
   async function handleRevokeKey(keyId) {
@@ -1684,7 +1669,7 @@ function App() {
           newAppDescription={newAppDescription}
           newAppDeveloperUrl={newAppDeveloperUrl}
           newAppRedirectUrl={newAppRedirectUrl}
-          newAppCategories={newAppCategories}
+          selectedCategories={selectedCategories}
           oneTimeKey={oneTimeKey}
           oneTimeKeyScopes={oneTimeKeyScopes}
           oneTimeKeyCategories={oneTimeKeyCategories}
@@ -1696,7 +1681,7 @@ function App() {
           setNewAppDescription={setNewAppDescription}
           setNewAppDeveloperUrl={setNewAppDeveloperUrl}
           setNewAppRedirectUrl={setNewAppRedirectUrl}
-          setNewAppCategories={setNewAppCategories}
+          setSelectedCategories={setSelectedCategories}
           setShowAppForm={setShowAppForm}
           onCreateApp={handleCreateApp}
           onUpdateApp={handleUpdateApp}

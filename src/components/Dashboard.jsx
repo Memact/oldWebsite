@@ -24,7 +24,7 @@ export function Dashboard({
   newAppDescription,
   newAppDeveloperUrl,
   newAppRedirectUrl,
-  newAppCategories,
+  selectedCategories,
   oneTimeKey,
   oneTimeKeyScopes,
   oneTimeKeyCategories,
@@ -36,7 +36,7 @@ export function Dashboard({
   setNewAppDescription,
   setNewAppDeveloperUrl,
   setNewAppRedirectUrl,
-  setNewAppCategories,
+  setSelectedCategories,
   setShowAppForm,
   onCreateApp,
   onUpdateApp,
@@ -80,16 +80,15 @@ export function Dashboard({
   const [isEditingApp, setIsEditingApp] = useState(false)
   const isCreatingApp = (showAppForm || !hasApps) && !isEditingApp
   const selectedApp = hasApps ? apps.find((app) => app.id === selectedAppId) : null
-  const selectedAppCategories = (selectedApp?.default_categories || []).filter((cat) => !cat.includes(":"))
   const selectedKeys = apiKeys.filter((key) => key.app_id === selectedAppId)
   const activeKeys = selectedKeys.filter((key) => !key.revoked_at)
   const revokedKeys = selectedKeys.filter((key) => key.revoked_at)
   const usageStats = getUsageStats(selectedApp, selectedKeys, apps)
   const selectedConsent = consents.find((consent) => consent.app_id === selectedAppId && !consent.revoked_at)
   const scopesChanged = selectedConsent ? !sameValues(selectedScopes, selectedConsent.scopes) : true
-  const categoriesChanged = selectedConsent ? !sameValues(selectedAppCategories, selectedConsent.categories || []) : true
+  const categoriesChanged = selectedConsent ? !sameValues(selectedCategories, selectedConsent.categories || []) : true
   const consentChanged = scopesChanged || categoriesChanged
-  const canCreateKey = Boolean(selectedAppId && selectedConsent && !consentChanged && selectedScopes.length && selectedAppCategories.length)
+  const canCreateKey = Boolean(selectedAppId && selectedConsent && !consentChanged && selectedScopes.length && selectedCategories.length)
   const permissionsHint = !selectedAppId
     ? "Create app first."
     : selectedConsent
@@ -133,15 +132,12 @@ export function Dashboard({
   const [editAppDescription, setEditAppDescription] = useState("")
   const [editAppDeveloperUrl, setEditAppDeveloperUrl] = useState("")
   const [editAppRedirectUrl, setEditAppRedirectUrl] = useState("")
-  const [editAppCategories, setEditAppCategories] = useState([])
-
   const startEditingApp = () => {
     if (!selectedApp) return
     setEditAppName(selectedApp.name || "")
     setEditAppDescription(selectedApp.description || "")
     setEditAppDeveloperUrl(selectedApp.developer_url || "")
     setEditAppRedirectUrl(selectedApp.redirect_urls?.[0] || "")
-    setEditAppCategories((selectedApp.default_categories || []).filter((cat) => !cat.includes(":")))
     setIsEditingApp(true)
   }
 
@@ -429,14 +425,6 @@ export function Dashboard({
                   Purpose
                   <textarea value={newAppDescription} placeholder="Optional: What will this app use Memact for?" onChange={(event) => setNewAppDescription(event.target.value)} />
                 </label>
-                <div>
-                  <h3 className="form-subheader">Context this app can request</h3>
-                  <CategoryGrid
-                    categories={filteredCategories}
-                    selected={newAppCategories}
-                    onToggle={(category) => toggleValue(setNewAppCategories, category)}
-                  />
-                </div>
                 <button type="submit">Create app</button>
               </form>
             ) : null}
@@ -449,8 +437,7 @@ export function Dashboard({
                     name: editAppName,
                     description: editAppDescription,
                     developer_url: editAppDeveloperUrl,
-                    redirect_url: editAppRedirectUrl,
-                    categories: editAppCategories
+                    redirect_url: editAppRedirectUrl
                   });
                   setIsEditingApp(false);
                 } catch (err) {
@@ -473,14 +460,6 @@ export function Dashboard({
                   Purpose
                   <textarea value={editAppDescription} placeholder="Optional: What will this app use Memact for?" onChange={(event) => setEditAppDescription(event.target.value)} />
                 </label>
-                <div>
-                  <h3 className="form-subheader">Context this app can request</h3>
-                  <CategoryGrid
-                    categories={filteredCategories}
-                    selected={editAppCategories}
-                    onToggle={(category) => toggleValue(setEditAppCategories, category)}
-                  />
-                </div>
                 <div style={{ display: "flex", gap: "12px" }}>
                   <button type="submit">Save settings</button>
                   <button type="button" className="ghost" onClick={() => setIsEditingApp(false)}>Cancel</button>
@@ -511,39 +490,53 @@ export function Dashboard({
             <section id="permissions-panel" className="panel">
               <div className="section-head">
                 <div className="section-copy">
-                  <h2>Choose what this app can ask Memact to use</h2>
+                  <h2>Choose what this app can request</h2>
                 </div>
                 <div className="actions section-actions">
                   <span className="tooltip-wrap" title={permissionsHint || undefined}>
-                    <button type="button" className="ghost" disabled={!selectedAppId || !selectedScopes.length || !selectedAppCategories.length} onClick={onGrantConsent}>Save permissions</button>
+                    <button type="button" className="ghost" disabled={!selectedAppId || !selectedScopes.length || !selectedCategories.length} onClick={onGrantConsent}>Save permissions</button>
                   </span>
                   <span className="tooltip-wrap" title={createKeyHint || undefined}>
                     <button type="button" disabled={!canCreateKey} onClick={onCreateKey}>Create API key</button>
                   </span>
                 </div>
               </div>
-              <div className="scope-grid">
-                {Object.entries(filteredScopes).map(([scope, definition]) => {
-                  const inputId = `scope-${scope.replace(/[^a-z0-9_-]/gi, "-")}`
-                  return (
-                    <label key={scope} className="scope-card" htmlFor={inputId}>
-                      <input
-                        id={inputId}
-                        type="checkbox"
-                        checked={selectedScopes.includes(scope)}
-                        onChange={() => {
-                          setSelectedScopes((current) => current.includes(scope)
-                            ? current.filter((item) => item !== scope)
-                            : [...current, scope])
-                        }}
-                      />
-                      <span>
-                        <strong>{scope}</strong>
-                        <small>{definition.description}</small>
-                      </span>
-                    </label>
-                  )
-                })}
+              <div className="permissions-sections stack" style={{ gap: "20px" }}>
+                <div className="permissions-section stack" style={{ gap: "10px" }}>
+                  <h3 className="form-subheader">Memact-native capabilities</h3>
+                  <div className="scope-grid">
+                    {Object.entries(filteredScopes).map(([scope, definition]) => {
+                      const inputId = `scope-${scope.replace(/[^a-z0-9_-]/gi, "-")}`
+                      return (
+                        <label key={scope} className="scope-card" htmlFor={inputId}>
+                          <input
+                            id={inputId}
+                            type="checkbox"
+                            checked={selectedScopes.includes(scope)}
+                            onChange={() => {
+                              setSelectedScopes((current) => current.includes(scope)
+                                ? current.filter((item) => item !== scope)
+                                : [...current, scope])
+                            }}
+                          />
+                          <span>
+                            <strong>{scope}</strong>
+                            <small>{definition.description}</small>
+                          </span>
+                        </label>
+                      )
+                    })}
+                  </div>
+                </div>
+
+                <div className="permissions-section stack" style={{ gap: "10px" }}>
+                  <h3 className="form-subheader">Activity categories</h3>
+                  <CategoryGrid
+                    categories={filteredCategories}
+                    selected={selectedCategories}
+                    onToggle={(category) => toggleValue(setSelectedCategories, category)}
+                  />
+                </div>
               </div>
             </section>
 
