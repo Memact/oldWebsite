@@ -743,7 +743,7 @@ function buildBrowserUnderstandingStrategy(scopes = [], categories = []) {
   return {
     id: `browser_understanding_${categories.join("_").replace(/[^a-z0-9_]/gi, "") || "default"}`,
     product: "memact",
-    tagline: "Your Identity. Your Choice.",
+    tagline: "Decide how apps know you.",
     scopes,
     categories,
     capture_plan: {
@@ -765,7 +765,7 @@ function buildBrowserCompiledPolicy({ appId = "", scopes = [], categories = [], 
     id: `browser_policy_${String(appId || "new").replace(/[^a-z0-9]/gi, "").slice(0, 18)}_${categories.join("_").replace(/[^a-z0-9_]/gi, "") || "default"}`,
     app_id: appId,
     product: "memact",
-    tagline: "Your Identity. Your Choice.",
+    tagline: "Decide how apps know you.",
     purpose: String(purpose || "").trim().slice(0, 240),
     scopes,
     categories,

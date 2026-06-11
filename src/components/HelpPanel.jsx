@@ -6,7 +6,7 @@ import { Chevron } from "./Chevron.jsx"
 const USER_BASIC_FAQS = [
   {
     question: "What is Memact?",
-    answer: "Memact helps you see what apps know about you and control it."
+    answer: "Memact helps you decide how apps know you, because your activity is not your identity."
   },
   {
     question: "What is Yourself?",

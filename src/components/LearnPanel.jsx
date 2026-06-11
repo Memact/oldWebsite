@@ -6,7 +6,7 @@ import { Chevron } from "./Chevron.jsx"
 const START_FAQS = [
   {
     question: "What is Memact?",
-    answer: "Memact helps you see what apps know about you and control it."
+    answer: "Memact helps you decide how apps know you, because your activity is not your identity."
   },
   {
     question: "What problem is Memact solving?",
@@ -93,7 +93,7 @@ export function LearnPanel() {
   return (
     <section className="panel help-panel">
       <div>
-        <h2>See what apps know about you</h2>
+        <h2>Decide how apps know you</h2>
       </div>
 
       <div className="faq-section">

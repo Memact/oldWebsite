@@ -142,10 +142,10 @@ export function Landing({
           ) : (
             <>
               <h1 className="locked-tagline">
-                <span>Your Identity.</span>
-                <span className="tagline-with">Your Choice.</span>
+                <span>Decide how</span>
+                <span className="tagline-with">apps know you.</span>
               </h1>
-              <p>See what apps know about you and control it.</p>
+              <p>Because your activity is not your identity.</p>
               {showAuth ? (
                 <div className="landing-actions">
                   <a className="scroll-to-auth" href="/#sign-up" onClick={(event) => handleAuthScroll(event, "sign-up")}>Get started</a>
