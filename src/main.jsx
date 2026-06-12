@@ -1028,6 +1028,10 @@ function Dashboard({
   const provider = user?.provider || authUser?.app_metadata?.provider || authUser?.identities?.[0]?.provider || "email"
   const avatar = user?.avatar_url || authUser?.user_metadata?.avatar_url || authUser?.user_metadata?.picture || ""
   const displayEmail = user?.email || authUser?.email || ""
+  const [avatarError, setAvatarError] = React.useState(false)
+  React.useEffect(() => {
+    setAvatarError(false)
+  }, [avatar])
 
   return (
     <section className="dashboard">
@@ -1042,7 +1046,7 @@ function Dashboard({
       {activeTab === "account" ? (
         <section className="panel account-panel">
           <div className="identity-card">
-            {avatar ? <img src={avatar} alt="" /> : <span aria-hidden="true">{displayEmail.slice(0, 1).toUpperCase()}</span>}
+            {avatar && !avatarError ? <img src={avatar} alt="" onError={() => setAvatarError(true)} /> : <span aria-hidden="true">{displayEmail.slice(0, 1).toUpperCase()}</span>}
             <div>
               <h2>{displayEmail}</h2>
               <p className="muted">Signed in with {provider}.</p>
