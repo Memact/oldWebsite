@@ -127,6 +127,10 @@ export function Dashboard({
   const avatar = getAvatarUrl(user, authUser)
   const displayEmail = getUserEmail(user, authUser)
   const initials = getInitials(displayName, displayEmail)
+  const [avatarError, setAvatarError] = useState(false)
+  React.useEffect(() => {
+    setAvatarError(false)
+  }, [avatar])
   const [accountEditor, setAccountEditor] = useState(authFlow === "recovery" || needsPasswordSetup ? "password" : "")
   const [editAppName, setEditAppName] = useState("")
   const [editAppDescription, setEditAppDescription] = useState("")
@@ -174,7 +178,7 @@ export function Dashboard({
             <p className="notice" role="status">We found approved app access for this email. Set a password to open your Memact account.</p>
           ) : null}
           <div className="identity-card">
-            {avatar ? <img src={avatar} alt="" /> : <span aria-hidden="true">{initials}</span>}
+            {avatar && !avatarError ? <img src={avatar} alt="" onError={() => setAvatarError(true)} /> : <span aria-hidden="true">{initials}</span>}
             <div>
               <h2>{displayName}</h2>
               <p className="identity-meta">
