@@ -473,18 +473,7 @@ button.error-dismiss:focus-visible:not(:disabled) {
 
 .slim-panel { padding: 18px; }
 
-.permissions-sub-panel {
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md, 10px);
-  padding: 18px;
-  background: var(--surface-2);
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-.permissions-sub-panel > .form-subheader {
-  margin: 0;
-}
+
 
 .eyebrow {
   margin: 0 0 8px;
@@ -542,8 +531,7 @@ p { margin-top: 0; }
 .transparency-card h3,
 .user-consent-card h3,
 .wiki-section-head h3,
-.wiki-empty-state h4,
-.form-subheader {
+.wiki-empty-state h4 {
   margin: 0;
   font-size: var(--subheader-size);
   line-height: 1.14;

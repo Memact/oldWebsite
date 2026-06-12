@@ -489,9 +489,7 @@ export function Dashboard({
           <div className="access-layout">
             <section id="permissions-panel" className="panel">
               <div className="section-head">
-                <div className="section-copy">
-                  <h2>Choose what this app can request</h2>
-                </div>
+                <h2>Choose what this app can request</h2>
                 <div className="actions section-actions">
                   <span className="tooltip-wrap" title={permissionsHint || undefined}>
                     <button type="button" className="ghost" disabled={!selectedAppId || !selectedScopes.length || !selectedCategories.length} onClick={onGrantConsent}>Save permissions</button>
@@ -501,9 +499,13 @@ export function Dashboard({
                   </span>
                 </div>
               </div>
-              <div className="permissions-sections stack" style={{ gap: "16px" }}>
-                <div className="permissions-sub-panel">
-                  <h3 className="form-subheader">Memact-native capabilities</h3>
+              <div className="stack">
+                <div>
+                  <div className="wiki-section-head">
+                    <div>
+                      <h3>Capabilities</h3>
+                    </div>
+                  </div>
                   <div className="scope-grid">
                     {Object.entries(filteredScopes).map(([scope, definition]) => {
                       const inputId = `scope-${scope.replace(/[^a-z0-9_-]/gi, "-")}`
@@ -529,8 +531,12 @@ export function Dashboard({
                   </div>
                 </div>
 
-                <div className="permissions-sub-panel">
-                  <h3 className="form-subheader">Activity categories</h3>
+                <div>
+                  <div className="wiki-section-head">
+                    <div>
+                      <h3>Activity categories</h3>
+                    </div>
+                  </div>
                   <CategoryGrid
                     categories={filteredCategories}
                     selected={selectedCategories}
