@@ -159,7 +159,7 @@ export function Landing({
         {showAuth ? (
           <section id={isSignIn ? "sign-in" : "sign-up"} className="panel auth-panel" aria-label={isSignIn ? "Memact sign in" : "Memact sign up"}>
             <img className="auth-panel-logo" src="/logo.png" alt="Memact" />
-            <p className="eyebrow">{isSignIn ? "Sign in" : isConsentAuth ? "Review request" : "Get started"}</p>
+            <h2>{isSignIn ? "Sign in" : isConsentAuth ? "Review request" : "Get started"}</h2>
             <p className="muted auth-support">
               {isSignIn
                 ? isSignInVerificationStep

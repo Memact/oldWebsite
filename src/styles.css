@@ -1458,11 +1458,62 @@ input:-webkit-autofill:focus {
   background: rgba(255, 255, 255, 0.105);
 }
 
-.app-chip.is-active,
+.app-chip:hover:not(:disabled) {
+  border-color: rgba(255, 255, 255, 0.28) !important;
+  background: var(--surface-2) !important;
+  color: var(--text) !important;
+}
+
+.app-chip.is-active {
+  border-color: rgba(255, 255, 255, 0.42) !important;
+  color: #ffffff !important;
+  background: rgba(255, 255, 255, 0.105) !important;
+}
+
 .app-chip.is-active:hover:not(:disabled) {
+  border-color: rgba(255, 255, 255, 0.62) !important;
+  color: #ffffff !important;
+  background: rgba(255, 255, 255, 0.18) !important;
+}
+
+.scope-card:hover,
+.category-card:hover {
+  border-color: rgba(255, 255, 255, 0.24);
+  background: var(--surface-2);
+}
+
+.scope-card.is-active,
+.scope-card:has(input:checked),
+.category-card.is-active,
+.category-card:has(input:checked) {
   border-color: rgba(255, 255, 255, 0.42);
-  color: #ffffff;
   background: rgba(255, 255, 255, 0.105);
+}
+
+.scope-card.is-active:hover,
+.scope-card:has(input:checked):hover,
+.category-card.is-active:hover,
+.category-card:has(input:checked):hover {
+  border-color: rgba(255, 255, 255, 0.62);
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.scope-card.is-active strong,
+.scope-card:has(input:checked) strong,
+.category-card.is-active strong,
+.category-card:has(input:checked) strong {
+  color: #ffffff;
+}
+
+.card-category-label,
+.card-source-label {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 /* Removed hover highlighting for non-clickable elements */

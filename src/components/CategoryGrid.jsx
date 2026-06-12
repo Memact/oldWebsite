@@ -8,7 +8,7 @@ export function CategoryGrid({ categories, selected, onToggle }) {
       {entries.map(([category, definition]) => {
         const inputId = `category-${category.replace(/[^a-z0-9_-]/gi, "-")}`
         return (
-          <label key={category} className="scope-card category-card" htmlFor={inputId}>
+          <label key={category} className={`scope-card category-card ${selected.includes(category) ? "is-active" : ""}`} htmlFor={inputId}>
             <input
               id={inputId}
               type="checkbox"

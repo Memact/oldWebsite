@@ -5,12 +5,11 @@ export function PublicWikiPage({ username }) {
     <section className="dashboard public-wiki-page">
       <section className="panel help-panel">
         <div>
-          <p className="eyebrow">Shared memory</p>
           <h2>{username ? `${username}'s shared page` : "Shared page"}</h2>
           <p className="muted">Only entries a user explicitly made shareable should appear here.</p>
         </div>
         <div className="permission-list wiki-entry-panel">
-          <p className="eyebrow">Shared entries</p>
+          <h3>Shared entries</h3>
           <p className="muted">No shared entries are available from this local page yet.</p>
         </div>
         <p className="muted public-wiki-footer">Powered by Memact.</p>

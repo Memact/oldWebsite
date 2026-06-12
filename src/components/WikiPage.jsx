@@ -591,7 +591,7 @@ function WikiEntryCard({ entry, onDelete, onVisibility }) {
     <article className={`wiki-entry-card wiki-entry-${entry.source_type}`}>
       <div className="wiki-entry-main">
         <div>
-          <p className="eyebrow">{entry.category}</p>
+          <span className="card-category-label">{entry.category}</span>
           <h4>{entry.title}</h4>
           <p className="muted">{typeof entry.value === "string" ? entry.value : entry.value?.note || JSON.stringify(entry.value)}</p>
         </div>
@@ -812,7 +812,7 @@ function WikiProposalCard({ entry, onAccept, onEdit, onReject }) {
     <article className={`wiki-entry-card wiki-proposal-card wiki-entry-${entry.source_type}`}>
       <div className="wiki-entry-main">
         <div>
-          <p className="eyebrow">{entry.source_label}</p>
+          <span className="card-source-label">{entry.source_label}</span>
           <h4>This app wants to remember: {entry.title}</h4>
           <p className="muted">{typeof entry.value === "string" ? entry.value : entry.value?.note || entry.reason || "Review before this becomes accepted memory."}</p>
         </div>

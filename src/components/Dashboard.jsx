@@ -382,8 +382,7 @@ export function Dashboard({
           <section id="app-panel" className="panel app-workspace">
             <div className="section-head">
               <div className="section-copy">
-                <p className="eyebrow">{hasApps ? "Start by selecting or creating an app" : "Start by creating an app"}</p>
-                <h2>{appHeading}</h2>
+                <h2>{isCreatingApp || isEditingApp ? appHeading : (hasApps ? "Start by selecting or creating an app" : "Start by creating an app")}</h2>
               </div>
               {hasApps ? (
                 <div className="actions section-actions" aria-label="App actions">
@@ -490,8 +489,7 @@ export function Dashboard({
             <section id="permissions-panel" className="panel">
               <div className="section-head">
                 <div className="section-copy">
-                  <p className="eyebrow">Next, choose what this app can request</p>
-                  <h2>Choose what this app can request</h2>
+                  <h2>Next, choose what this app can request</h2>
                 </div>
                 <div className="actions section-actions">
                   <span className="tooltip-wrap" title={permissionsHint || undefined}>
@@ -511,7 +509,7 @@ export function Dashboard({
                     {Object.entries(filteredScopes).map(([scope, definition]) => {
                       const inputId = `scope-${scope.replace(/[^a-z0-9_-]/gi, "-")}`
                       return (
-                        <label key={scope} className="scope-card" htmlFor={inputId}>
+                        <label key={scope} className={`scope-card ${selectedScopes.includes(scope) ? "is-active" : ""}`} htmlFor={inputId}>
                           <input
                             id={inputId}
                             type="checkbox"
@@ -549,8 +547,7 @@ export function Dashboard({
               <section id="api-keys-panel" className="panel api-keys-panel">
                 <div className="section-head">
                   <div className="section-copy">
-                    <p className="eyebrow">Now, API keys</p>
-                    <h2>API keys</h2>
+                    <h2>Now, API keys</h2>
                   </div>
                 </div>
                 <div className="stack">
