@@ -1302,3 +1302,23 @@ textarea:focus {
     gap: 0.55rem;
   }
 }
+
+.usage-overview {
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  padding: 1rem;
+  background: var(--glass-inner);
+  display: grid;
+  gap: 0.85rem;
+}
+
+.usage-overview-head {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.usage-overview-head h3 {
+  margin: 0;
+  font-size: var(--subheader-size);
+  line-height: 1.14;
+}
