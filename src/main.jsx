@@ -1205,9 +1205,13 @@ function Dashboard({
                   </span>
                 </div>
               </div>
-              <div className="permissions-sections stack" style={{ gap: "16px" }}>
-                <div className="permissions-sub-panel">
-                  <h3 className="form-subheader">Memact-native capabilities</h3>
+              <div className="stack">
+                <div>
+                  <div className="wiki-section-head">
+                    <div>
+                      <h3>Capabilities</h3>
+                    </div>
+                  </div>
                   <div className="scope-grid">
                     {Object.entries(scopes).map(([scope, definition]) => (
                       <label key={scope} className="scope-card">
@@ -1229,8 +1233,12 @@ function Dashboard({
                   </div>
                 </div>
 
-                <div className="permissions-sub-panel">
-                  <h3 className="form-subheader">Activity categories</h3>
+                <div>
+                  <div className="wiki-section-head">
+                    <div>
+                      <h3>Activity categories</h3>
+                    </div>
+                  </div>
                   <CategoryGrid
                     categories={categories}
                     selected={selectedCategories}

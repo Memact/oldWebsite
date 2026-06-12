@@ -405,17 +405,22 @@ button:disabled {
   justify-content: space-between;
 }
 
-.permissions-sub-panel {
-  border: 1px solid var(--line);
-  border-radius: 18px;
-  padding: 18px;
-  background: var(--glass-inner, rgba(255, 255, 255, 0.045));
+.wiki-section-head {
   display: flex;
-  flex-direction: column;
-  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
 }
-.permissions-sub-panel > .form-subheader {
+.wiki-section-head > div {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+.wiki-section-head h3 {
   margin: 0;
+  font-size: var(--subheader-size, 16px);
+  line-height: 1.14;
+  letter-spacing: -0.035em;
 }
 
 .auth-panel {
