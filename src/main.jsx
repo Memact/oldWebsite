@@ -1128,10 +1128,10 @@ function Dashboard({
         <>
           <section id="app-panel" className="panel app-workspace">
             <div className="section-head">
-              <div>
-                <p className="eyebrow">App</p>
+              <div className="section-copy">
+                <p className="eyebrow">{hasApps ? "Start by selecting or creating an app" : "Start by creating an app"}</p>
                 <h2>{appHeading}</h2>
-                <p className="muted">{appDescription}</p>
+                {appDescription ? <p className="muted">{appDescription}</p> : null}
               </div>
               {hasApps ? (
                 <div className="section-toolbar">
@@ -1188,8 +1188,8 @@ function Dashboard({
             <section id="permissions-panel" className="panel">
               <div className="section-head">
                 <div className="section-copy">
-                  <p className="eyebrow">Permissions</p>
-                  <h2>Choose what this app can request</h2>
+                  <p className="eyebrow">Next, choose what this app can request</p>
+                  <h2>What this app can request</h2>
                   <p className="muted">
                     {selectedConsent
                       ? consentChanged ? "Permissions changed. Save them before creating the next key." : "Permissions are saved for this app. Change scopes any time."
@@ -1250,7 +1250,12 @@ function Dashboard({
 
             {selectedKeys.length > 0 && (
               <section id="api-keys-panel" className="panel">
-                <p className="eyebrow">API keys</p>
+                <div className="section-head">
+                  <div className="section-copy">
+                    <p className="eyebrow">Now, API keys</p>
+                    <h2>API keys</h2>
+                  </div>
+                </div>
                 <div className="stack">
                   {selectedKeys.map((key) => (
                     <div className="list-card" key={key.id}>
