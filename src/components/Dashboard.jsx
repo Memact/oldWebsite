@@ -380,32 +380,32 @@ export function Dashboard({
             </div>
           </div>
           <section id="app-panel" className="panel app-workspace">
-            <div className={hasApps ? "current-app-block" : "current-app-note"}>
-              <div>
-                {hasApps ? <h2>{appHeading}</h2> : <p>{appHeading}</p>}
+            <div className="section-head">
+              <div className="section-copy">
+                <p className="eyebrow">{hasApps ? "Start by selecting or creating an app" : "Start by creating an app"}</p>
+                <h2>{appHeading}</h2>
               </div>
+              {hasApps ? (
+                <div className="actions section-actions" aria-label="App actions">
+                  <button type="button" className="new-app-button" aria-label={(isCreatingApp || isEditingApp) ? "Cancel app operation" : "Create app"} onClick={() => {
+                    if (isCreatingApp || isEditingApp) {
+                      setShowAppForm(false);
+                      setIsEditingApp(false);
+                    } else {
+                      setShowAppForm(true);
+                    }
+                  }}>
+                    {(isCreatingApp || isEditingApp) ? "Cancel" : "New app"}
+                  </button>
+                  {!isCreatingApp && !isEditingApp && selectedApp ? (
+                    <>
+                      <button type="button" className="edit-app-button" onClick={startEditingApp}>Edit settings</button>
+                      <button type="button" className="ghost danger app-delete-button" onClick={onDeleteApp}>Delete app</button>
+                    </>
+                  ) : null}
+                </div>
+              ) : null}
             </div>
-
-            {hasApps ? (
-              <div className="app-actions" aria-label="App actions">
-                <button type="button" className="new-app-button" aria-label={(isCreatingApp || isEditingApp) ? "Cancel app operation" : "Create app"} onClick={() => {
-                  if (isCreatingApp || isEditingApp) {
-                    setShowAppForm(false);
-                    setIsEditingApp(false);
-                  } else {
-                    setShowAppForm(true);
-                  }
-                }}>
-                  {(isCreatingApp || isEditingApp) ? "Cancel" : "New app"}
-                </button>
-                {!isCreatingApp && !isEditingApp && selectedApp ? (
-                  <>
-                    <button type="button" className="edit-app-button" onClick={startEditingApp}>Edit settings</button>
-                    <button type="button" className="ghost danger app-delete-button" onClick={onDeleteApp}>Delete app</button>
-                  </>
-                ) : null}
-              </div>
-            ) : null}
 
             {isCreatingApp ? (
               <form className="form app-create-form" onSubmit={onCreateApp}>
@@ -489,7 +489,10 @@ export function Dashboard({
           <div className="access-layout">
             <section id="permissions-panel" className="panel">
               <div className="section-head">
-                <h2>Choose what this app can request</h2>
+                <div className="section-copy">
+                  <p className="eyebrow">Next, choose what this app can request</p>
+                  <h2>What this app can request</h2>
+                </div>
                 <div className="actions section-actions">
                   <span className="tooltip-wrap" title={permissionsHint || undefined}>
                     <button type="button" className="ghost" disabled={!selectedAppId || !selectedScopes.length || !selectedCategories.length} onClick={onGrantConsent}>Save permissions</button>
@@ -548,7 +551,12 @@ export function Dashboard({
 
             {selectedKeys.length > 0 && (
               <section id="api-keys-panel" className="panel api-keys-panel">
-                <h2>API keys</h2>
+                <div className="section-head">
+                  <div className="section-copy">
+                    <p className="eyebrow">Now, API keys</p>
+                    <h2>API keys</h2>
+                  </div>
+                </div>
                 <div className="stack">
                   <section className="usage-overview" aria-label="Usage statistics">
                     <div className="usage-overview-head">
