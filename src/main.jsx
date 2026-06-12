@@ -442,6 +442,30 @@ function App() {
     }
   }
 
+  async function handleGoogleLogin() {
+    setError("")
+    setAuthNotice("")
+    setAuthLoading("google")
+    setStatus("Opening Google login.")
+    try {
+      const { error: oauthError } = await requireSupabase().auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: getAuthRedirectTarget(),
+          queryParams: {
+            access_type: "offline",
+            prompt: "consent"
+          }
+        }
+      })
+      if (oauthError) throw oauthError
+    } catch (authError) {
+      setError(authError.message)
+      setStatus(authStatusMessage(authError))
+      setAuthLoading("")
+    }
+  }
+
   async function handleSetPassword(event) {
     event.preventDefault()
     setError("")
@@ -853,13 +877,14 @@ function App() {
           onPasswordLogin={handlePasswordLogin}
           onForgotPassword={handleForgotPassword}
           onGithubLogin={handleGithubLogin}
+          onGoogleLogin={handleGoogleLogin}
         />
       )}
     </main>
   )
 }
 
-function Landing({ connectRequest, showAuth, portalNavigate, email, password, authLoading, authNotice, setEmail, setPassword, onEmailLogin, onPasswordLogin, onForgotPassword, onGithubLogin }) {
+function Landing({ connectRequest, showAuth, portalNavigate, email, password, authLoading, authNotice, setEmail, setPassword, onEmailLogin, onPasswordLogin, onForgotPassword, onGithubLogin, onGoogleLogin }) {
   const isConnecting = Boolean(connectRequest?.app_id && isConnectPath())
   return (
     <section className={showAuth ? "landing landing-with-auth" : "landing"}>
@@ -902,6 +927,9 @@ function Landing({ connectRequest, showAuth, portalNavigate, email, password, au
               {authLoading === "email" ? "Sending link..." : "Email me a login link"}
             </button>
             <div className="auth-divider" aria-hidden="true"><span>or</span></div>
+            <button type="button" className="ghost" disabled={authLoading === "google"} onClick={onGoogleLogin}>
+              {authLoading === "google" ? "Opening Google..." : "Continue with Google"}
+            </button>
             <button type="button" className="ghost" disabled={authLoading === "github"} onClick={onGithubLogin}>
               {authLoading === "github" ? "Opening GitHub..." : "Continue with GitHub"}
             </button>
