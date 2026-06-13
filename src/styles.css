@@ -1170,6 +1170,10 @@ input[type="password"]::-ms-clear {
   gap: 12px;
 }
 
+.permission-list {
+  align-content: start;
+}
+
 .help-panel,
 .app-workspace { gap: 14px; }
 
