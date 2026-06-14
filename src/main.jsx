@@ -92,6 +92,18 @@ function App() {
     }
   }, [])
 
+  const [dismissedRedesign, setDismissedRedesign] = useState(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("memact.redesign_dismissed") === "true";
+    }
+    return false;
+  });
+
+  const handleDismissRedesign = () => {
+    localStorage.setItem("memact.redesign_dismissed", "true");
+    setDismissedRedesign(true);
+  };
+
   const [authSession, setAuthSession] = useState(null)
   const [authUser, setAuthUser] = useState(null)
   const [authChecking, setAuthChecking] = useState(true)
@@ -1812,9 +1824,112 @@ function App() {
           onClearPendingVerification={clearPendingVerification}
           onClearPendingSignInVerification={clearPendingSignInVerification}
           onGithubLogin={handleGithubLogin}
-          onGoogleLogin={handleGoogleLogin}
           onLearnMore={() => { navigateToPage("learn") }}
         />
+      )}
+      {!dismissedRedesign && (
+        <div style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: "rgba(0, 1, 27, 0.82)",
+          backdropFilter: "blur(16px)",
+          WebkitBackdropFilter: "blur(16px)",
+          zIndex: 99999,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: "24px",
+          fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif"
+        }}>
+          <div style={{
+            backgroundColor: "#07082E",
+            border: "1px solid rgba(232, 233, 255, 0.08)",
+            borderRadius: "4px",
+            padding: "36px 32px",
+            maxWidth: "460px",
+            width: "100%",
+            boxShadow: "0 24px 60px rgba(0, 0, 0, 0.65)",
+            textAlign: "center"
+          }}>
+            {/* Logo */}
+            <div style={{ marginBottom: "24px", userSelect: "none" }}>
+              <span style={{
+                color: "#E8E9FF",
+                fontWeight: 800,
+                fontSize: "22px",
+                letterSpacing: "-0.5px"
+              }}>
+                memact<span style={{ color: "#5B6AFF" }}>.me</span>
+              </span>
+            </div>
+
+            {/* Content */}
+            <h2 style={{
+              color: "#E8E9FF",
+              fontSize: "18px",
+              fontWeight: 700,
+              lineHeight: 1.35,
+              marginBottom: "12px",
+              marginTop: 0
+            }}>
+              Under Redesign
+            </h2>
+            <p style={{
+              color: "#8788B8",
+              fontSize: "13px",
+              lineHeight: 1.6,
+              marginBottom: "28px",
+              marginTop: 0
+            }}>
+              We are currently rebuilding the Memact platform around our new **Personal Address Protocol**. While we transition, we invite you to preview our Website 2.0 demo.
+            </p>
+
+            {/* Actions */}
+            <div style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: "10px"
+            }}>
+              <a 
+                href="https://github.com/Memact/Website-2.0"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  backgroundColor: "#5B6AFF",
+                  color: "#FFFFFF",
+                  fontSize: "13px",
+                  fontWeight: 600,
+                  padding: "12.5px",
+                  borderRadius: "2px",
+                  textDecoration: "none",
+                  display: "block",
+                  transition: "opacity 0.2s"
+                }}
+              >
+                Go to Website 2.0 Demo
+              </a>
+              <button
+                onClick={handleDismissRedesign}
+                style={{
+                  backgroundColor: "transparent",
+                  color: "#8788B8",
+                  border: "1px solid rgba(232, 233, 255, 0.08)",
+                  fontSize: "13px",
+                  fontWeight: 600,
+                  padding: "12.5px",
+                  borderRadius: "2px",
+                  cursor: "pointer",
+                  transition: "all 0.2s"
+                }}
+              >
+                Continue to Legacy Site
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </main>
   )
