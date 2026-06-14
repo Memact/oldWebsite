@@ -20,79 +20,62 @@ interface FAQCategory {
 const FAQ_DATA: FAQCategory[] = [
   {
     id: 'general',
-    title: 'Account & Address',
+    title: 'Getting Started',
     icon: BookOpen,
     items: [
       {
         id: 'what-is-memact',
         question: 'What is Memact?',
-        answer: 'Memact is a user-controlled memory layer for software. Instead of apps storing what they learn about you in hidden, siloed databases, Memact provides a single notebook where you own, view, and govern your digital profile.'
+        answer: 'Memact gives you one clean place to store what you want AI assistants and people to know about you. Instead of retelling your background, preferences, or goals every time you start a new conversation or sign up for a new tool, they can reference your personal Memact link to understand you instantly.'
       },
       {
         id: 'what-is-address',
-        question: 'What is a you.memact.me address?',
-        answer: 'It is your permanent personal address. You can share it with others or use it to connect third-party apps. You control exactly who can see each entry (Public, Friends, or Private).'
+        question: 'What is a you.memact.me link?',
+        answer: 'It is a secure, readable link representing your digital profile. Think of it like a smart business card or personal landing page that you control. You can customize what stays private, what is visible to friends, and what is open to anyone.'
       }
     ]
   },
   {
-    id: 'memory',
-    title: 'Memory Governance',
-    icon: UserCheck,
-    items: [
-      {
-        id: 'difference-chatbot',
-        question: 'How is Memact different from a chatbot?',
-        answer: 'Memact is not an AI companion or chatbot. It is a data utility. It provides a standard API and notebook stream that other software queries to personalize their services, with your consent.'
-      },
-      {
-        id: 'how-suggestions-work',
-        question: 'How do Suggestions work?',
-        answer: 'When a connected app or AI learns something about you, it proposes it as a suggestion. The item is queued in your notebook under "Suggestions". It will never be added to your profile until you manually review and click "Add".'
-      }
-    ]
-  },
-  {
-    id: 'connections',
-    title: 'App Connections',
+    id: 'usage',
+    title: 'How to Use',
     icon: Cpu,
     items: [
       {
-        id: 'how-to-connect',
-        question: 'How do I connect an app to my notebook?',
-        answer: 'Connect apps using the secure consent flow:',
-        steps: [
-          'Inside the third-party app, click "Connect Memact".',
-          'Review the requested visibility scopes (e.g. read public entries).',
-          'Click Approve. The app receives a unique connection ID to fetch allowed details.'
-        ]
+        id: 'how-to-use-link',
+        question: 'How do I use my link?',
+        answer: 'You can copy your link (like alex.memact.me) and paste it into any AI agent (like ChatGPT, Claude, or Cursor). Simply tell the agent: "Here is my background: alex.memact.me". The agent reads your approved profile entries and adapts its responses to you instantly.'
       },
       {
-        id: 'how-to-revoke',
-        question: 'How do I revoke an app\'s access?',
-        answer: 'You can disconnect any app instantly:',
-        steps: [
-          'Open your Memact Notebook and select the "Connections" tab.',
-          'Find the app or integration you want to remove.',
-          'Click Disconnect. This immediately invalidates their access tokens and revokes all permissions.'
-        ]
+        id: 'how-to-share',
+        question: 'How do I share it with others?',
+        answer: 'You can send your link to friends, family, or collaborators. They can view your public entries or, if you authorize them as friends, see your "Friends Only" updates.'
       }
     ]
   },
   {
-    id: 'security',
-    title: 'Security & Privacy',
+    id: 'privacy',
+    title: 'Privacy & Control',
     icon: Shield,
     items: [
       {
-        id: 'data-storage',
-        question: 'Where is my data stored?',
-        answer: 'Your memory data is encrypted and saved inside your private profile. Memact secures this data and only exposes approved scopes to third-party integrations using cryptographic API keys.'
+        id: 'who-sees-notes',
+        question: 'Who can see my profile entries?',
+        answer: 'You have full control over the visibility of every single entry in your notebook:',
+        steps: [
+          'Public: Visible to anyone who visits your link, and readable by public AI agents.',
+          'Friends: Visible only to connections who sign in with their own Memact link.',
+          'Private: Visible only to you when logged in. AI agents and other users can never read these.'
+        ]
       },
       {
-        id: 'can-apps-see-everything',
-        question: 'Can connected apps read my entire notebook?',
-        answer: 'No. Apps only see the specific visibility scopes you approved during the connection setup. They can never read your private entries.'
+        id: 'how-to-edit',
+        question: 'Can apps or AI agents change my profile without permission?',
+        answer: 'Never. If an app or AI agent notices a new preference (e.g. you pushed open source code or listened to a specific song), it can only send a "Suggestion" to your inbox. It will not appear on your profile until you manually approve it.'
+      },
+      {
+        id: 'delete-data',
+        question: 'Can I edit or delete my data?',
+        answer: 'Yes. You can edit the text, toggle visibility (e.g., from Public to Private), or delete any entry in your notebook at any time. When you delete an entry, it is permanently erased from our system.'
       }
     ]
   }

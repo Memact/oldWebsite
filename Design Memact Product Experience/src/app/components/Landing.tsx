@@ -668,8 +668,8 @@ export function Landing({ onNavigate, isDark, onToggleDark }: LandingProps) {
         <div className="grid grid-cols-1 md:grid-cols-3">
           {[
             { title: 'Claim your address.', body: 'Create your username.memact.me link. It belongs entirely to you.' },
-            { title: 'Own your data.', body: 'Store your preferences, focus, and links in one place, not scattered across fifty apps.' },
-            { title: 'Connect to apps.', body: 'When you open a new app, it reads allowed details from your address. You never start from zero.' },
+            { title: 'Own your data.', body: 'Store your bio, active projects, and preferences in one place, not scattered across different profiles.' },
+            { title: 'Paste to AI agents.', body: 'Give your link to ChatGPT, Claude, or Cursor. They read it and instantly adapt to you. No more retyping who you are.' },
           ].map((item, i) => (
             <div key={item.title} className={`reveal reveal-delay-${i * 100} px-10 py-12 ${i < 2 ? 'border-b md:border-b-0 md:border-r border-border' : ''}`}>
               <div className="text-sm font-semibold text-foreground mb-2">{item.title}</div>
@@ -723,9 +723,9 @@ export function Landing({ onNavigate, isDark, onToggleDark }: LandingProps) {
             </div>
             
             <div className="reveal reveal-delay-300 p-5 bg-card/60 border border-border/80 rounded-sm">
-              <div className="text-xs font-bold text-foreground mb-2">Connect to apps</div>
+              <div className="text-xs font-bold text-foreground mb-2">Skip setup forms</div>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                When joining a new app, connect your link. The tool reads your allowed focus and preferences automatically, so you never start from zero.
+                Instead of copying your bio or filling out your goals on every new website, just share your link. Services read it and configure your workspace instantly.
               </p>
             </div>
 
