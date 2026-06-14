@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ArrowRight, Moon, Sun, Check, Terminal, Calendar, Sliders, Shield, ArrowUpRight, CheckCircle2, Globe, Users, Lock } from 'lucide-react';
+import { ArrowRight, Moon, Sun, Check, Terminal, Calendar, Sliders, Shield, ArrowUpRight, CheckCircle2, Globe, Users, Lock, X } from 'lucide-react';
 import textLogoLight from '../../imports/text_logo_nobg_light.png';
 import textLogoDark  from '../../imports/text_logo_nobg_dark.png';
 
@@ -7,23 +7,97 @@ import textLogoDark  from '../../imports/text_logo_nobg_dark.png';
 
 function QuerySimulator() {
   const [activeApp, setActiveApp] = useState<'none' | 'cursor' | 'claude' | 'cal'>('none');
-  const [status, setStatus] = useState<'idle' | 'requesting' | 'authorized'>('idle');
+  const [status, setStatus] = useState<'idle' | 'proposing' | 'proposed' | 'approved' | 'rejected'>('idle');
+  const [proposal, setProposal] = useState<{
+    id: string;
+    app: string;
+    text: string;
+    type: 'cursor' | 'claude' | 'cal';
+  } | null>(null);
+
+  const [approvedItems, setApprovedItems] = useState<Array<{
+    id: string;
+    text: string;
+    source: string;
+    visibility: 'Public' | 'Private' | 'Friends';
+    isNew?: boolean;
+  }>>([
+    { id: 'init-1', text: 'Building Memact address protocol beta.', source: 'You', visibility: 'Public' },
+    { id: 'init-2', text: 'Available for booking on afternoons only.', source: 'You', visibility: 'Public' }
+  ]);
 
   useEffect(() => {
     if (activeApp === 'none') {
       setStatus('idle');
+      setProposal(null);
       return;
     }
-    setStatus('requesting');
+
+    setStatus('proposing');
     const timer = setTimeout(() => {
-      setStatus('authorized');
-    }, 1200);
+      setStatus('proposed');
+      if (activeApp === 'cursor') {
+        setProposal({
+          id: 'prop-cursor',
+          app: 'Cursor IDE',
+          text: 'Alex is building a React app with TypeScript & Tailwind.',
+          type: 'cursor'
+        });
+      } else if (activeApp === 'claude') {
+        setProposal({
+          id: 'prop-claude',
+          app: 'Claude AI',
+          text: 'Alex is researching Tokyo subway architecture.',
+          type: 'claude'
+        });
+      } else if (activeApp === 'cal') {
+        setProposal({
+          id: 'prop-cal',
+          app: 'Cal.com',
+          text: 'Prefers booking on afternoons only.',
+          type: 'cal'
+        });
+      }
+    }, 800);
+
     return () => clearTimeout(timer);
   }, [activeApp]);
 
+  const handleApprove = () => {
+    if (!proposal) return;
+    
+    if (!approvedItems.some(item => item.text === proposal.text)) {
+      setApprovedItems(prev => [
+        {
+          id: proposal.id,
+          text: proposal.text,
+          source: proposal.app,
+          visibility: 'Public',
+          isNew: true
+        },
+        ...prev
+      ]);
+    }
+    
+    setStatus('approved');
+    setProposal(null);
+  };
+
+  const handleReject = () => {
+    setStatus('rejected');
+    setProposal(null);
+  };
+
+  const resetSimulator = () => {
+    setActiveApp('none');
+    setStatus('idle');
+    setProposal(null);
+    setApprovedItems(prev => prev.map(item => ({ ...item, isNew: false })));
+  };
+
   return (
     <div
-      className="w-full rounded-sm overflow-hidden border border-border bg-card/65 shadow-[0_20px_50px_rgba(0,1,27,0.08)] flex flex-col h-[460px]"
+      className="w-full rounded-sm overflow-hidden border border-border bg-card/65 shadow-[0_20px_50px_rgba(0,1,27,0.08)] flex flex-col h-[480px]"
       style={{ fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif" }}
     >
       {/* Browser Bar / Address header */}
@@ -42,151 +116,189 @@ function QuerySimulator() {
 
       {/* Simulator Body */}
       <div className="flex-1 grid grid-cols-1 md:grid-cols-12 overflow-hidden">
-        {/* Left: Alex's Notebook Stream */}
-        <div className="md:col-span-5 border-r border-border p-4 bg-background/40 flex flex-col justify-between overflow-y-auto">
-          <div className="space-y-3">
-            <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider select-none">Approved Stream</div>
-            
-            <div className="p-3 bg-card rounded-sm border border-border/80 space-y-2 relative group">
-              <div className="text-xs text-foreground font-medium leading-relaxed">
-                Building Memact address protocol beta.
+        {/* Left Column: Inbox & Notebook Stream (Governance Hub) */}
+        <div className="md:col-span-6 border-r border-border p-4 bg-background/40 flex flex-col justify-between overflow-y-auto">
+          <div className="space-y-4">
+            {/* Inbox / Proposal Panel */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Inbox (Pending)</span>
+                {proposal && (
+                  <span className="w-2 h-2 rounded-full bg-yellow-500 animate-pulse" />
+                )}
               </div>
-              <div className="flex items-center gap-1.5 text-[9px] text-muted-foreground font-semibold">
-                <span>By you</span>
-                <span>•</span>
-                <span className="flex items-center gap-1 text-chart-2">
-                  <Globe size={9} /> Public
-                </span>
-              </div>
+
+              {proposal ? (
+                <div className="p-3 bg-secondary/80 border border-yellow-500/30 rounded-sm space-y-2 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                  <div className="text-[10px] font-bold text-yellow-600 dark:text-yellow-400">
+                    Proposal from {proposal.app}...
+                  </div>
+                  <div className="text-xs text-foreground font-medium leading-relaxed">
+                    "{proposal.text}"
+                  </div>
+                  <div className="flex items-center gap-2 pt-1">
+                    <button
+                      onClick={handleApprove}
+                      className="flex-1 flex items-center justify-center gap-1 py-1 px-2 bg-foreground text-background rounded-sm text-[10px] font-bold hover:opacity-90 transition-opacity"
+                    >
+                      <Check size={10} /> Approve
+                    </button>
+                    <button
+                      onClick={handleReject}
+                      className="flex-1 flex items-center justify-center py-1 px-2 bg-secondary border border-border text-muted-foreground rounded-sm text-[10px] font-bold hover:text-foreground hover:bg-secondary/80 transition-colors"
+                    >
+                      Reject
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="p-4 border border-dashed border-border/60 rounded-sm bg-secondary/10 text-center py-6">
+                  <div className="text-[10px] text-muted-foreground/60">No pending proposals</div>
+                </div>
+              )}
             </div>
 
-            <div className="p-3 bg-card rounded-sm border border-border/80 space-y-2 relative group">
-              <div className="text-xs text-foreground font-medium leading-relaxed">
-                Available for booking on afternoons only.
-              </div>
-              <div className="flex items-center gap-1.5 text-[9px] text-muted-foreground font-semibold">
-                <span>By you</span>
-                <span>•</span>
-                <span className="flex items-center gap-1 text-chart-2">
-                  <Globe size={9} /> Public
-                </span>
-              </div>
-            </div>
-
-            <div className="p-3 bg-card rounded-sm border border-border/80 space-y-2 relative group opacity-60">
-              <div className="text-xs text-foreground/80 font-medium leading-relaxed">
-                Tokyo subway architecture research & essay.
-              </div>
-              <div className="flex items-center gap-1.5 text-[9px] text-muted-foreground/80 font-semibold">
-                <span>By Claude</span>
-                <span>•</span>
-                <span className="flex items-center gap-1">
-                  <Lock size={9} className="text-muted-foreground/60" /> Private
-                </span>
+            {/* Approved stream */}
+            <div className="space-y-2">
+              <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Approved Stream</div>
+              
+              <div className="space-y-2 max-h-[220px] overflow-y-auto pr-1">
+                {approvedItems.map((item) => (
+                  <div
+                    key={item.id}
+                    className={`p-3 bg-card rounded-sm border transition-all duration-500 ${
+                      item.isNew 
+                        ? 'border-green-500/50 shadow-[0_0_12px_rgba(34,197,94,0.15)]' 
+                        : 'border-border/80'
+                    }`}
+                  >
+                    <div className="text-xs text-foreground font-medium leading-relaxed">
+                      {item.text}
+                    </div>
+                    <div className="flex items-center justify-between mt-2 text-[9px] text-muted-foreground font-semibold">
+                      <span>By {item.source}</span>
+                      <span className="flex items-center gap-1 text-chart-2">
+                        <Globe size={9} /> Public
+                      </span>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
-          <div className="text-[9px] text-muted-foreground/60 italic pt-3 select-none">
-            Hosted securely. You control who sees what.
+          <div className="text-[9px] text-muted-foreground/60 italic pt-2 select-none border-t border-border/20">
+            You control what apps know about you.
           </div>
         </div>
 
-        {/* Right: The App Connection Sandbox */}
-        <div className="md:col-span-7 p-4 flex flex-col justify-between bg-card/10 overflow-y-auto">
-          {/* Top selection */}
-          <div>
-            <div className="flex gap-1.5 flex-wrap">
+        {/* Right Column: Interactive App Console */}
+        <div className="md:col-span-6 p-4 flex flex-col justify-between bg-card/10 overflow-y-auto">
+          {/* App Trigger Options */}
+          <div className="space-y-3">
+            <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Connect & Trigger App</div>
+            <div className="flex flex-col gap-2">
               {[
-                { id: 'cursor', label: 'Cursor IDE', icon: <Terminal size={12} /> },
-                { id: 'claude', label: 'Claude AI', icon: <Sliders size={12} /> },
-                { id: 'cal', label: 'Cal.com', icon: <Calendar size={12} /> },
+                { id: 'cursor', label: 'Cursor IDE', desc: 'Detects tech stack & context', icon: <Terminal size={12} /> },
+                { id: 'claude', label: 'Claude AI', desc: 'Saves research interests', icon: <Sliders size={12} /> },
+                { id: 'cal', label: 'Cal.com', desc: 'Requests scheduling preferences', icon: <Calendar size={12} /> },
               ].map((app) => (
                 <button
                   key={app.id}
+                  disabled={status === 'proposing'}
                   onClick={() => setActiveApp(app.id as any)}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-sm text-xs font-semibold border transition-all ${
+                  className={`w-full text-left p-2.5 rounded-sm border transition-all flex items-start gap-2.5 ${
                     activeApp === app.id
                       ? 'bg-foreground text-background border-foreground'
                       : 'bg-background hover:bg-secondary/60 text-muted-foreground border-border'
                   }`}
                 >
-                  {app.icon} {app.label}
+                  <div className={`p-1.5 rounded-sm ${activeApp === app.id ? 'bg-background text-foreground' : 'bg-secondary text-muted-foreground'}`}>
+                    {app.icon}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className={`text-xs font-bold ${activeApp === app.id ? 'text-background font-semibold' : 'text-foreground'}`}>
+                      {app.label}
+                    </div>
+                    <div className={`text-[10px] mt-0.5 ${activeApp === app.id ? 'text-background/80' : 'text-muted-foreground'}`}>
+                      {app.desc}
+                    </div>
+                  </div>
                 </button>
               ))}
             </div>
           </div>
 
-          {/* Center visual logs */}
-          <div className="flex-1 flex flex-col justify-center my-4">
-            {activeApp === 'none' ? (
-              <div className="text-center py-8 px-4 border border-dashed border-border rounded-sm bg-secondary/20">
-                <Shield className="mx-auto text-muted-foreground/40 mb-2" size={24} />
-                <div className="text-xs font-bold text-foreground mb-1">Select an app to connect</div>
-                <div className="text-[11px] text-muted-foreground max-w-[200px] mx-auto leading-relaxed">
-                  Watch how apps personalize instantly using your address instead of sign-up forms.
+          {/* Console / Status Logs */}
+          <div className="flex-1 flex flex-col justify-center my-4 min-h-[140px]">
+            {activeApp === 'none' && status === 'idle' && (
+              <div className="text-center py-6 px-4 border border-dashed border-border rounded-sm bg-secondary/20">
+                <Shield className="mx-auto text-muted-foreground/40 mb-2" size={20} />
+                <div className="text-xs font-bold text-foreground mb-1">Click an app above</div>
+                <div className="text-[10px] text-muted-foreground max-w-[200px] mx-auto leading-relaxed">
+                  Trigger the live loop: watch the app propose context to your Inbox for your approval.
                 </div>
               </div>
-            ) : (
-              <div className="bg-background border border-border p-4 rounded-sm flex-1 flex flex-col justify-between font-mono text-[11px] leading-relaxed shadow-[inset_0_2px_4px_rgba(0,0,0,0.01)] min-h-[180px]">
-                {status === 'requesting' && (
-                  <div className="space-y-2 text-muted-foreground">
-                    <div className="flex items-center gap-2">
-                      <span className="w-1.5 h-1.5 bg-yellow-500 rounded-full animate-ping" />
-                      <span>Connecting to alex.memact.me...</span>
-                    </div>
-                    <div>[Query] Requesting read access to Public entries...</div>
-                    <div className="text-[10px] text-muted-foreground/60 italic">Validating authorization...</div>
-                  </div>
-                )}
+            )}
 
-                {status === 'authorized' && activeApp === 'cursor' && (
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-1.5 text-green-600 dark:text-green-400 font-semibold">
-                      <CheckCircle2 size={12} /> Connected to alex.memact.me
-                    </div>
-                    <div className="text-muted-foreground text-[10px] space-y-0.5">
-                      <div>&gt; Read Public entries ... Success</div>
-                      <div>&gt; Found focus: <span className="text-foreground font-semibold">"Building Memact address..."</span></div>
-                      <div>&gt; Private entries (Tokyo Subway) ... <span className="text-yellow-600 dark:text-yellow-400">[Access Denied]</span></div>
-                      <div className="mt-1">&gt; Configuring TypeScript &amp; React environment...</div>
-                    </div>
-                    <div className="text-foreground font-bold mt-1 pt-1 border-t border-border/40 text-[10px]">
-                      Cursor initialized instantly. You skipped the setup profile forms.
-                    </div>
+            {status === 'proposing' && (
+              <div className="bg-background border border-border p-4 rounded-sm flex-1 flex flex-col justify-center font-mono text-[10px] leading-relaxed shadow-[inset_0_2px_4px_rgba(0,0,0,0.01)]">
+                <div className="space-y-2 text-muted-foreground">
+                  <div className="flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 bg-yellow-500 rounded-full animate-ping" />
+                    <span>Connecting to alex.memact.me...</span>
                   </div>
-                )}
+                  <div>[SDK] Checking identity rules...</div>
+                  <div>[API] Sending proposal to user Inbox...</div>
+                </div>
+              </div>
+            )}
 
-                {status === 'authorized' && activeApp === 'claude' && (
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-1.5 text-green-600 dark:text-green-400 font-semibold">
-                      <CheckCircle2 size={12} /> Connected to alex.memact.me
-                    </div>
-                    <div className="text-muted-foreground text-[10px] space-y-0.5">
-                      <div>&gt; Read Public entries ... Success</div>
-                      <div>&gt; Current focus loaded: <span className="text-foreground font-semibold">"Building Memact address..."</span></div>
-                      <div>&gt; Private entries ... <span className="text-yellow-600 dark:text-yellow-400">[Access Denied]</span></div>
-                    </div>
-                    <div className="text-foreground mt-1 pt-1 border-t border-border/40 leading-normal font-semibold text-[10px]">
-                      "Welcome back. Let's write the code for the Memact address protocol."
-                    </div>
+            {status === 'proposed' && proposal && (
+              <div className="bg-background border border-border p-4 rounded-sm flex-1 flex flex-col justify-center font-mono text-[10px] leading-relaxed">
+                <div className="space-y-2 text-yellow-600 dark:text-yellow-400 font-semibold animate-pulse">
+                  <div>&gt; Proposal sent to Inbox!</div>
+                  <div className="text-muted-foreground font-normal">
+                    Waiting for user to Accept or Reject on the left.
                   </div>
-                )}
+                </div>
+              </div>
+            )}
 
-                {status === 'authorized' && activeApp === 'cal' && (
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-1.5 text-green-600 dark:text-green-400 font-semibold">
-                      <CheckCircle2 size={12} /> Connected to alex.memact.me
-                    </div>
-                    <div className="text-muted-foreground text-[10px] space-y-0.5">
-                      <div>&gt; Read Public entries ... Success</div>
-                      <div>&gt; Found preference: <span className="text-foreground font-semibold">"Booking on afternoons only"</span></div>
-                      <div>&gt; Private entries ... <span className="text-yellow-600 dark:text-yellow-400">[Access Denied]</span></div>
-                    </div>
-                    <div className="text-foreground font-bold mt-1 pt-1 border-t border-border/40 text-[10px]">
-                      Calendar synced. Available slots configured instantly.
-                    </div>
+            {status === 'approved' && (
+              <div className="bg-background border border-border p-4 rounded-sm flex-1 flex flex-col justify-between font-mono text-[10px] leading-relaxed">
+                <div className="space-y-2">
+                  <div className="flex items-center gap-1.5 text-green-600 dark:text-green-400 font-bold">
+                    <CheckCircle2 size={12} /> Approved & Saved to memory
                   </div>
-                )}
+                  <div className="text-muted-foreground space-y-1">
+                    <div>&gt; Access check ... PASSED</div>
+                    <div>&gt; Context written to Memory</div>
+                    <div>&gt; App personalization ... SUCCESS</div>
+                  </div>
+                  <div className="text-foreground leading-normal font-semibold mt-2 pt-2 border-t border-border/40">
+                    {activeApp === 'cursor' && "Cursor initialized instantly. You skipped the setup profile forms."}
+                    {activeApp === 'claude' && '"Welcome back. Let\'s write the code for the Memact address protocol."'}
+                    {activeApp === 'cal' && "Calendar slots synced automatically using approved preferences."}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {status === 'rejected' && (
+              <div className="bg-background border border-border p-4 rounded-sm flex-1 flex flex-col justify-between font-mono text-[10px] leading-relaxed">
+                <div className="space-y-2">
+                  <div className="flex items-center gap-1.5 text-red-600 dark:text-red-400 font-bold">
+                    <Shield size={12} /> Access Denied / Rejected
+                  </div>
+                  <div className="text-muted-foreground space-y-1">
+                    <div>&gt; Proposal rejected by user</div>
+                    <div>&gt; Transaction canceled</div>
+                    <div>&gt; App was blocked from reading/storing this data</div>
+                  </div>
+                  <div className="text-foreground font-semibold mt-2 pt-2 border-t border-border/40">
+                    Your personal privacy profile is preserved.
+                  </div>
+                </div>
               </div>
             )}
           </div>
@@ -194,7 +306,7 @@ function QuerySimulator() {
           {/* Reset button */}
           {activeApp !== 'none' && (
             <button
-              onClick={() => setActiveApp('none')}
+              onClick={resetSimulator}
               className="text-[10px] font-bold text-muted-foreground hover:text-foreground transition-colors self-start underline underline-offset-2 select-none"
             >
               Reset simulator
@@ -306,7 +418,7 @@ export function Landing({ onNavigate, isDark, onToggleDark }: LandingProps) {
           {[
             { title: 'Claim your address.', body: 'Create your username.memact.me link. It belongs entirely to you.' },
             { title: 'Own your data.', body: 'Store your preferences, focus, and links in one place, not scattered across fifty apps.' },
-            { title: 'Skip the setup forms.', body: 'When you open a new app, it reads allowed details from your address. You never start from zero.' },
+            { title: 'Connect to apps.', body: 'When you open a new app, it reads allowed details from your address. You never start from zero.' },
           ].map((item, i) => (
             <div key={item.title} className={`px-10 py-12 ${i < 2 ? 'border-b md:border-b-0 md:border-r border-border' : ''}`}>
               <div className="text-sm font-semibold text-foreground mb-2">{item.title}</div>
@@ -355,14 +467,14 @@ export function Landing({ onNavigate, isDark, onToggleDark }: LandingProps) {
             <div className="p-5 bg-card/60 border border-border/80 rounded-sm">
               <div className="text-xs font-bold text-foreground mb-2">Paste it to AI agents</div>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                Tell ChatGPT, Claude, or Cursor: <span className="font-mono text-[10px] bg-secondary/80 px-1.5 py-0.5 rounded-xs text-foreground font-semibold">"Read alex.memact.me to know what I am working on."</span> They instantly adapt to your context.
+                Tell ChatGPT, Claude, or Cursor: <span className="font-mono text-[10px] bg-secondary/80 px-1.5 py-0.5 rounded-xs text-foreground font-semibold">"Here is my info: alex.memact.me"</span>. They read it and instantly adapt to you.
               </p>
             </div>
             
             <div className="p-5 bg-card/60 border border-border/80 rounded-sm">
-              <div className="text-xs font-bold text-foreground mb-2">Skip signup forms</div>
+              <div className="text-xs font-bold text-foreground mb-2">Connect to apps</div>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                When joining a new app, connect your link. The tool reads your allowed focus and timezone automatically, so you never start from zero.
+                When joining a new app, connect your link. The tool reads your allowed focus and preferences automatically, so you never start from zero.
               </p>
             </div>
 
