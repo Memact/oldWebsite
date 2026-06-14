@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ArrowRight, Moon, Sun, Check, Terminal, Calendar, Sliders, Shield, ArrowUpRight, CheckCircle2, Globe, Users, Lock, X } from 'lucide-react';
+import { ArrowRight, Moon, Sun, Check, Terminal, Calendar, Sliders, Shield, ArrowUpRight, CheckCircle2, Globe, Users, Lock, X, Sparkles } from 'lucide-react';
 import textLogoLight from '../../imports/text_logo_nobg_light.png';
 import textLogoDark  from '../../imports/text_logo_nobg_dark.png';
 
@@ -97,7 +97,7 @@ function QuerySimulator() {
 
   return (
     <div
-      className="w-full rounded-sm overflow-hidden border border-border bg-card/65 shadow-[0_20px_50px_rgba(0,1,27,0.08)] flex flex-col h-[480px]"
+      className="w-full rounded-sm overflow-hidden border border-border bg-card/65 shadow-[0_20px_50px_rgba(0,1,27,0.08)] flex flex-col h-[500px]"
       style={{ fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif" }}
     >
       {/* Browser Bar / Address header */}
@@ -121,64 +121,85 @@ function QuerySimulator() {
           <div className="space-y-4">
             {/* Inbox / Proposal Panel */}
             <div className="space-y-2">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between select-none">
                 <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Inbox (Pending)</span>
                 {proposal && (
-                  <span className="w-2 h-2 rounded-full bg-yellow-500 animate-pulse" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-yellow-500 animate-pulse" />
                 )}
               </div>
 
               {proposal ? (
-                <div className="p-3 bg-secondary/80 border border-yellow-500/30 rounded-sm space-y-2 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                  <div className="text-[10px] font-bold text-yellow-600 dark:text-yellow-400">
-                    Proposal from {proposal.app}...
+                <div className="bg-card border border-border p-4 rounded-sm shadow-[0_4px_16px_rgba(0,0,0,0.01)] space-y-3 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className={`px-2 py-0.5 text-[9px] font-bold border rounded-full ${
+                        proposal.type === 'cursor' ? 'bg-muted text-muted-foreground border-muted' :
+                        proposal.type === 'claude' ? 'bg-chart-5/10 text-chart-5 border-chart-5/20' :
+                        'bg-chart-3/10 text-chart-3 border-chart-3/20'
+                      }`}>
+                        {proposal.app}
+                      </span>
+                      <span className="text-[9px] text-muted-foreground font-semibold">Suggested update</span>
+                    </div>
                   </div>
-                  <div className="text-xs text-foreground font-medium leading-relaxed">
-                    "{proposal.text}"
+                  <div>
+                    <h3 className="text-xs font-bold text-foreground mb-1 leading-snug">"{proposal.text}"</h3>
+                    <p className="text-[10px] text-muted-foreground/85 leading-normal flex items-start gap-1.5 font-medium mt-1 mb-2">
+                      <Sparkles size={11} className="shrink-0 mt-0.5 text-muted-foreground/50" />
+                      <span>
+                        {proposal.type === 'cursor' && 'Detected from local directory edits.'}
+                        {proposal.type === 'claude' && 'Extracted from Tokyo architecture research notes.'}
+                        {proposal.type === 'cal' && 'Extracted from calendar availability query.'}
+                      </span>
+                    </p>
                   </div>
-                  <div className="flex items-center gap-2 pt-1">
+                  <div className="flex gap-2 pt-2 border-t border-border/40">
                     <button
                       onClick={handleApprove}
-                      className="flex-1 flex items-center justify-center gap-1 py-1 px-2 bg-foreground text-background rounded-sm text-[10px] font-bold hover:opacity-90 transition-opacity"
+                      className="flex-1 py-1.5 bg-foreground text-background text-[10px] font-bold hover:opacity-85 transition-opacity rounded-sm shadow-xs cursor-pointer"
                     >
-                      <Check size={10} /> Approve
+                      Approve
                     </button>
                     <button
                       onClick={handleReject}
-                      className="flex-1 flex items-center justify-center py-1 px-2 bg-secondary border border-border text-muted-foreground rounded-sm text-[10px] font-bold hover:text-foreground hover:bg-secondary/80 transition-colors"
+                      className="px-3 py-1.5 bg-secondary hover:bg-chart-3/10 text-muted-foreground hover:text-chart-3 text-[10px] font-bold rounded-sm border border-border transition-all cursor-pointer"
                     >
                       Reject
                     </button>
                   </div>
                 </div>
               ) : (
-                <div className="p-4 border border-dashed border-border/60 rounded-sm bg-secondary/10 text-center py-6">
-                  <div className="text-[10px] text-muted-foreground/60">No pending proposals</div>
+                <div className="p-4 border border-dashed border-border rounded-sm bg-secondary/15 py-8 text-center select-none">
+                  <Check className="mx-auto text-chart-2 mb-2 bg-chart-2/10 p-1.5 rounded-full border border-chart-2/25" size={24} />
+                  <h3 className="text-[10px] font-bold text-foreground mb-0.5">Inbox is clear</h3>
                 </div>
               )}
             </div>
 
             {/* Approved stream */}
             <div className="space-y-2">
-              <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Approved Stream</div>
+              <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider select-none">Approved Stream</div>
               
-              <div className="space-y-2 max-h-[220px] overflow-y-auto pr-1">
+              <div className="space-y-2 max-h-[200px] overflow-y-auto pr-1">
                 {approvedItems.map((item) => (
                   <div
                     key={item.id}
-                    className={`p-3 bg-card rounded-sm border transition-all duration-500 ${
+                    className={`p-3 bg-card rounded-sm border transition-all duration-500 space-y-2 ${
                       item.isNew 
-                        ? 'border-green-500/50 shadow-[0_0_12px_rgba(34,197,94,0.15)]' 
+                        ? 'border-green-500/50 shadow-[0_0_12px_rgba(34,197,94,0.12)]' 
                         : 'border-border/80'
                     }`}
                   >
-                    <div className="text-xs text-foreground font-medium leading-relaxed">
+                    <p className="text-xs font-medium text-foreground leading-relaxed">
                       {item.text}
-                    </div>
-                    <div className="flex items-center justify-between mt-2 text-[9px] text-muted-foreground font-semibold">
+                    </p>
+                    <div className="flex items-center justify-between pt-2 border-t border-border/40 text-[9px] text-muted-foreground font-semibold select-none">
                       <span>By {item.source}</span>
-                      <span className="flex items-center gap-1 text-chart-2">
-                        <Globe size={9} /> Public
+                      <span className="flex items-center gap-1">
+                        {item.visibility === 'Public' && <Globe size={9} className="text-chart-2" />}
+                        {item.visibility === 'Friends' && <Users size={9} className="text-chart-3" />}
+                        {item.visibility === 'Private' && <Lock size={9} className="text-muted-foreground/60" />}
+                        <span>{item.visibility}</span>
                       </span>
                     </div>
                   </div>
@@ -191,113 +212,184 @@ function QuerySimulator() {
           </div>
         </div>
 
-        {/* Right Column: Interactive App Console */}
+        {/* Right Column: App Connect & Personalization Preview */}
         <div className="md:col-span-6 p-4 flex flex-col justify-between bg-card/10 overflow-y-auto">
-          {/* App Trigger Options */}
+          {/* App Selection list */}
           <div className="space-y-3">
-            <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Connect & Trigger App</div>
+            <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider select-none">Trigger App Request</div>
             <div className="flex flex-col gap-2">
               {[
-                { id: 'cursor', label: 'Cursor IDE', desc: 'Detects tech stack & context', icon: <Terminal size={12} /> },
-                { id: 'claude', label: 'Claude AI', desc: 'Saves research interests', icon: <Sliders size={12} /> },
-                { id: 'cal', label: 'Cal.com', desc: 'Requests scheduling preferences', icon: <Calendar size={12} /> },
+                { id: 'cursor', label: 'Cursor IDE', desc: 'Suggests environment configuration', icon: <Terminal size={13} /> },
+                { id: 'claude', label: 'Claude AI', desc: 'Syncs research context', icon: <Sliders size={13} /> },
+                { id: 'cal', label: 'Cal.com', desc: 'Queries scheduling slots', icon: <Calendar size={13} /> },
               ].map((app) => (
                 <button
                   key={app.id}
                   disabled={status === 'proposing'}
                   onClick={() => setActiveApp(app.id as any)}
-                  className={`w-full text-left p-2.5 rounded-sm border transition-all flex items-start gap-2.5 ${
+                  className={`w-full text-left p-3 rounded-sm border transition-all flex items-center justify-between cursor-pointer ${
                     activeApp === app.id
-                      ? 'bg-foreground text-background border-foreground'
-                      : 'bg-background hover:bg-secondary/60 text-muted-foreground border-border'
+                      ? 'bg-secondary border-foreground/35 shadow-[0_2px_8px_rgba(0,0,0,0.02)]'
+                      : 'bg-card hover:bg-secondary/65 border-border'
                   }`}
                 >
-                  <div className={`p-1.5 rounded-sm ${activeApp === app.id ? 'bg-background text-foreground' : 'bg-secondary text-muted-foreground'}`}>
-                    {app.icon}
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className={`p-2 rounded-full border shrink-0 ${
+                      activeApp === app.id 
+                        ? 'bg-foreground text-background border-foreground' 
+                        : 'bg-secondary text-muted-foreground border-border'
+                    }`}>
+                      {app.icon}
+                    </div>
+                    <div className="min-w-0">
+                      <div className="text-xs font-bold text-foreground">
+                        {app.label}
+                      </div>
+                      <div className="text-[10px] text-muted-foreground/80 mt-0.5 font-medium truncate">
+                        {app.desc}
+                      </div>
+                    </div>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <div className={`text-xs font-bold ${activeApp === app.id ? 'text-background font-semibold' : 'text-foreground'}`}>
-                      {app.label}
-                    </div>
-                    <div className={`text-[10px] mt-0.5 ${activeApp === app.id ? 'text-background/80' : 'text-muted-foreground'}`}>
-                      {app.desc}
-                    </div>
+                  <div className={`w-3 h-3 rounded-full border flex items-center justify-center shrink-0 ${
+                    activeApp === app.id
+                      ? 'border-accent bg-accent'
+                      : 'border-border'
+                  }`}>
+                    {activeApp === app.id && <div className="w-1.5 h-1.5 rounded-full bg-background" />}
                   </div>
                 </button>
               ))}
             </div>
           </div>
 
-          {/* Console / Status Logs */}
-          <div className="flex-1 flex flex-col justify-center my-4 min-h-[140px]">
+          {/* Humane Visual Outcome mock */}
+          <div className="flex-1 flex flex-col justify-center my-4 min-h-[160px]">
             {activeApp === 'none' && status === 'idle' && (
-              <div className="text-center py-6 px-4 border border-dashed border-border rounded-sm bg-secondary/20">
-                <Shield className="mx-auto text-muted-foreground/40 mb-2" size={20} />
-                <div className="text-xs font-bold text-foreground mb-1">Click an app above</div>
+              <div className="text-center py-6 px-4 border border-dashed border-border rounded-sm bg-secondary/20 flex-1 flex flex-col justify-center items-center select-none">
+                <Shield className="text-muted-foreground/45 mb-2 bg-muted/10 p-1.5 rounded-full border border-border" size={24} />
+                <div className="text-xs font-bold text-foreground mb-0.5">App Personalization Hub</div>
                 <div className="text-[10px] text-muted-foreground max-w-[200px] mx-auto leading-relaxed">
-                  Trigger the live loop: watch the app propose context to your Inbox for your approval.
+                  Select an app above to watch it propose context. Approve the request, and see the app instantly adapt.
                 </div>
               </div>
             )}
 
             {status === 'proposing' && (
-              <div className="bg-background border border-border p-4 rounded-sm flex-1 flex flex-col justify-center font-mono text-[10px] leading-relaxed shadow-[inset_0_2px_4px_rgba(0,0,0,0.01)]">
-                <div className="space-y-2 text-muted-foreground">
-                  <div className="flex items-center gap-2">
-                    <span className="w-1.5 h-1.5 bg-yellow-500 rounded-full animate-ping" />
-                    <span>Connecting to alex.memact.me...</span>
-                  </div>
-                  <div>[SDK] Checking identity rules...</div>
-                  <div>[API] Sending proposal to user Inbox...</div>
-                </div>
+              <div className="bg-card border border-border p-5 rounded-sm flex-1 flex flex-col justify-center items-center text-center space-y-3">
+                <div className="w-5 h-5 border-2 border-accent border-t-transparent rounded-full animate-spin" />
+                <div className="text-[11px] font-semibold text-foreground">Connecting to your address...</div>
               </div>
             )}
 
             {status === 'proposed' && proposal && (
-              <div className="bg-background border border-border p-4 rounded-sm flex-1 flex flex-col justify-center font-mono text-[10px] leading-relaxed">
-                <div className="space-y-2 text-yellow-600 dark:text-yellow-400 font-semibold animate-pulse">
-                  <div>&gt; Proposal sent to Inbox!</div>
-                  <div className="text-muted-foreground font-normal">
-                    Waiting for user to Accept or Reject on the left.
-                  </div>
+              <div className="bg-card border border-border p-5 rounded-sm flex-1 flex flex-col justify-center items-center text-center space-y-2">
+                <div className="w-7 h-7 rounded-full bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 flex items-center justify-center border border-yellow-500/20">
+                  <Sparkles size={14} className="animate-pulse" />
+                </div>
+                <div className="text-xs font-bold text-foreground">Proposal Sent to Inbox</div>
+                <div className="text-[10px] text-muted-foreground max-w-[200px] leading-relaxed">
+                  Waiting for your decision on the left side of the dashboard. Click <span className="font-semibold text-foreground">Approve</span> to let the app adapt.
                 </div>
               </div>
             )}
 
             {status === 'approved' && (
-              <div className="bg-background border border-border p-4 rounded-sm flex-1 flex flex-col justify-between font-mono text-[10px] leading-relaxed">
-                <div className="space-y-2">
-                  <div className="flex items-center gap-1.5 text-green-600 dark:text-green-400 font-bold">
-                    <CheckCircle2 size={12} /> Approved & Saved to memory
+              <div className="flex-1 flex flex-col animate-in fade-in duration-300">
+                {activeApp === 'cursor' && (
+                  <div className="bg-background border border-border rounded-sm flex-1 flex flex-col overflow-hidden text-left shadow-md">
+                    <div className="bg-secondary/40 border-b border-border px-3 py-2 flex items-center justify-between select-none">
+                      <div className="flex items-center gap-1.5">
+                        <Terminal size={10} className="text-muted-foreground" />
+                        <span className="text-[10px] font-bold text-foreground">Cursor AI Chat</span>
+                      </div>
+                      <div className="w-1.5 h-1.5 rounded-full bg-green-500" />
+                    </div>
+                    <div className="p-4 flex-1 flex flex-col justify-between bg-card/50">
+                      <div className="space-y-3">
+                        <div className="bg-secondary/35 p-2 rounded-sm border border-border/40 text-[9px] leading-relaxed text-muted-foreground font-mono">
+                          &gt; Read alex.memact.me focus stream... <span className="text-green-500 font-semibold">Success</span>
+                        </div>
+                        <p className="text-[11px] font-medium text-foreground leading-relaxed">
+                          "Hi Alex! I configured your environment with <span className="font-bold text-accent">React, TypeScript, & Tailwind</span> using the focus settings approved in your Memact address. Ready to code!"
+                        </p>
+                      </div>
+                      <div className="text-[9px] text-muted-foreground/60 select-none border-t border-border/20 pt-2 flex justify-between items-center font-medium">
+                        <span>Context match: 100%</span>
+                        <span className="text-green-500 font-bold">Personalized</span>
+                      </div>
+                    </div>
                   </div>
-                  <div className="text-muted-foreground space-y-1">
-                    <div>&gt; Access check ... PASSED</div>
-                    <div>&gt; Context written to Memory</div>
-                    <div>&gt; App personalization ... SUCCESS</div>
+                )}
+
+                {activeApp === 'claude' && (
+                  <div className="bg-background border border-border rounded-sm flex-1 flex flex-col overflow-hidden text-left shadow-md">
+                    <div className="bg-secondary/40 border-b border-border px-3 py-2 flex items-center justify-between select-none">
+                      <div className="flex items-center gap-1.5">
+                        <Sliders size={10} className="text-muted-foreground" />
+                        <span className="text-[10px] font-bold text-foreground">Claude 3.5 Sonnet</span>
+                      </div>
+                      <div className="w-1.5 h-1.5 rounded-full bg-green-500" />
+                    </div>
+                    <div className="p-4 flex-1 flex flex-col justify-between bg-card/50">
+                      <div className="space-y-3">
+                        <div className="bg-secondary/35 p-2 rounded-sm border border-border/40 text-[9px] leading-relaxed text-muted-foreground font-mono">
+                          &gt; Context loaded from alex.memact.me... <span className="text-green-500 font-semibold">Success</span>
+                        </div>
+                        <p className="text-[11px] font-medium text-foreground leading-relaxed">
+                          "I see you're currently researching <span className="font-bold text-accent">Tokyo subway architecture</span>. Let's start sketching the layout of the old Ginza line stations."
+                        </p>
+                      </div>
+                      <div className="text-[9px] text-muted-foreground/60 select-none border-t border-border/20 pt-2 flex justify-between items-center font-medium">
+                        <span>Context match: 100%</span>
+                        <span className="text-green-500 font-bold">Personalized</span>
+                      </div>
+                    </div>
                   </div>
-                  <div className="text-foreground leading-normal font-semibold mt-2 pt-2 border-t border-border/40">
-                    {activeApp === 'cursor' && "Cursor initialized instantly. You skipped the setup profile forms."}
-                    {activeApp === 'claude' && '"Welcome back. Let\'s write the code for the Memact address protocol."'}
-                    {activeApp === 'cal' && "Calendar slots synced automatically using approved preferences."}
+                )}
+
+                {activeApp === 'cal' && (
+                  <div className="bg-background border border-border rounded-sm flex-1 flex flex-col overflow-hidden text-left shadow-md">
+                    <div className="bg-secondary/40 border-b border-border px-3 py-2 flex items-center justify-between select-none">
+                      <div className="flex items-center gap-1.5">
+                        <Calendar size={10} className="text-muted-foreground" />
+                        <span className="text-[10px] font-bold text-foreground">Cal.com Booking</span>
+                      </div>
+                      <div className="w-1.5 h-1.5 rounded-full bg-green-500" />
+                    </div>
+                    <div className="p-4 flex-1 flex flex-col justify-between bg-card/50">
+                      <div className="space-y-3">
+                        <div className="bg-secondary/35 p-2 rounded-sm border border-border/40 text-[9px] leading-relaxed text-muted-foreground font-mono">
+                          &gt; Read scheduling preferences... <span className="text-green-500 font-semibold">Success</span>
+                        </div>
+                        <div className="space-y-2">
+                          <p className="text-[11px] font-medium text-foreground leading-relaxed">
+                            Booking slots adjusted: <span className="font-bold text-accent">Afternoons only</span>.
+                          </p>
+                          <div className="grid grid-cols-3 gap-1.5 pt-1">
+                            <div className="p-1 border border-border rounded-sm text-center text-[9px] text-muted-foreground line-through">09:00 AM</div>
+                            <div className="p-1 border border-accent bg-accent/5 rounded-sm text-center text-[9px] text-foreground font-bold">02:00 PM</div>
+                            <div className="p-1 border border-accent bg-accent/5 rounded-sm text-center text-[9px] text-foreground font-bold">04:00 PM</div>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="text-[9px] text-muted-foreground/60 select-none border-t border-border/20 pt-2 flex justify-between items-center font-medium">
+                        <span>Context match: 100%</span>
+                        <span className="text-green-500 font-bold">Personalized</span>
+                      </div>
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             )}
 
             {status === 'rejected' && (
-              <div className="bg-background border border-border p-4 rounded-sm flex-1 flex flex-col justify-between font-mono text-[10px] leading-relaxed">
-                <div className="space-y-2">
-                  <div className="flex items-center gap-1.5 text-red-600 dark:text-red-400 font-bold">
-                    <Shield size={12} /> Access Denied / Rejected
-                  </div>
-                  <div className="text-muted-foreground space-y-1">
-                    <div>&gt; Proposal rejected by user</div>
-                    <div>&gt; Transaction canceled</div>
-                    <div>&gt; App was blocked from reading/storing this data</div>
-                  </div>
-                  <div className="text-foreground font-semibold mt-2 pt-2 border-t border-border/40">
-                    Your personal privacy profile is preserved.
-                  </div>
+              <div className="bg-card border border-border p-5 rounded-sm flex-1 flex flex-col justify-center items-center text-center space-y-2 shadow-sm animate-in fade-in duration-300">
+                <div className="w-7 h-7 rounded-full bg-red-500/10 text-red-600 dark:text-red-400 flex items-center justify-center border border-red-500/20">
+                  <Shield size={14} />
+                </div>
+                <div className="text-xs font-bold text-foreground">Access Denied</div>
+                <div className="text-[10px] text-muted-foreground max-w-[200px] leading-relaxed">
+                  You rejected the request. The app was blocked from reading or suggesting this context, keeping your personal profile secure.
                 </div>
               </div>
             )}
@@ -307,7 +399,7 @@ function QuerySimulator() {
           {activeApp !== 'none' && (
             <button
               onClick={resetSimulator}
-              className="text-[10px] font-bold text-muted-foreground hover:text-foreground transition-colors self-start underline underline-offset-2 select-none"
+              className="text-[10px] font-bold text-muted-foreground hover:text-foreground transition-colors self-start underline underline-offset-2 select-none cursor-pointer"
             >
               Reset simulator
             </button>
