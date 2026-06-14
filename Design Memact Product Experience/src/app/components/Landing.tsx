@@ -6,14 +6,30 @@ import textLogoDark  from '../../imports/text_logo_nobg_dark.png';
 // ─── Interactive Query Simulator ─────────────────────────────────────────────
 
 function QuerySimulator() {
-  const [activeApp, setActiveApp] = useState<'none' | 'cursor' | 'claude' | 'cal'>('none');
-  const [status, setStatus] = useState<'idle' | 'proposing' | 'proposed' | 'approved' | 'rejected'>('idle');
-  const [proposal, setProposal] = useState<{
+  const [activeTab, setActiveTab] = useState<'inbox' | 'myself' | 'access'>('inbox');
+  const [personalizationState, setPersonalizationState] = useState<'none' | 'cursor-success' | 'claude-proposed' | 'linear-proposed' | 'linear-approved'>('none');
+  
+  const [inboxItems, setInboxItems] = useState<Array<{
     id: string;
-    app: string;
-    text: string;
-    type: 'cursor' | 'claude' | 'cal';
-  } | null>(null);
+    type: 'suggestion' | 'request';
+    from: string;
+    avatarColor: string;
+    title: string;
+    reason: string;
+    visibility: 'Public' | 'Friends' | 'Private';
+    value: string;
+  }>>([
+    {
+      id: 'github-1',
+      type: 'suggestion',
+      from: 'GitHub',
+      avatarColor: 'bg-muted text-muted-foreground border-muted',
+      title: 'Open Source Contributor',
+      reason: 'Pushed 4 commits to cargo-lipo today.',
+      visibility: 'Public',
+      value: 'Open Source Contributor'
+    }
+  ]);
 
   const [approvedItems, setApprovedItems] = useState<Array<{
     id: string;
@@ -26,78 +42,118 @@ function QuerySimulator() {
     { id: 'init-2', text: 'Available for booking on afternoons only.', source: 'You', visibility: 'Public' }
   ]);
 
-  useEffect(() => {
-    if (activeApp === 'none') {
-      setStatus('idle');
-      setProposal(null);
-      return;
-    }
+  const [permittedApps, setPermittedApps] = useState<Array<{
+    id: string;
+    name: string;
+    scope: string;
+    time: string;
+  }>>([
+    { id: 'cursor', name: 'Cursor IDE', scope: 'Public entries', time: 'Active 5m ago' },
+    { id: 'cal', name: 'Cal.com', scope: 'Public entries', time: 'Active yesterday' }
+  ]);
 
-    setStatus('proposing');
-    const timer = setTimeout(() => {
-      setStatus('proposed');
-      if (activeApp === 'cursor') {
-        setProposal({
-          id: 'prop-cursor',
-          app: 'Cursor IDE',
-          text: 'Alex is building a React app with TypeScript & Tailwind.',
-          type: 'cursor'
-        });
-      } else if (activeApp === 'claude') {
-        setProposal({
-          id: 'prop-claude',
-          app: 'Claude AI',
-          text: 'Alex is researching Tokyo subway architecture.',
-          type: 'claude'
-        });
-      } else if (activeApp === 'cal') {
-        setProposal({
-          id: 'prop-cal',
-          app: 'Cal.com',
-          text: 'Prefers booking on afternoons only.',
-          type: 'cal'
-        });
+  const handleApprove = (item: typeof inboxItems[0]) => {
+    if (item.type === 'request') {
+      setPermittedApps(prev => [
+        { id: item.from.toLowerCase(), name: item.from, scope: 'Public & Friends entries', time: 'Granted just now' },
+        ...prev
+      ]);
+      setPersonalizationState('linear-approved');
+      setActiveTab('access');
+    } else {
+      if (!approvedItems.some(x => x.text === item.value)) {
+        setApprovedItems(prev => [
+          {
+            id: item.id,
+            text: item.value,
+            source: item.from,
+            visibility: item.visibility,
+            isNew: true
+          },
+          ...prev
+        ]);
       }
-    }, 800);
+      setActiveTab('myself');
+    }
+    setInboxItems(prev => prev.filter(x => x.id !== item.id));
+  };
 
-    return () => clearTimeout(timer);
-  }, [activeApp]);
+  const handleReject = (item: typeof inboxItems[0]) => {
+    setInboxItems(prev => prev.filter(x => x.id !== item.id));
+  };
 
-  const handleApprove = () => {
-    if (!proposal) return;
-    
-    if (!approvedItems.some(item => item.text === proposal.text)) {
-      setApprovedItems(prev => [
+  const triggerClaudeProposal = () => {
+    if (!inboxItems.some(x => x.id === 'claude-1') && !approvedItems.some(x => x.text === 'Researching Tokyo subway architecture.')) {
+      setInboxItems(prev => [
         {
-          id: proposal.id,
-          text: proposal.text,
-          source: proposal.app,
-          visibility: 'Public',
-          isNew: true
+          id: 'claude-1',
+          type: 'suggestion',
+          from: 'Claude',
+          avatarColor: 'bg-chart-5/10 text-chart-5 border-chart-5/20',
+          title: 'Researching Tokyo subway architecture.',
+          reason: 'Extracted from Tokyo design outline edits.',
+          visibility: 'Private',
+          value: 'Researching Tokyo subway architecture.'
         },
         ...prev
       ]);
     }
-    
-    setStatus('approved');
-    setProposal(null);
+    setPersonalizationState('claude-proposed');
+    setActiveTab('inbox');
   };
 
-  const handleReject = () => {
-    setStatus('rejected');
-    setProposal(null);
+  const triggerLinearRequest = () => {
+    if (!inboxItems.some(x => x.id === 'linear-1') && !permittedApps.some(x => x.id === 'linear')) {
+      setInboxItems(prev => [
+        {
+          id: 'linear-1',
+          type: 'request',
+          from: 'Linear',
+          avatarColor: 'bg-chart-4/10 text-chart-4 border-chart-4/20',
+          title: 'Linear requests access to read what you are working on',
+          reason: 'Wants to match ticket priority to your focus stream.',
+          visibility: 'Private',
+          value: 'Linear'
+        },
+        ...prev
+      ]);
+    }
+    setPersonalizationState('linear-proposed');
+    setActiveTab('inbox');
+  };
+
+  const triggerCursorPersonalization = () => {
+    setPersonalizationState('cursor-success');
   };
 
   const resetSimulator = () => {
-    setActiveApp('none');
-    setStatus('idle');
-    setProposal(null);
-    setApprovedItems(prev => prev.map(item => ({ ...item, isNew: false })));
+    setInboxItems([
+      {
+        id: 'github-1',
+        type: 'suggestion',
+        from: 'GitHub',
+        avatarColor: 'bg-muted text-muted-foreground border-muted',
+        title: 'Open Source Contributor',
+        reason: 'Pushed 4 commits to cargo-lipo today.',
+        visibility: 'Public',
+        value: 'Open Source Contributor'
+      }
+    ]);
+    setApprovedItems([
+      { id: 'init-1', text: 'Building Memact address protocol beta.', source: 'You', visibility: 'Public' },
+      { id: 'init-2', text: 'Available for booking on afternoons only.', source: 'You', visibility: 'Public' }
+    ]);
+    setPermittedApps([
+      { id: 'cursor', name: 'Cursor IDE', scope: 'Public entries', time: 'Active 5m ago' },
+      { id: 'cal', name: 'Cal.com', scope: 'Public entries', time: 'Active yesterday' }
+    ]);
+    setPersonalizationState('none');
+    setActiveTab('inbox');
   };
 
   return (
     <div
-      className="w-full rounded-sm overflow-hidden border border-border bg-card/65 shadow-[0_20px_50px_rgba(0,1,27,0.08)] flex flex-col h-[500px]"
+      className="w-full rounded-sm overflow-hidden border border-border bg-card/65 shadow-[0_20px_50px_rgba(0,1,27,0.08)] flex flex-col h-[520px]"
       style={{ fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif" }}
     >
       {/* Browser Bar / Address header */}
@@ -116,290 +172,290 @@ function QuerySimulator() {
 
       {/* Simulator Body */}
       <div className="flex-1 grid grid-cols-1 md:grid-cols-12 overflow-hidden">
-        {/* Left Column: Inbox & Notebook Stream (Governance Hub) */}
-        <div className="md:col-span-6 border-r border-border p-4 bg-background/40 flex flex-col justify-between overflow-y-auto">
-          <div className="space-y-4">
-            {/* Inbox / Proposal Panel */}
-            <div className="space-y-2">
-              <div className="flex items-center justify-between select-none">
-                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Inbox (Pending)</span>
-                {proposal && (
-                  <span className="w-1.5 h-1.5 rounded-full bg-yellow-500 animate-pulse" />
-                )}
-              </div>
+        {/* Left Column: Memact Portal Mockup */}
+        <div className="md:col-span-6 border-r border-border bg-background/40 flex flex-col overflow-hidden">
+          {/* Mini Nav tabs */}
+          <div className="flex items-center border-b border-border bg-secondary/25 px-2 select-none">
+            {[
+              { id: 'inbox', label: 'Inbox', badge: inboxItems.length },
+              { id: 'myself', label: 'Myself' },
+              { id: 'access', label: 'Access' }
+            ].map(tab => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id as any)}
+                className={`text-[10px] font-bold py-2.5 px-3 relative transition-colors cursor-pointer ${
+                  activeTab === tab.id
+                    ? 'text-foreground border-b border-foreground'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                <span>{tab.label}</span>
+                {tab.badge && tab.badge > 0 ? (
+                  <span className="ml-1 bg-accent/15 border border-accent/25 text-accent text-[8px] font-bold px-1.5 py-0.25 rounded-full shrink-0">
+                    {tab.badge}
+                  </span>
+                ) : null}
+              </button>
+            ))}
+          </div>
 
-              {proposal ? (
-                <div className="bg-card border border-border p-4 rounded-sm shadow-[0_4px_16px_rgba(0,0,0,0.01)] space-y-3 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className={`px-2 py-0.5 text-[9px] font-bold border rounded-full ${
-                        proposal.type === 'cursor' ? 'bg-muted text-muted-foreground border-muted' :
-                        proposal.type === 'claude' ? 'bg-chart-5/10 text-chart-5 border-chart-5/20' :
-                        'bg-chart-3/10 text-chart-3 border-chart-3/20'
-                      }`}>
-                        {proposal.app}
-                      </span>
-                      <span className="text-[9px] text-muted-foreground font-semibold">Suggested update</span>
+          {/* Tab Content */}
+          <div className="flex-1 p-3 overflow-y-auto flex flex-col justify-between">
+            <div className="space-y-3">
+              {activeTab === 'inbox' && (
+                <div className="space-y-3">
+                  {inboxItems.length === 0 ? (
+                    <div className="p-6 border border-dashed border-border rounded-sm bg-secondary/15 text-center py-10 select-none">
+                      <Check className="mx-auto text-chart-2 mb-2 bg-chart-2/10 p-1 rounded-full border border-chart-2/25" size={20} />
+                      <div className="text-[10px] font-bold text-foreground">Inbox is clear</div>
                     </div>
-                  </div>
-                  <div>
-                    <h3 className="text-xs font-bold text-foreground mb-1 leading-snug">"{proposal.text}"</h3>
-                    <p className="text-[10px] text-muted-foreground/85 leading-normal flex items-start gap-1.5 font-medium mt-1 mb-2">
-                      <Sparkles size={11} className="shrink-0 mt-0.5 text-muted-foreground/50" />
-                      <span>
-                        {proposal.type === 'cursor' && 'Detected from local directory edits.'}
-                        {proposal.type === 'claude' && 'Extracted from Tokyo architecture research notes.'}
-                        {proposal.type === 'cal' && 'Extracted from calendar availability query.'}
-                      </span>
-                    </p>
-                  </div>
-                  <div className="flex gap-2 pt-2 border-t border-border/40">
-                    <button
-                      onClick={handleApprove}
-                      className="flex-1 py-1.5 bg-foreground text-background text-[10px] font-bold hover:opacity-85 transition-opacity rounded-sm shadow-xs cursor-pointer"
-                    >
-                      Approve
-                    </button>
-                    <button
-                      onClick={handleReject}
-                      className="px-3 py-1.5 bg-secondary hover:bg-chart-3/10 text-muted-foreground hover:text-chart-3 text-[10px] font-bold rounded-sm border border-border transition-all cursor-pointer"
-                    >
-                      Reject
-                    </button>
-                  </div>
+                  ) : (
+                    inboxItems.map(item => (
+                      <div key={item.id} className="bg-card border border-border p-3.5 rounded-sm shadow-[0_2px_8px_rgba(0,0,0,0.01)] space-y-3">
+                        <div className="flex items-center justify-between select-none">
+                          <div className="flex items-center gap-1.5">
+                            <span className={`px-2 py-0.25 text-[8px] font-bold border rounded-full ${item.avatarColor}`}>
+                              {item.from}
+                            </span>
+                            <span className="text-[8px] text-muted-foreground font-semibold">
+                              {item.type === 'request' ? 'Permission requested' : 'Suggested update'}
+                            </span>
+                          </div>
+                        </div>
+                        <div>
+                          <h4 className="text-[11px] font-bold text-foreground leading-snug">
+                            {item.type === 'request' ? item.title : `"${item.title}"`}
+                          </h4>
+                          <p className="text-[9px] text-muted-foreground/80 leading-relaxed flex items-start gap-1 font-medium mt-1 select-none">
+                            <Sparkles size={9} className="shrink-0 mt-0.5 text-muted-foreground/40" />
+                            <span>{item.reason}</span>
+                          </p>
+                        </div>
+                        <div className="flex gap-2 pt-2 border-t border-border/40 select-none">
+                          <button
+                            onClick={() => handleApprove(item)}
+                            className="flex-1 py-1 bg-foreground text-background text-[9px] font-bold hover:opacity-85 transition-opacity rounded-xs cursor-pointer"
+                          >
+                            {item.type === 'request' ? 'Grant Access' : 'Approve'}
+                          </button>
+                          <button
+                            onClick={() => handleReject(item)}
+                            className="px-2 py-1 bg-secondary text-muted-foreground hover:text-foreground text-[9px] font-bold rounded-xs border border-border transition-colors cursor-pointer"
+                          >
+                            Reject
+                          </button>
+                        </div>
+                      </div>
+                    ))
+                  )}
                 </div>
-              ) : (
-                <div className="p-4 border border-dashed border-border rounded-sm bg-secondary/15 py-8 text-center select-none">
-                  <Check className="mx-auto text-chart-2 mb-2 bg-chart-2/10 p-1.5 rounded-full border border-chart-2/25" size={24} />
-                  <h3 className="text-[10px] font-bold text-foreground mb-0.5">Inbox is clear</h3>
+              )}
+
+              {activeTab === 'myself' && (
+                <div className="space-y-2 max-h-[340px] overflow-y-auto">
+                  {approvedItems.map(item => (
+                    <div
+                      key={item.id}
+                      className={`p-3 bg-card rounded-sm border transition-all duration-500 space-y-2 ${
+                        item.isNew 
+                          ? 'border-green-500/50 shadow-[0_0_12px_rgba(34,197,94,0.12)]' 
+                          : 'border-border/80'
+                      }`}
+                    >
+                      <p className="text-xs font-medium text-foreground leading-relaxed">
+                        {item.text}
+                      </p>
+                      <div className="flex items-center justify-between pt-1.5 border-t border-border/30 text-[8px] text-muted-foreground font-semibold select-none">
+                        <span>By {item.source}</span>
+                        <span className="flex items-center gap-1">
+                          {item.visibility === 'Public' && <Globe size={8} className="text-chart-2" />}
+                          {item.visibility === 'Friends' && <Users size={8} className="text-chart-3" />}
+                          {item.visibility === 'Private' && <Lock size={8} className="text-muted-foreground/60" />}
+                          <span>{item.visibility}</span>
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {activeTab === 'access' && (
+                <div className="space-y-2">
+                  <div className="text-[9px] text-muted-foreground font-semibold pb-1 border-b border-border/30 select-none">Apps reading your address</div>
+                  {permittedApps.map(app => (
+                    <div key={app.id} className="bg-card border border-border p-2.5 rounded-sm flex items-center justify-between shadow-[0_1px_4px_rgba(0,0,0,0.005)]">
+                      <div>
+                        <div className="text-xs font-bold text-foreground">{app.name}</div>
+                        <div className="text-[8px] text-muted-foreground/80 font-medium mt-0.5">{app.scope} • {app.time}</div>
+                      </div>
+                      <span className="text-[8px] font-bold text-muted-foreground/65 border border-border px-1.5 py-0.5 rounded-xs select-none">
+                        Revoke
+                      </span>
+                    </div>
+                  ))}
                 </div>
               )}
             </div>
-
-            {/* Approved stream */}
-            <div className="space-y-2">
-              <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider select-none">Approved Stream</div>
-              
-              <div className="space-y-2 max-h-[200px] overflow-y-auto pr-1">
-                {approvedItems.map((item) => (
-                  <div
-                    key={item.id}
-                    className={`p-3 bg-card rounded-sm border transition-all duration-500 space-y-2 ${
-                      item.isNew 
-                        ? 'border-green-500/50 shadow-[0_0_12px_rgba(34,197,94,0.12)]' 
-                        : 'border-border/80'
-                    }`}
-                  >
-                    <p className="text-xs font-medium text-foreground leading-relaxed">
-                      {item.text}
-                    </p>
-                    <div className="flex items-center justify-between pt-2 border-t border-border/40 text-[9px] text-muted-foreground font-semibold select-none">
-                      <span>By {item.source}</span>
-                      <span className="flex items-center gap-1">
-                        {item.visibility === 'Public' && <Globe size={9} className="text-chart-2" />}
-                        {item.visibility === 'Friends' && <Users size={9} className="text-chart-3" />}
-                        {item.visibility === 'Private' && <Lock size={9} className="text-muted-foreground/60" />}
-                        <span>{item.visibility}</span>
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
+            
+            <div className="text-[8px] text-muted-foreground/65 italic pt-2 select-none border-t border-border/20 mt-4">
+              {activeTab === 'inbox' && 'Approve suggestions to save them to your profile.'}
+              {activeTab === 'myself' && 'This is your living notebook profile. Apps read only what you allow.'}
+              {activeTab === 'access' && 'Manage which apps can read your notebook context.'}
             </div>
-          </div>
-          <div className="text-[9px] text-muted-foreground/60 italic pt-2 select-none border-t border-border/20">
-            You control what apps know about you.
           </div>
         </div>
 
-        {/* Right Column: App Connect & Personalization Preview */}
+        {/* Right Column: Simulate Actions & App Response */}
         <div className="md:col-span-6 p-4 flex flex-col justify-between bg-card/10 overflow-y-auto">
-          {/* App Selection list */}
-          <div className="space-y-3">
-            <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider select-none">Trigger App Request</div>
-            <div className="flex flex-col gap-2">
-              {[
-                { id: 'cursor', label: 'Cursor IDE', desc: 'Suggests environment configuration', icon: <Terminal size={13} /> },
-                { id: 'claude', label: 'Claude AI', desc: 'Syncs research context', icon: <Sliders size={13} /> },
-                { id: 'cal', label: 'Cal.com', desc: 'Queries scheduling slots', icon: <Calendar size={13} /> },
-              ].map((app) => (
-                <button
-                  key={app.id}
-                  disabled={status === 'proposing'}
-                  onClick={() => setActiveApp(app.id as any)}
-                  className={`w-full text-left p-3 rounded-sm border transition-all flex items-center justify-between cursor-pointer ${
-                    activeApp === app.id
-                      ? 'bg-secondary border-foreground/35 shadow-[0_2px_8px_rgba(0,0,0,0.02)]'
-                      : 'bg-card hover:bg-secondary/65 border-border'
-                  }`}
-                >
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div className={`p-2 rounded-full border shrink-0 ${
-                      activeApp === app.id 
-                        ? 'bg-foreground text-background border-foreground' 
-                        : 'bg-secondary text-muted-foreground border-border'
-                    }`}>
-                      {app.icon}
-                    </div>
-                    <div className="min-w-0">
-                      <div className="text-xs font-bold text-foreground">
-                        {app.label}
-                      </div>
-                      <div className="text-[10px] text-muted-foreground/80 mt-0.5 font-medium truncate">
-                        {app.desc}
-                      </div>
-                    </div>
+          {/* Action trigger panels */}
+          <div className="space-y-2.5">
+            <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider select-none">Simulate App Actions</div>
+            
+            <div className="grid grid-cols-1 gap-2">
+              {/* Claude proposes fact */}
+              <button
+                onClick={triggerClaudeProposal}
+                className="w-full text-left p-2.5 rounded-sm border bg-card hover:bg-secondary/65 border-border transition-all flex items-center justify-between cursor-pointer"
+              >
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="p-1.5 rounded-full bg-chart-5/10 text-chart-5 border border-chart-5/20 shrink-0">
+                    <Sliders size={12} />
                   </div>
-                  <div className={`w-3 h-3 rounded-full border flex items-center justify-center shrink-0 ${
-                    activeApp === app.id
-                      ? 'border-accent bg-accent'
-                      : 'border-border'
-                  }`}>
-                    {activeApp === app.id && <div className="w-1.5 h-1.5 rounded-full bg-background" />}
+                  <div className="min-w-0">
+                    <div className="text-[11px] font-bold text-foreground leading-none">Claude AI</div>
+                    <div className="text-[9px] text-muted-foreground/80 font-medium mt-1 truncate">Propose 'Tokyo Subway' research fact</div>
                   </div>
-                </button>
-              ))}
+                </div>
+                <ArrowRight size={10} className="text-muted-foreground" />
+              </button>
+
+              {/* Linear requests access */}
+              <button
+                onClick={triggerLinearRequest}
+                className="w-full text-left p-2.5 rounded-sm border bg-card hover:bg-secondary/65 border-border transition-all flex items-center justify-between cursor-pointer"
+              >
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="p-1.5 rounded-full bg-chart-4/10 text-chart-4 border border-chart-4/20 shrink-0">
+                    <Users size={12} />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="text-[11px] font-bold text-foreground leading-none">Linear</div>
+                    <div className="text-[9px] text-muted-foreground/80 font-medium mt-1 truncate">Request permission to read focus stream</div>
+                  </div>
+                </div>
+                <ArrowRight size={10} className="text-muted-foreground" />
+              </button>
+
+              {/* Cursor IDE queries */}
+              <button
+                onClick={triggerCursorPersonalization}
+                className="w-full text-left p-2.5 rounded-sm border bg-card hover:bg-secondary/65 border-border transition-all flex items-center justify-between cursor-pointer"
+              >
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="p-1.5 rounded-full bg-muted text-muted-foreground border border-border shrink-0">
+                    <Terminal size={12} />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="text-[11px] font-bold text-foreground leading-none">Cursor IDE</div>
+                    <div className="text-[9px] text-muted-foreground/80 font-medium mt-1 truncate">Personalize developer workspace</div>
+                  </div>
+                </div>
+                <ArrowRight size={10} className="text-muted-foreground" />
+              </button>
             </div>
           </div>
 
-          {/* Humane Visual Outcome mock */}
-          <div className="flex-1 flex flex-col justify-center my-4 min-h-[160px]">
-            {activeApp === 'none' && status === 'idle' && (
-              <div className="text-center py-6 px-4 border border-dashed border-border rounded-sm bg-secondary/20 flex-1 flex flex-col justify-center items-center select-none">
+          {/* Outcome Visual Mockups */}
+          <div className="flex-1 flex flex-col justify-center my-3.5 min-h-[160px]">
+            {personalizationState === 'none' && (
+              <div className="text-center py-5 px-4 border border-dashed border-border rounded-sm bg-secondary/15 flex-1 flex flex-col justify-center items-center select-none">
                 <Shield className="text-muted-foreground/45 mb-2 bg-muted/10 p-1.5 rounded-full border border-border" size={24} />
-                <div className="text-xs font-bold text-foreground mb-0.5">App Personalization Hub</div>
-                <div className="text-[10px] text-muted-foreground max-w-[200px] mx-auto leading-relaxed">
-                  Select an app above to watch it propose context. Approve the request, and see the app instantly adapt.
+                <div className="text-xs font-bold text-foreground mb-0.5">App Outcome Sandbox</div>
+                <div className="text-[9px] text-muted-foreground max-w-[200px] leading-relaxed">
+                  Trigger an action above to see how apps interact with Memact.
                 </div>
               </div>
             )}
 
-            {status === 'proposing' && (
-              <div className="bg-card border border-border p-5 rounded-sm flex-1 flex flex-col justify-center items-center text-center space-y-3">
-                <div className="w-5 h-5 border-2 border-accent border-t-transparent rounded-full animate-spin" />
-                <div className="text-[11px] font-semibold text-foreground">Connecting to your address...</div>
-              </div>
-            )}
-
-            {status === 'proposed' && proposal && (
-              <div className="bg-card border border-border p-5 rounded-sm flex-1 flex flex-col justify-center items-center text-center space-y-2">
+            {personalizationState === 'claude-proposed' && (
+              <div className="bg-card border border-border p-4 rounded-sm flex-1 flex flex-col justify-center items-center text-center space-y-2 animate-in fade-in duration-300">
                 <div className="w-7 h-7 rounded-full bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 flex items-center justify-center border border-yellow-500/20">
-                  <Sparkles size={14} className="animate-pulse" />
+                  <Sparkles size={13} className="animate-pulse" />
                 </div>
-                <div className="text-xs font-bold text-foreground">Proposal Sent to Inbox</div>
-                <div className="text-[10px] text-muted-foreground max-w-[200px] leading-relaxed">
-                  Waiting for your decision on the left side of the dashboard. Click <span className="font-semibold text-foreground">Approve</span> to let the app adapt.
+                <div className="text-xs font-bold text-foreground">Suggested Fact Sent</div>
+                <div className="text-[10px] text-muted-foreground max-w-[190px] leading-relaxed">
+                  Claude sent a proposal to your Inbox. Approve it in the left <span className="font-semibold text-foreground">Inbox tab</span> to add it to your notebook profile.
                 </div>
               </div>
             )}
 
-            {status === 'approved' && (
-              <div className="flex-1 flex flex-col animate-in fade-in duration-300">
-                {activeApp === 'cursor' && (
-                  <div className="bg-background border border-border rounded-sm flex-1 flex flex-col overflow-hidden text-left shadow-md">
-                    <div className="bg-secondary/40 border-b border-border px-3 py-2 flex items-center justify-between select-none">
-                      <div className="flex items-center gap-1.5">
-                        <Terminal size={10} className="text-muted-foreground" />
-                        <span className="text-[10px] font-bold text-foreground">Cursor AI Chat</span>
-                      </div>
-                      <div className="w-1.5 h-1.5 rounded-full bg-green-500" />
-                    </div>
-                    <div className="p-4 flex-1 flex flex-col justify-between bg-card/50">
-                      <div className="space-y-3">
-                        <div className="bg-secondary/35 p-2 rounded-sm border border-border/40 text-[9px] leading-relaxed text-muted-foreground font-mono">
-                          &gt; Read alex.memact.me focus stream... <span className="text-green-500 font-semibold">Success</span>
-                        </div>
-                        <p className="text-[11px] font-medium text-foreground leading-relaxed">
-                          "Hi Alex! I configured your environment with <span className="font-bold text-accent">React, TypeScript, & Tailwind</span> using the focus settings approved in your Memact address. Ready to code!"
-                        </p>
-                      </div>
-                      <div className="text-[9px] text-muted-foreground/60 select-none border-t border-border/20 pt-2 flex justify-between items-center font-medium">
-                        <span>Context match: 100%</span>
-                        <span className="text-green-500 font-bold">Personalized</span>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {activeApp === 'claude' && (
-                  <div className="bg-background border border-border rounded-sm flex-1 flex flex-col overflow-hidden text-left shadow-md">
-                    <div className="bg-secondary/40 border-b border-border px-3 py-2 flex items-center justify-between select-none">
-                      <div className="flex items-center gap-1.5">
-                        <Sliders size={10} className="text-muted-foreground" />
-                        <span className="text-[10px] font-bold text-foreground">Claude 3.5 Sonnet</span>
-                      </div>
-                      <div className="w-1.5 h-1.5 rounded-full bg-green-500" />
-                    </div>
-                    <div className="p-4 flex-1 flex flex-col justify-between bg-card/50">
-                      <div className="space-y-3">
-                        <div className="bg-secondary/35 p-2 rounded-sm border border-border/40 text-[9px] leading-relaxed text-muted-foreground font-mono">
-                          &gt; Context loaded from alex.memact.me... <span className="text-green-500 font-semibold">Success</span>
-                        </div>
-                        <p className="text-[11px] font-medium text-foreground leading-relaxed">
-                          "I see you're currently researching <span className="font-bold text-accent">Tokyo subway architecture</span>. Let's start sketching the layout of the old Ginza line stations."
-                        </p>
-                      </div>
-                      <div className="text-[9px] text-muted-foreground/60 select-none border-t border-border/20 pt-2 flex justify-between items-center font-medium">
-                        <span>Context match: 100%</span>
-                        <span className="text-green-500 font-bold">Personalized</span>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {activeApp === 'cal' && (
-                  <div className="bg-background border border-border rounded-sm flex-1 flex flex-col overflow-hidden text-left shadow-md">
-                    <div className="bg-secondary/40 border-b border-border px-3 py-2 flex items-center justify-between select-none">
-                      <div className="flex items-center gap-1.5">
-                        <Calendar size={10} className="text-muted-foreground" />
-                        <span className="text-[10px] font-bold text-foreground">Cal.com Booking</span>
-                      </div>
-                      <div className="w-1.5 h-1.5 rounded-full bg-green-500" />
-                    </div>
-                    <div className="p-4 flex-1 flex flex-col justify-between bg-card/50">
-                      <div className="space-y-3">
-                        <div className="bg-secondary/35 p-2 rounded-sm border border-border/40 text-[9px] leading-relaxed text-muted-foreground font-mono">
-                          &gt; Read scheduling preferences... <span className="text-green-500 font-semibold">Success</span>
-                        </div>
-                        <div className="space-y-2">
-                          <p className="text-[11px] font-medium text-foreground leading-relaxed">
-                            Booking slots adjusted: <span className="font-bold text-accent">Afternoons only</span>.
-                          </p>
-                          <div className="grid grid-cols-3 gap-1.5 pt-1">
-                            <div className="p-1 border border-border rounded-sm text-center text-[9px] text-muted-foreground line-through">09:00 AM</div>
-                            <div className="p-1 border border-accent bg-accent/5 rounded-sm text-center text-[9px] text-foreground font-bold">02:00 PM</div>
-                            <div className="p-1 border border-accent bg-accent/5 rounded-sm text-center text-[9px] text-foreground font-bold">04:00 PM</div>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="text-[9px] text-muted-foreground/60 select-none border-t border-border/20 pt-2 flex justify-between items-center font-medium">
-                        <span>Context match: 100%</span>
-                        <span className="text-green-500 font-bold">Personalized</span>
-                      </div>
-                    </div>
-                  </div>
-                )}
+            {personalizationState === 'linear-proposed' && (
+              <div className="bg-card border border-border p-4 rounded-sm flex-1 flex flex-col justify-center items-center text-center space-y-2 animate-in fade-in duration-300">
+                <div className="w-7 h-7 rounded-full bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 flex items-center justify-center border border-yellow-500/20">
+                  <Users size={13} className="animate-pulse" />
+                </div>
+                <div className="text-xs font-bold text-foreground">Access Request Sent</div>
+                <div className="text-[10px] text-muted-foreground max-w-[190px] leading-relaxed">
+                  Linear requested read access. Review it in the left <span className="font-semibold text-foreground">Inbox tab</span>.
+                </div>
               </div>
             )}
 
-            {status === 'rejected' && (
-              <div className="bg-card border border-border p-5 rounded-sm flex-1 flex flex-col justify-center items-center text-center space-y-2 shadow-sm animate-in fade-in duration-300">
-                <div className="w-7 h-7 rounded-full bg-red-500/10 text-red-600 dark:text-red-400 flex items-center justify-center border border-red-500/20">
-                  <Shield size={14} />
+            {personalizationState === 'linear-approved' && (
+              <div className="bg-background border border-border rounded-sm flex-1 flex flex-col overflow-hidden text-left shadow-md animate-in fade-in duration-300">
+                <div className="bg-secondary/40 border-b border-border px-3 py-1.5 flex items-center justify-between select-none">
+                  <span className="text-[10px] font-bold text-foreground">Linear Workspace</span>
+                  <div className="w-1.5 h-1.5 rounded-full bg-green-500" />
                 </div>
-                <div className="text-xs font-bold text-foreground">Access Denied</div>
-                <div className="text-[10px] text-muted-foreground max-w-[200px] leading-relaxed">
-                  You rejected the request. The app was blocked from reading or suggesting this context, keeping your personal profile secure.
+                <div className="p-4 flex-1 flex flex-col justify-between bg-card/50">
+                  <div className="space-y-2.5">
+                    <div className="bg-green-500/10 text-green-600 dark:text-green-400 p-2 rounded-xs border border-green-500/20 text-[9px] leading-tight font-semibold">
+                      Connected to alex.memact.me
+                    </div>
+                    <p className="text-[11px] font-medium text-foreground leading-relaxed">
+                      Linear successfully matched your backlog tickets to your active notebook focus!
+                    </p>
+                  </div>
+                  <div className="text-[8px] text-muted-foreground/60 select-none border-t border-border/20 pt-2 font-medium">
+                    Permissions: Granted
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {personalizationState === 'cursor-success' && (
+              <div className="bg-background border border-border rounded-sm flex-1 flex flex-col overflow-hidden text-left shadow-md animate-in fade-in duration-300">
+                <div className="bg-secondary/40 border-b border-border px-3 py-1.5 flex items-center justify-between select-none">
+                  <div className="flex items-center gap-1">
+                    <Terminal size={10} className="text-muted-foreground" />
+                    <span className="text-[10px] font-bold text-foreground">Cursor AI Chat</span>
+                  </div>
+                  <div className="w-1.5 h-1.5 rounded-full bg-green-500" />
+                </div>
+                <div className="p-4 flex-1 flex flex-col justify-between bg-card/50">
+                  <div className="space-y-2.5">
+                    <div className="bg-secondary/35 p-2 rounded-sm border border-border/40 text-[9px] leading-relaxed text-muted-foreground font-mono">
+                      &gt; Read alex.memact.me focus stream... <span className="text-green-500 font-semibold">Success</span>
+                    </div>
+                    <p className="text-[10px] font-medium text-foreground leading-relaxed">
+                      "I initialized your workspace environment for: <span className="font-bold text-accent">"{approvedItems[0]?.text || 'Active focus'}"</span> based on approved profile data. Setup form skipped!"
+                    </p>
+                  </div>
+                  <div className="text-[8px] text-muted-foreground/60 select-none border-t border-border/20 pt-2 flex justify-between items-center font-medium">
+                    <span>Context matching: 100%</span>
+                    <span className="text-green-500 font-bold">Personalized</span>
+                  </div>
                 </div>
               </div>
             )}
           </div>
 
           {/* Reset button */}
-          {activeApp !== 'none' && (
+          {personalizationState !== 'none' && (
             <button
               onClick={resetSimulator}
-              className="text-[10px] font-bold text-muted-foreground hover:text-foreground transition-colors self-start underline underline-offset-2 select-none cursor-pointer"
+              className="text-[9px] font-bold text-muted-foreground hover:text-foreground transition-colors self-start underline underline-offset-2 select-none cursor-pointer"
             >
               Reset simulator
             </button>
