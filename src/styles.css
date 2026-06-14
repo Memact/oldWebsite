@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap');
+
 :root {
   --bg: #00011b;
   --panel: rgba(255, 255, 255, 0.07);
@@ -12,7 +14,7 @@
   --muted: rgba(255, 255, 255, 0.68);
   --soft: rgba(255, 255, 255, 0.48);
   --error: #ffb4b4;
-  font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
+  font-family: "Outfit", "Inter", "Segoe UI", sans-serif;
   color: var(--text);
   background: var(--bg);
 }
@@ -46,7 +48,7 @@ body {
     linear-gradient(180deg, var(--glass-floor), rgba(255, 255, 255, 0.018) 46rem, rgba(255, 255, 255, 0.026)),
     var(--bg);
   background-attachment: fixed;
-  font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
+  font-family: "Outfit", "Inter", "Segoe UI", sans-serif;
 }
 
 button,

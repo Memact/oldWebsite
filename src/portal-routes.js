@@ -1,9 +1,9 @@
 export const ROUTES = {
   home: "/",
   access: "/Dashboard",
-  wiki: "/Yourself",
+  wiki: "/notebook",
   account: "/Settings",
-  data: "/Yourself",
+  data: "/notebook",
   help: "/Help",
   learn: "/Learn",
   connect: "/connect"
@@ -20,6 +20,8 @@ const LEGACY_ROUTES = new Map([
   ["/Yourself", ROUTES.wiki],
   ["/ourselves", ROUTES.wiki],
   ["/Ourselves", ROUTES.wiki],
+  ["/notebook", ROUTES.wiki],
+  ["/Notebook", ROUTES.wiki],
   ["/login", `${ROUTES.home}#sign-in`],
   ["/access", ROUTES.access],
   ["/Access", ROUTES.access],
