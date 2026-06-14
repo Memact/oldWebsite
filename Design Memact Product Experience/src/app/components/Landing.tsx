@@ -16,7 +16,7 @@ function QuerySimulator() {
     avatarColor: string;
     title: string;
     reason: string;
-    visibility: 'Public' | 'Friends' | 'Private';
+    visibility: 'Public' | 'Private' | 'Friends';
     value: string;
   }>>([
     {
@@ -28,6 +28,46 @@ function QuerySimulator() {
       reason: 'Pushed 4 commits to cargo-lipo today.',
       visibility: 'Public',
       value: 'Open Source Contributor'
+    },
+    {
+      id: 'sofia-1',
+      type: 'suggestion',
+      from: 'Sofia M.',
+      avatarColor: 'bg-chart-3/10 text-chart-3 border-chart-3/20',
+      title: "Sofia says I'm funny.",
+      reason: 'Mentioned in text conversation yesterday.',
+      visibility: 'Friends',
+      value: "Sofia says I'm funny."
+    },
+    {
+      id: 'claude-init',
+      type: 'suggestion',
+      from: 'Claude',
+      avatarColor: 'bg-chart-5/10 text-chart-5 border-chart-5/20',
+      title: 'Systems thinking',
+      reason: 'Extracted from Tokyo design outline edits.',
+      visibility: 'Private',
+      value: 'Systems thinking'
+    },
+    {
+      id: 'spotify-1',
+      type: 'suggestion',
+      from: 'Spotify',
+      avatarColor: 'bg-chart-2/10 text-chart-2 border-chart-2/20',
+      title: 'Lofi & Ambient listener',
+      reason: 'Listened to 3 hours of focus music today.',
+      visibility: 'Public',
+      value: 'Lofi & Ambient listener'
+    },
+    {
+      id: 'calendly-1',
+      type: 'suggestion',
+      from: 'Calendly',
+      avatarColor: 'bg-chart-1/10 text-chart-1 border-chart-1/20',
+      title: 'Prefer afternoon meetings',
+      reason: '80% of booked events occur after 2 PM.',
+      visibility: 'Friends',
+      value: 'Prefer afternoon meetings'
     }
   ]);
 
@@ -137,6 +177,46 @@ function QuerySimulator() {
         reason: 'Pushed 4 commits to cargo-lipo today.',
         visibility: 'Public',
         value: 'Open Source Contributor'
+      },
+      {
+        id: 'sofia-1',
+        type: 'suggestion',
+        from: 'Sofia M.',
+        avatarColor: 'bg-chart-3/10 text-chart-3 border-chart-3/20',
+        title: "Sofia says I'm funny.",
+        reason: 'Mentioned in text conversation yesterday.',
+        visibility: 'Friends',
+        value: "Sofia says I'm funny."
+      },
+      {
+        id: 'claude-init',
+        type: 'suggestion',
+        from: 'Claude',
+        avatarColor: 'bg-chart-5/10 text-chart-5 border-chart-5/20',
+        title: 'Systems thinking',
+        reason: 'Extracted from Tokyo design outline edits.',
+        visibility: 'Private',
+        value: 'Systems thinking'
+      },
+      {
+        id: 'spotify-1',
+        type: 'suggestion',
+        from: 'Spotify',
+        avatarColor: 'bg-chart-2/10 text-chart-2 border-chart-2/20',
+        title: 'Lofi & Ambient listener',
+        reason: 'Listened to 3 hours of focus music today.',
+        visibility: 'Public',
+        value: 'Lofi & Ambient listener'
+      },
+      {
+        id: 'calendly-1',
+        type: 'suggestion',
+        from: 'Calendly',
+        avatarColor: 'bg-chart-1/10 text-chart-1 border-chart-1/20',
+        title: 'Prefer afternoon meetings',
+        reason: '80% of booked events occur after 2 PM.',
+        visibility: 'Friends',
+        value: 'Prefer afternoon meetings'
       }
     ]);
     setApprovedItems([
@@ -502,6 +582,29 @@ interface LandingProps {
 export function Landing({ onNavigate, isDark, onToggleDark }: LandingProps) {
   const [email, setEmail] = useState('');
 
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('reveal-active');
+          }
+        });
+      },
+      {
+        threshold: 0.05,
+        rootMargin: '0px 0px -40px 0px'
+      }
+    );
+
+    const elements = document.querySelectorAll('.reveal');
+    elements.forEach((el) => observer.observe(el));
+
+    return () => {
+      elements.forEach((el) => observer.unobserve(el));
+    };
+  }, []);
+
   return (
     <div className="min-h-screen bg-background text-foreground" style={{ fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif" }}>
 
@@ -529,13 +632,13 @@ export function Landing({ onNavigate, isDark, onToggleDark }: LandingProps) {
         {/* Left */}
         <div className="flex flex-col justify-center px-12 py-16 lg:pl-16 lg:pr-8">
           <div className="max-w-lg">
-            <h1 className="text-[clamp(36px,5.5vw,56px)] font-bold leading-[1.06] tracking-tight text-foreground mb-5">
+            <h1 className="reveal text-[clamp(36px,5.5vw,56px)] font-bold leading-[1.06] tracking-tight text-foreground mb-5">
               Stop reintroducing<br />yourself to the world.
             </h1>
-            <p className="text-base text-muted-foreground leading-relaxed mb-8 max-w-md">
+            <p className="reveal reveal-delay-100 text-base text-muted-foreground leading-relaxed mb-8 max-w-md">
               Claim <span className="text-foreground font-semibold">username.memact.me</span>: a personal address where apps, agents, and users read and write about you.
             </p>
-            <div className="flex flex-wrap gap-3">
+            <div className="reveal reveal-delay-200 flex flex-wrap gap-3">
               <button
                 onClick={() => onNavigate('auth', 'signup')}
                 className="flex items-center gap-2 bg-foreground text-background px-6 py-3 text-sm font-semibold hover:opacity-80 transition-opacity"
@@ -553,7 +656,7 @@ export function Landing({ onNavigate, isDark, onToggleDark }: LandingProps) {
         </div>
 
         {/* Right — query simulator */}
-        <div className="relative flex items-center justify-center px-8 py-16 lg:pl-4 lg:pr-12 bg-card/40">
+        <div className="reveal reveal-delay-300 relative flex items-center justify-center px-8 py-16 lg:pl-4 lg:pr-12 bg-card/40">
           <div className="w-full max-w-xl relative">
             <QuerySimulator />
           </div>
@@ -568,7 +671,7 @@ export function Landing({ onNavigate, isDark, onToggleDark }: LandingProps) {
             { title: 'Own your data.', body: 'Store your preferences, focus, and links in one place, not scattered across fifty apps.' },
             { title: 'Connect to apps.', body: 'When you open a new app, it reads allowed details from your address. You never start from zero.' },
           ].map((item, i) => (
-            <div key={item.title} className={`px-10 py-12 ${i < 2 ? 'border-b md:border-b-0 md:border-r border-border' : ''}`}>
+            <div key={item.title} className={`reveal reveal-delay-${i * 100} px-10 py-12 ${i < 2 ? 'border-b md:border-b-0 md:border-r border-border' : ''}`}>
               <div className="text-sm font-semibold text-foreground mb-2">{item.title}</div>
               <p className="text-sm text-muted-foreground leading-relaxed">{item.body}</p>
             </div>
@@ -579,7 +682,7 @@ export function Landing({ onNavigate, isDark, onToggleDark }: LandingProps) {
       {/* Suggestions section */}
       <section className="border-t border-border">
         <div className="grid grid-cols-1 lg:grid-cols-2">
-          <div className="px-10 py-14 lg:border-r border-border">
+          <div className="reveal px-10 py-14 lg:border-r border-border">
             <h2 className="text-2xl font-bold text-foreground mb-4 leading-snug tracking-tight">
               Let apps update you.
             </h2>
@@ -587,15 +690,15 @@ export function Landing({ onNavigate, isDark, onToggleDark }: LandingProps) {
               When a connected tool or collaborator notices a change in your stack or focus, they can suggest an update. You approve, edit, or reject it.
             </p>
             <ul className="space-y-2">
-              {['You own every profile card', 'Nothing changes without your permission', 'All edits are transparent'].map((t) => (
-                <li key={t} className="flex items-center gap-2.5 text-sm text-muted-foreground">
+              {['You own every profile card', 'Nothing changes without your permission', 'All edits are transparent'].map((t, idx) => (
+                <li key={t} className={`reveal reveal-delay-${(idx + 1) * 100} flex items-center gap-2.5 text-sm text-muted-foreground`}>
                   <Check size={13} className="text-accent shrink-0" />
                   {t}
                 </li>
               ))}
             </ul>
           </div>
-          <div className="px-10 py-14">
+          <div className="reveal reveal-delay-200 px-10 py-14">
             <SuggestionPreview />
           </div>
         </div>
@@ -604,29 +707,29 @@ export function Landing({ onNavigate, isDark, onToggleDark }: LandingProps) {
       {/* The URL section */}
       <section className="border-t border-border px-10 py-16 text-center">
         <div className="max-w-xl mx-auto">
-          <div className="text-[clamp(22px,4vw,48px)] font-bold tracking-tight text-foreground mb-4">
+          <div className="reveal text-[clamp(22px,4vw,48px)] font-bold tracking-tight text-foreground mb-4">
             <span className="text-muted-foreground">username.</span>memact.me
           </div>
-          <p className="text-sm text-muted-foreground leading-relaxed max-w-sm mx-auto mb-10">
+          <p className="reveal reveal-delay-100 text-sm text-muted-foreground leading-relaxed max-w-sm mx-auto mb-10">
             A secure, readable link for your digital self. Share it, connect it to apps, or keep it private.
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5 text-left max-w-4xl mx-auto">
-            <div className="p-5 bg-card/60 border border-border/80 rounded-sm">
+            <div className="reveal reveal-delay-200 p-5 bg-card/60 border border-border/80 rounded-sm">
               <div className="text-xs font-bold text-foreground mb-2">Paste it to AI agents</div>
               <p className="text-xs text-muted-foreground leading-relaxed">
                 Tell ChatGPT, Claude, or Cursor: <span className="font-mono text-[10px] bg-secondary/80 px-1.5 py-0.5 rounded-xs text-foreground font-semibold">"Here is my info: alex.memact.me"</span>. They read it and instantly adapt to you.
               </p>
             </div>
             
-            <div className="p-5 bg-card/60 border border-border/80 rounded-sm">
+            <div className="reveal reveal-delay-300 p-5 bg-card/60 border border-border/80 rounded-sm">
               <div className="text-xs font-bold text-foreground mb-2">Connect to apps</div>
               <p className="text-xs text-muted-foreground leading-relaxed">
                 When joining a new app, connect your link. The tool reads your allowed focus and preferences automatically, so you never start from zero.
               </p>
             </div>
 
-            <div className="p-5 bg-card/60 border border-border/80 rounded-sm">
+            <div className="reveal reveal-delay-400 p-5 bg-card/60 border border-border/80 rounded-sm">
               <div className="text-xs font-bold text-foreground mb-2">Share with connections</div>
               <p className="text-xs text-muted-foreground leading-relaxed">
                 Send your link to friends or collaborators. They can view your public notebook stream or authenticate to see "Friends Only" updates.
@@ -637,7 +740,7 @@ export function Landing({ onNavigate, isDark, onToggleDark }: LandingProps) {
       </section>
 
       {/* CTA — adaptive theme */}
-      <section className="px-10 py-20 border-t border-border bg-card">
+      <section className="reveal px-10 py-20 border-t border-border bg-card">
         <div className="max-w-xl mx-auto text-center">
           <h2 className="text-[clamp(26px,4vw,40px)] font-bold mb-3 tracking-tight leading-tight text-foreground">
             Stop starting from scratch.
