@@ -101,7 +101,27 @@ We have successfully evolved Memact to the **Notebook** model. All user-facing r
 - Cleanly resolved and merged **PR #19** (`added music category schema`) into `main`.
 - Merged **PR #26** (`Added SECURITY.md file`) into `main`.
 - Merged **PR #35** (`[FEATURE] : Husky implementation for commit linting`) into `main`.
-- Posted review feedback on **PR #36** (`feat: add movie-booking category schema`) detailing the required test coverage changes.
+- Merged **PR #36** (`feat: add movie-booking category schema`) into `main` after verifying the updated tests.
 
 #### Contributing Guidelines Update (`.github/CONTRIBUTING.md`, `Memact/CONTRIBUTING.md`)
 - Updated the organization's contributing guides to instruct contributors to leave a follow-up comment directly on their PRs so the maintainer receives an immediate notification for quicker reviews and merges.
+
+---
+
+## 8. Open PR Validation & Visibility Selector Refinement
+
+### Pull Request Check Results
+- Checked all active spine repositories and verified that **PR #36** (`feat: add movie-booking category schema`) in `Memact/Context` was the only open pull request.
+- Pushed tests were verified, and the PR has been successfully merged into the `main` branch. There are no remaining open PRs.
+
+### Visibility Selector Refinements ("Private/Public/Friends")
+- **Clean Pill Design**: Replaced the repetitive "Who can see this: " prefix on entries with a clean, borderless interactive pill displaying only the icon and active visibility (e.g. `Public`, `Friends`, or `Private`).
+- **Inbox Preview & Governance**: Added the visibility selector to suggestion cards in the Inbox tab. Users can now audit and customize an entry's visibility *before* approving it to their notebook.
+- **Form Integration**: Added a visibility dropdown selector to the "Add entry" form in the Himself/Yourself portal so users can choose visibility as they write new entries.
+- **Onboarding Seeding & Connection Simulation**:
+  - Integrated visibility selectors for both seeded entries in step 2 of the onboarding flow.
+  - Enhanced onboarding step 3's simulator to dynamically inspect and enforce visibility settings (e.g., hiding entries set to Friends or Private when queried by the third-party client).
+- **Theme Consistency**: Swapped raw Tailwind colors (`text-slate-400`) and element backgrounds with theme-aware CSS variables (`text-muted-foreground/60`, `bg-popover`, `text-popover-foreground`).
+- **Homepage Alignment**: Updated the homepage query simulator to display a miniature version of the chronological Notebook Stream (complete with visibility pills). Added explicit access status logs showing that third-party client queries resolve Public entries but receive `[Access Denied]` on Private entries.
+- **Vercel Readiness**: Added `vercel.json` configurations to both the root directory and the `Design Memact Product Experience` demo directory to configure Clean URLs and SPA routing rewrites.
+- **Production Validation**: Confirmed that the client app compiles cleanly into a production build (`dist/`) without errors.
