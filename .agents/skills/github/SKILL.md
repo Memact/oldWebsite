@@ -59,11 +59,17 @@ Follow this sequence to investigate a failing CI run:
 
 ## API for Advanced Queries
 
-The `gh api` command is useful for accessing data not available through other subcommands.
+The `gh api` command is useful for accessing data not available through other subcommands or for bypassing CLI-side validation limitations.
 
 Get PR with specific fields:
 ```bash
 gh api repos/owner/repo/pulls/55 --jq '.title, .state, .user.login'
+```
+
+### Direct Issue Assignment (Bypassing CLI Restrictions)
+If a contributor who has interacted with the repo (e.g., submitted a PR or commented) needs to be assigned to an issue, the standard `gh issue edit --add-assignee` command may fail with a "not found" error due to CLI-side validation limits. You can bypass this client-side restriction and assign them directly using the REST API:
+```bash
+gh api repos/{owner}/{repo}/issues/{issue_number} -X PATCH -F "assignees[]={username}"
 ```
 
 ## JSON Output
