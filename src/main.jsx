@@ -1877,7 +1877,7 @@ function App() {
               marginBottom: "32px",
               marginTop: 0
             }}>
-              We are currently rebuilding the Memact platform around our new Personal Address Protocol. While we transition, we invite you to preview our Website 2.0 demo.
+              We are currently rebuilding the Memact platform around our new Personal Address Protocol. While we transition, we invite you to preview our Website 2.0 demo. Please note that parts of this legacy website may be broken or out of date.
             </p>
 
             {/* Actions */}
