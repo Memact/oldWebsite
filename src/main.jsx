@@ -1834,57 +1834,50 @@ function App() {
           left: 0,
           right: 0,
           bottom: 0,
-          backgroundColor: "rgba(0, 1, 27, 0.82)",
-          backdropFilter: "blur(16px)",
-          WebkitBackdropFilter: "blur(16px)",
+          backgroundColor: "rgba(0, 1, 27, 0.72)",
+          backdropFilter: "blur(20px)",
+          WebkitBackdropFilter: "blur(20px)",
           zIndex: 99999,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
           padding: "24px",
-          fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif"
+          fontFamily: "\"Outfit\", \"Inter\", sans-serif"
         }}>
           <div style={{
-            backgroundColor: "#07082E",
-            border: "1px solid rgba(232, 233, 255, 0.08)",
-            borderRadius: "4px",
-            padding: "36px 32px",
+            background: "rgba(0, 1, 27, 0.85)",
+            border: "1px solid var(--border)",
+            borderRadius: "var(--radius-md)",
+            padding: "40px 32px",
             maxWidth: "460px",
             width: "100%",
-            boxShadow: "0 24px 60px rgba(0, 0, 0, 0.65)",
+            boxShadow: "0 24px 64px rgba(0, 0, 0, 0.75)",
             textAlign: "center"
           }}>
             {/* Logo */}
-            <div style={{ marginBottom: "24px", userSelect: "none" }}>
-              <span style={{
-                color: "#E8E9FF",
-                fontWeight: 800,
-                fontSize: "22px",
-                letterSpacing: "-0.5px"
-              }}>
-                memact<span style={{ color: "#5B6AFF" }}>.me</span>
-              </span>
+            <div style={{ marginBottom: "28px", display: "flex", justifyContent: "center", userSelect: "none" }}>
+              <img src="/logo.png" alt="Memact" style={{ height: "24px", width: "auto" }} />
             </div>
 
             {/* Content */}
             <h2 style={{
-              color: "#E8E9FF",
-              fontSize: "18px",
+              color: "var(--text)",
+              fontSize: "20px",
               fontWeight: 700,
-              lineHeight: 1.35,
+              lineHeight: 1.3,
               marginBottom: "12px",
               marginTop: 0
             }}>
               Under Redesign
             </h2>
             <p style={{
-              color: "#8788B8",
-              fontSize: "13px",
+              color: "var(--muted)",
+              fontSize: "13.5px",
               lineHeight: 1.6,
-              marginBottom: "28px",
+              marginBottom: "32px",
               marginTop: 0
             }}>
-              We are currently rebuilding the Memact platform around our new **Personal Address Protocol**. While we transition, we invite you to preview our Website 2.0 demo.
+              We are currently rebuilding the Memact platform around our new Personal Address Protocol. While we transition, we invite you to preview our Website 2.0 demo.
             </p>
 
             {/* Actions */}
@@ -1894,20 +1887,20 @@ function App() {
               gap: "10px"
             }}>
               <a 
-                href="https://github.com/Memact/Website-2.0"
-                target="_blank"
-                rel="noopener noreferrer"
+                href="https://memact.vercel.app"
                 style={{
-                  backgroundColor: "#5B6AFF",
-                  color: "#FFFFFF",
-                  fontSize: "13px",
+                  backgroundColor: "var(--text)",
+                  color: "var(--bg)",
+                  fontSize: "13.5px",
                   fontWeight: 600,
                   padding: "12.5px",
-                  borderRadius: "2px",
+                  borderRadius: "6px",
                   textDecoration: "none",
                   display: "block",
                   transition: "opacity 0.2s"
                 }}
+                onMouseOver={(e) => e.currentTarget.style.opacity = "0.9"}
+                onMouseOut={(e) => e.currentTarget.style.opacity = "1"}
               >
                 Go to Website 2.0 Demo
               </a>
@@ -1915,14 +1908,22 @@ function App() {
                 onClick={handleDismissRedesign}
                 style={{
                   backgroundColor: "transparent",
-                  color: "#8788B8",
-                  border: "1px solid rgba(232, 233, 255, 0.08)",
-                  fontSize: "13px",
+                  color: "var(--muted)",
+                  border: "1px solid var(--border)",
+                  fontSize: "13.5px",
                   fontWeight: 600,
                   padding: "12.5px",
-                  borderRadius: "2px",
+                  borderRadius: "6px",
                   cursor: "pointer",
                   transition: "all 0.2s"
+                }}
+                onMouseOver={(e) => {
+                  e.currentTarget.style.color = "var(--text)";
+                  e.currentTarget.style.borderColor = "var(--border-strong)";
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.color = "var(--muted)";
+                  e.currentTarget.style.borderColor = "var(--border)";
                 }}
               >
                 Continue to Legacy Site
