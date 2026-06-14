@@ -1693,6 +1693,8 @@ function App() {
         />
       ) : session && currentPage === "wiki" ? (
         <WikiPage
+          session={session}
+          client={client}
           app={connectRequest?.app_id && connectDetails?.app ? connectDetails.app : null}
           scopes={connectDetails?.scopes || scopes}
           categories={connectDetails?.activity_categories || policy?.activity_categories || {}}
@@ -1897,7 +1899,7 @@ function shouldOfferPasswordSetup(user) {
 
 function labelForPortalTab(page, accountType = ACCOUNT_TYPES.developer) {
   if (accountType === ACCOUNT_TYPES.user) {
-    if (page === "wiki" || page === "data" || page === "access") return "Yourself"
+    if (page === "wiki" || page === "data" || page === "access") return "Notebook"
     if (page === "account") return "Settings"
     if (page === "help") return "Help"
     if (page === "connect") return "Connect"

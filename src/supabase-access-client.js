@@ -643,6 +643,141 @@ export class SupabaseAccessClient {
       missing_categories: []
     }
   }
+
+  async listUserNotebook() {
+    const { data: userData, error: userError } = await this.supabase.auth.getUser()
+    if (userError) throw mapSupabaseRpcError(userError)
+    const user = userData?.user
+    if (!user?.id) throw new AccessApiError(401, "Please sign in again.", "invalid_session")
+
+    const [claimsRes, proposalsRes] = await Promise.all([
+      this.supabase.from("memact_memory_records").select("*").eq("user_id", user.id),
+      this.supabase.from("memact_wiki_proposals").select("*").eq("user_id", user.id).eq("status", "pending")
+    ])
+
+    if (claimsRes.error) throw mapSupabaseRpcError(claimsRes.error)
+    if (proposalsRes.error) throw mapSupabaseRpcError(proposalsRes.error)
+
+    return {
+      claims: claimsRes.data || [],
+      suggestions: proposalsRes.data || []
+    }
+  }
+
+  async createUserNotebookClaim(_session, body) {
+    const { data: userData, error: userError } = await this.supabase.auth.getUser()
+    if (userError) throw mapSupabaseRpcError(userError)
+    const user = userData?.user
+    if (!user?.id) throw new AccessApiError(401, "Please sign in again.", "invalid_session")
+
+    const now = new Date().toISOString()
+    const claim = {
+      user_id: user.id,
+      title: body.title,
+      category: body.category,
+      group: body.category,
+      subgroup: "General",
+      field_path: body.field_path || `user.manual.${Date.now()}`,
+      value: body.value,
+      visibility: body.visibility || "private",
+      source_type: "user",
+      source_label: "User added",
+      status: "approved",
+      user_verified: true,
+      confidence: 1.0,
+      created_at: now,
+      updated_at: now
+    }
+
+    const { data, error } = await this.supabase.from("memact_memory_records").insert(claim).select("*").single()
+    if (error) throw mapSupabaseRpcError(error)
+    return { claim: data }
+  }
+
+  async approveUserNotebookProposal(_session, proposalId) {
+    const { data: userData, error: userError } = await this.supabase.auth.getUser()
+    if (userError) throw mapSupabaseRpcError(userError)
+    const user = userData?.user
+    if (!user?.id) throw new AccessApiError(401, "Please sign in again.", "invalid_session")
+
+    const { data: proposal, error: getError } = await this.supabase
+      .from("memact_wiki_proposals")
+      .select("*")
+      .eq("entry_id", proposalId)
+      .eq("user_id", user.id)
+      .single()
+    if (getError) throw mapSupabaseRpcError(getError)
+
+    const now = new Date().toISOString()
+    const { error: updateError } = await this.supabase
+      .from("memact_wiki_proposals")
+      .update({ status: "approved", updated_at: now })
+      .eq("entry_id", proposalId)
+      .eq("user_id", user.id)
+    if (updateError) throw mapSupabaseRpcError(updateError)
+
+    const claim = {
+      user_id: user.id,
+      title: proposal.title,
+      category: proposal.category,
+      group: proposal.category,
+      subgroup: "General",
+      field_path: proposal.field_path || `app.${proposal.category}.${proposal.entry_id}`,
+      value: proposal.value || proposal.context || {},
+      visibility: "private",
+      source_app_id: proposal.app_id,
+      connection_id: proposal.connection_id,
+      source_type: "app",
+      source_label: proposal.source_app || "Connected app",
+      status: "approved",
+      user_verified: true,
+      confidence: proposal.confidence || 0.65,
+      created_at: now,
+      updated_at: now
+    }
+
+    const { data: claimData, error: claimError } = await this.supabase
+      .from("memact_memory_records")
+      .insert(claim)
+      .select("*")
+      .single()
+    if (claimError) throw mapSupabaseRpcError(claimError)
+
+    return { claim: claimData, proposal: { ...proposal, status: "approved" } }
+  }
+
+  async rejectUserNotebookProposal(_session, proposalId) {
+    const { data: userData, error: userError } = await this.supabase.auth.getUser()
+    if (userError) throw mapSupabaseRpcError(userError)
+    const user = userData?.user
+    if (!user?.id) throw new AccessApiError(401, "Please sign in again.", "invalid_session")
+
+    const now = new Date().toISOString()
+    const { data, error } = await this.supabase
+      .from("memact_wiki_proposals")
+      .update({ status: "rejected", updated_at: now })
+      .eq("entry_id", proposalId)
+      .eq("user_id", user.id)
+      .select("*")
+      .single()
+    if (error) throw mapSupabaseRpcError(error)
+    return { proposal: data }
+  }
+
+  async deleteUserNotebookClaim(_session, claimId) {
+    const { data: userData, error: userError } = await this.supabase.auth.getUser()
+    if (userError) throw mapSupabaseRpcError(userError)
+    const user = userData?.user
+    if (!user?.id) throw new AccessApiError(401, "Please sign in again.", "invalid_session")
+
+    const { error } = await this.supabase
+      .from("memact_memory_records")
+      .delete()
+      .eq("id", claimId)
+      .eq("user_id", user.id)
+    if (error) throw mapSupabaseRpcError(error)
+    return { success: true }
+  }
 }
 
 function mapSupabaseRpcError(error) {

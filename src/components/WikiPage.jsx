@@ -28,6 +28,8 @@ const VISIBILITY_OPTIONS = [
 ]
 
 export function WikiPage({
+  session,
+  client,
   app,
   categories,
   scopes,
@@ -53,24 +55,16 @@ export function WikiPage({
   const scopeOptions = optionRef.current.scopes
   const categoryOptions = optionRef.current.categories
   const hasEnoughSelection = safeRequestedScopes.length > 0 && safeRequestedCategories.length > 0
-  const [manualEntries, setManualEntries] = useState(() => {
+  const [claims, setClaims] = useState(() => {
     try {
-      const saved = localStorage.getItem("memact_manual_entries")
-      return saved ? JSON.parse(saved) : []
+      const manual = JSON.parse(localStorage.getItem("memact_manual_entries") || "[]")
+      const accepted = JSON.parse(localStorage.getItem("memact_accepted_proposals") || "[]")
+      return [...manual, ...accepted]
     } catch {
       return []
     }
   })
-  const [draft, setDraft] = useState(defaultDraft())
-  const [showAddMemory, setShowAddMemory] = useState(false)
-  const [acceptedProposals, setAcceptedProposals] = useState(() => {
-    try {
-      const saved = localStorage.getItem("memact_accepted_proposals")
-      return saved ? JSON.parse(saved) : []
-    } catch {
-      return []
-    }
-  })
+  const [suggestions, setSuggestions] = useState([])
   const [rejectedProposals, setRejectedProposals] = useState(() => {
     try {
       const saved = localStorage.getItem("memact_rejected_proposals")
@@ -79,30 +73,65 @@ export function WikiPage({
       return []
     }
   })
+  const [isLoading, setIsLoading] = useState(false)
 
+  // Sync to local storage only if session is absent
   useEffect(() => {
+    if (session) return
     try {
-      localStorage.setItem("memact_manual_entries", JSON.stringify(manualEntries))
+      const manual = claims.filter(e => e.source_type === "user")
+      const accepted = claims.filter(e => e.source_type !== "user")
+      localStorage.setItem("memact_manual_entries", JSON.stringify(manual))
+      localStorage.setItem("memact_accepted_proposals", JSON.stringify(accepted))
     } catch (e) {
-      console.error("Failed to save manual entries", e)
+      console.error("Failed to save claims to local storage", e)
     }
-  }, [manualEntries])
+  }, [claims, session])
 
   useEffect(() => {
-    try {
-      localStorage.setItem("memact_accepted_proposals", JSON.stringify(acceptedProposals))
-    } catch (e) {
-      console.error("Failed to save accepted proposals", e)
-    }
-  }, [acceptedProposals])
-
-  useEffect(() => {
+    if (session) return
     try {
       localStorage.setItem("memact_rejected_proposals", JSON.stringify(rejectedProposals))
     } catch (e) {
       console.error("Failed to save rejected proposals", e)
     }
-  }, [rejectedProposals])
+  }, [rejectedProposals, session])
+
+  // Load from backend if session is present
+  useEffect(() => {
+    if (!session || !client) return
+    let active = true
+    setIsLoading(true)
+    client.listUserNotebook(session)
+      .then((data) => {
+        if (!active) return
+        setClaims(data.claims || [])
+        const suggestionsMapped = (data.suggestions || []).map(p => ({
+          id: p.entry_id || p.id,
+          title: p.title,
+          category: p.category,
+          group: p.category,
+          subgroup: "General",
+          field_path: p.field_path || `app.${p.category}.${p.entry_id}`,
+          value: p.value || p.context || {},
+          visibility: "private",
+          source_type: "app",
+          source_label: p.source_app || "App",
+          source_detail: `Suggested by ${p.source_app || "app"}`,
+          status: p.status || "pending",
+          confidence: p.confidence || 0.65
+        }))
+        setSuggestions(suggestionsMapped)
+      })
+      .catch((err) => {
+        console.error("Failed to load user notebook", err)
+      })
+      .finally(() => {
+        if (active) setIsLoading(false)
+      })
+    return () => { active = false }
+  }, [session, client])
+
   const [wikiSearch, setWikiSearch] = useState("")
   const [goalText, setGoalText] = useState("")
   const [activeGoal, setActiveGoal] = useState(null)
@@ -136,52 +165,108 @@ export function WikiPage({
       : [...safeRequestedCategories, category]
     onUpdateSelection?.({ scopes: safeRequestedScopes, categories: nextCategories })
   }
-  const submitManualEntry = (event) => {
+  const submitManualEntry = async (event) => {
     event.preventDefault()
-    const entry = {
-      id: `local-${Date.now()}`,
+    const entryData = {
       title: draft.title.trim(),
       category: draft.category,
-      group: draft.category,
-      subgroup: "General",
-      field_path: `manual.${slugFieldPath(draft.category)}.${slugFieldPath(draft.title)}`,
       value: draft.value.trim(),
-      visibility: draft.visibility,
-      expires_at: draft.expires_at,
-      source_note: draft.source_note.trim(),
-      source_type: "user",
-      source_label: "Added by you",
-      source_detail: "Source: User-added",
-      status: "accepted",
-      user_verified: true,
-      confidence: "User verified",
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      competing_interpretations: [],
-      contradictions: []
+      field_path: `manual.${slugFieldPath(draft.category)}.${slugFieldPath(draft.title)}`,
+      visibility: draft.visibility
     }
-    if (!entry.title || !entry.value) return
-    setManualEntries((current) => [entry, ...current])
+    if (!entryData.title || !entryData.value) return
+
+    if (session && client) {
+      try {
+        const res = await client.createUserNotebookClaim(session, entryData)
+        if (res?.claim) {
+          setClaims((current) => [res.claim, ...current])
+        }
+      } catch (err) {
+        console.error("Failed to create manual entry", err)
+        alert("Failed to save entry: " + (err.message || err))
+      }
+    } else {
+      const entry = {
+        id: `local-${Date.now()}`,
+        ...entryData,
+        group: draft.category,
+        subgroup: "General",
+        source_type: "user",
+        source_label: "Added by you",
+        source_detail: "Source: User-added",
+        status: "accepted",
+        user_verified: true,
+        confidence: "User verified",
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        competing_interpretations: [],
+        contradictions: []
+      }
+      setClaims((current) => [entry, ...current])
+    }
     setDraft(defaultDraft())
     setShowAddMemory(false)
   }
   const updateDraft = (key, value) => setDraft((current) => ({ ...current, [key]: value }))
   const changeEntryVisibility = (id, visibility) => {
-    setManualEntries((current) => current.map((entry) => entry.id === id ? { ...entry, visibility } : entry))
+    setClaims((current) => current.map((entry) => entry.id === id ? { ...entry, visibility } : entry))
   }
-  const deleteEntry = (id) => {
-    setManualEntries((current) => current.filter((entry) => entry.id !== id))
+  const deleteEntry = async (id) => {
+    if (session && client) {
+      try {
+        await client.deleteUserNotebookClaim(session, id)
+        setClaims((current) => current.filter((entry) => entry.id !== id))
+      } catch (err) {
+        console.error("Failed to delete claim", err)
+        alert("Failed to delete entry: " + (err.message || err))
+      }
+    } else {
+      setClaims((current) => current.filter((entry) => entry.id !== id))
+    }
   }
-  const acceptProposal = (entry) => {
-    setAcceptedProposals((current) => [{ ...entry, status: "accepted", user_verified: true, accepted_at: new Date().toISOString(), updated_at: new Date().toISOString() }, ...current])
-    setRejectedProposals((current) => current.filter((id) => id !== entry.id))
+  const acceptProposal = async (entry) => {
+    if (session && client) {
+      try {
+        const res = await client.approveUserNotebookProposal(session, entry.id)
+        if (res?.claim) {
+          setClaims((current) => [res.claim, ...current])
+          setSuggestions((current) => current.filter((item) => item.id !== entry.id))
+        }
+      } catch (err) {
+        console.error("Failed to approve suggestion", err)
+        alert("Failed to approve suggestion: " + (err.message || err))
+      }
+    } else {
+      const accepted = {
+        ...entry,
+        status: "accepted",
+        user_verified: true,
+        accepted_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      }
+      setClaims((current) => [accepted, ...current])
+      setRejectedProposals((current) => current.filter((id) => id !== entry.id))
+    }
   }
-  const rejectProposal = (id) => {
-    setRejectedProposals((current) => Array.from(new Set([...current, id])))
-    setAcceptedProposals((current) => current.filter((entry) => entry.id !== id))
+  const rejectProposal = async (id) => {
+    if (session && client) {
+      try {
+        await client.rejectUserNotebookProposal(session, id)
+        setSuggestions((current) => current.filter((item) => item.id !== id))
+      } catch (err) {
+        console.error("Failed to reject suggestion", err)
+        alert("Failed to reject suggestion: " + (err.message || err))
+      }
+    } else {
+      setRejectedProposals((current) => Array.from(new Set([...current, id])))
+      setClaims((current) => current.filter((entry) => entry.id !== id))
+    }
   }
-  const visibleProposals = proposedEntries.filter((entry) => !rejectedProposals.includes(entry.id) && !acceptedProposals.some((item) => item.id === entry.id))
-  const visibleEntries = [...manualEntries, ...acceptedProposals]
+  const visibleProposals = app?.id
+    ? proposedEntries.filter((entry) => !rejectedProposals.includes(entry.id) && !claims.some((item) => item.id === entry.id))
+    : suggestions
+  const visibleEntries = claims
   const filteredEntries = filterWikiEntries(visibleEntries, wikiSearch)
   const groupedEntries = groupEntriesByContext(filteredEntries)
   const hasShareableEntries = visibleEntries.some((entry) => entry.visibility === "shareable")
@@ -261,7 +346,7 @@ export function WikiPage({
     <section className="panel wiki-page wiki-shell-panel">
       <div className="wiki-hero-panel">
         <div>
-          <h2>{app?.id ? `${appName}'s access to Yourself` : "What apps know about you"}</h2>
+          <h2>{app?.id ? `${appName}'s access to Your Notebook` : "What apps know about you"}</h2>
         </div>
         <div className="wiki-hero-actions">
           <button type="button" className="button wiki-add-button" onClick={openAddMemory}>
@@ -406,7 +491,7 @@ export function WikiPage({
             <div>
               <h3>Choose what this app can use</h3>
             </div>
-            <div className="transparency-summary" aria-label="Yourself selection summary">
+            <div className="transparency-summary" aria-label="Notebook selection summary">
               <span><strong>{safeRequestedScopes.length}</strong> Actions</span>
               <span><strong>{safeRequestedCategories.length}</strong> Activity types</span>
             </div>
@@ -515,7 +600,7 @@ export function WikiPage({
         </div>
       </section>
 
-      <section className="wiki-overview-grid" aria-label="Yourself overview">
+      <section className="wiki-overview-grid" aria-label="Notebook overview">
         <div className="wiki-overview-card">
           <span>Saved</span>
           <strong>{visibleEntries.length}</strong>

@@ -14,17 +14,17 @@ const START_FAQS = [
   },
   {
     question: "What is the basic flow?",
-    answer: "An app asks first. If the user allows it, the app can suggest memory or send specific app details for review. Context organizes those details, Yourself shows them, and the user decides what stays."
+    answer: "An app asks first. If the user allows it, the app can suggest memory or send specific app details for review. Context organizes those details, the Notebook shows them, and the user decides what stays."
   }
 ]
 
-const YOURSELF_FAQS = [
+const NOTEBOOK_FAQS = [
   {
-    question: "What is Yourself?",
+    question: "What is the Notebook?",
     answer: "It is the user's editable page of what apps know about them. Users can add details, review app suggestions, edit what is wrong, or delete what should not stay."
   },
   {
-    question: "Why is Yourself important?",
+    question: "Why is the Notebook important?",
     answer: "It gives users a readable place to see and correct what apps know. Without it, personalization stays hidden inside each app."
   },
   {
@@ -37,7 +37,7 @@ const YOURSELF_FAQS = [
   },
   {
     question: "What does \"private\" or \"shareable\" mean?",
-    answer: "Private stays only in Yourself. Shareable can be shared by link later. Private should be the default."
+    answer: "Private stays only in the Notebook. Shareable can be shared by link later. Private should be the default."
   }
 ]
 
@@ -71,7 +71,7 @@ const DEVELOPER_FAQS = [
   },
   {
     question: "Does Memact need a separate install?",
-    answer: "No. The core flow is app to Access to Context to Yourself to Memory. Apps can integrate through the SDK/API."
+    answer: "No. The core flow is app to Access to Context to Notebook to Memory. Apps can integrate through the SDK/API."
   }
 ]
 
@@ -104,8 +104,8 @@ export function LearnPanel() {
       </div>
 
       <div className="faq-section faq-section-advanced">
-        <p className="faq-section-title">Yourself</p>
-        {YOURSELF_FAQS.map((faq) => (
+        <p className="faq-section-title">The Notebook</p>
+        {NOTEBOOK_FAQS.map((faq) => (
           <FaqItem faq={faq} key={faq.question} />
         ))}
       </div>

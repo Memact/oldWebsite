@@ -9,11 +9,11 @@ const USER_BASIC_FAQS = [
     answer: "Memact helps you decide how apps know you, because your activity is not your identity."
   },
   {
-    question: "What is Yourself?",
-    answer: "Yourself is your editable memory page. You can add things yourself, approve what apps suggest, edit entries, delete them, or share selected parts later."
+    question: "What is the Notebook?",
+    answer: "The Notebook is your editable page about you. You can add things yourself, approve what apps suggest, edit entries, delete them, or share selected parts later."
   },
   {
-    question: "What can Yourself include?",
+    question: "What can the Notebook include?",
     answer: "It can include preferences, projects, reading habits, shopping interests, learning topics, work style, accessibility needs, usernames you prefer, and anything else you add or approve."
   },
   {
@@ -36,7 +36,7 @@ const USER_CONTROL_FAQS = [
     answer: "You can control which apps are connected, what they can use, what they can add, and whether they keep access."
   },
   {
-    question: "Can apps write to Yourself?",
+    question: "Can apps write to my Notebook?",
     answer: "Only if you allow it. Important entries can stay pending until you accept, edit, or reject them."
   },
   {
@@ -64,7 +64,7 @@ const DEVELOPER_BASIC_FAQS = [
   },
   {
     question: "What can my app see?",
-    answer: "Only what the user allowed for your app. You can see your app's access, API keys, and memory proposals, not the user's full Yourself page."
+    answer: "Only what the user allowed for your app. You can see your app's access, API keys, and memory proposals, not the user's full Notebook."
   },
   {
     question: "How do scopes and categories work?",

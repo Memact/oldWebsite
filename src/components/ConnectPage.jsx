@@ -52,7 +52,7 @@ export function ConnectPage({ connectRequest, connectDetails, loading, notice, s
               <small>Permissions and categories limit what this app can use.</small>
             </div>
             <div className="mini-row">
-              <strong>Yourself explains the details.</strong>
+              <strong>Your Notebook explains the details.</strong>
               <small>It shows what the app can add, what Memact may create, and what the app may receive.</small>
             </div>
             <div className="mini-row">
@@ -62,7 +62,7 @@ export function ConnectPage({ connectRequest, connectDetails, loading, notice, s
           </div>
           <div className="connect-link-row">
             <button type="button" className="learn-more-link connect-learn-more" onClick={onLearnMore}>Learn more</button>
-            <button type="button" className="button connect-learn-more" onClick={onWiki}>Yourself</button>
+            <button type="button" className="button connect-learn-more" onClick={onWiki}>Your Notebook</button>
           </div>
         </section>
 

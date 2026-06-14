@@ -99,6 +99,26 @@ export class AccessClient {
     return this.impl.connectApp(...args)
   }
 
+  listUserNotebook(...args) {
+    return this.impl.listUserNotebook(...args)
+  }
+
+  createUserNotebookClaim(...args) {
+    return this.impl.createUserNotebookClaim(...args)
+  }
+
+  approveUserNotebookProposal(...args) {
+    return this.impl.approveUserNotebookProposal(...args)
+  }
+
+  rejectUserNotebookProposal(...args) {
+    return this.impl.rejectUserNotebookProposal(...args)
+  }
+
+  deleteUserNotebookClaim(...args) {
+    return this.impl.deleteUserNotebookClaim(...args)
+  }
+
   verifyApiKey(...args) {
     return this.impl.verifyApiKey(...args)
   }

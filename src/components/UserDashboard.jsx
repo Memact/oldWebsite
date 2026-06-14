@@ -9,7 +9,7 @@ export function UserDashboard({ consents = [], apps = [], onRevokeConsent, isCon
       <section className="panel">
         <h2>Your connected apps</h2>
         {isConsentShell ? (
-          <p className="notice" role="status">This is a lightweight consent account. Finish account setup later to manage Yourself and settings.</p>
+          <p className="notice" role="status">This is a lightweight consent account. Finish account setup later to manage your Notebook and settings.</p>
         ) : null}
 
         <div className="user-consent-list">

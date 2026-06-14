@@ -117,6 +117,26 @@ export class HttpAccessClient {
     return this.post("/v1/connect/approve", body, session)
   }
 
+  listUserNotebook(session) {
+    return this.get("/v1/user/notebook", session)
+  }
+
+  createUserNotebookClaim(session, body) {
+    return this.post("/v1/user/notebook", body, session)
+  }
+
+  approveUserNotebookProposal(session, proposalId) {
+    return this.post(`/v1/user/notebook/${encodeURIComponent(proposalId)}/approve`, {}, session)
+  }
+
+  rejectUserNotebookProposal(session, proposalId) {
+    return this.post(`/v1/user/notebook/${encodeURIComponent(proposalId)}/reject`, {}, session)
+  }
+
+  deleteUserNotebookClaim(session, claimId) {
+    return this.delete(`/v1/user/notebook/${encodeURIComponent(claimId)}`, session)
+  }
+
   async verifyApiKey(apiKey, requiredScopes = [], requiredCategories = [], connectionId = "") {
     const result = await this.request("/v1/access/verify", {
       method: "POST",
