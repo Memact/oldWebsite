@@ -3,8 +3,8 @@ import { Landing }       from './components/Landing';
 import { IdentityView }  from './components/IdentityView';
 import { PublicProfile } from './components/PublicProfile';
 import { Auth }          from './components/Auth';
-import { FaqPage }       from './components/FaqPage';
 import { Onboarding }    from './components/Onboarding';
+import { supabase, toUiVisibility, toDbVisibility, formatTimeAgo } from '../supabase';
 
 export interface Entry {
   id: string;
@@ -15,25 +15,122 @@ export interface Entry {
   time: string;
 }
 
-type Page = 'landing' | 'identity' | 'public' | 'auth' | 'faq' | 'onboarding';
+type Page = 'landing' | 'identity' | 'public' | 'auth' | 'onboarding';
 
 export default function App() {
   const [page,   setPage]   = useState<Page>('landing');
-  const [isDark, setIsDark] = useState(false);
+  const [isDark, setIsDark] = useState(() => {
+    if (typeof window !== 'undefined' && window.matchMedia) {
+      const isLightPreferred = window.matchMedia('(prefers-color-scheme: light)').matches;
+      return !isLightPreferred;
+    }
+    return true;
+  });
   const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
   const [initialEmail, setInitialEmail] = useState('');
+  const [isClaimed, setIsClaimed] = useState(false);
+
+  // Dynamic Document Title based on current page
+  useEffect(() => {
+    if (page === 'landing') {
+      document.title = 'Memact | Home';
+    } else if (page === 'auth') {
+      document.title = authMode === 'login' ? 'Memact | Sign in' : 'Memact | Create account';
+    } else if (page === 'onboarding') {
+      document.title = 'Memact | Set up';
+    } else if (page === 'public') {
+      document.title = 'Memact | Profile';
+    }
+  }, [page, authMode]);
 
   // Global Record States
-  const [username, setUsername] = useState('alex');
-  const [fullName, setFullName] = useState('Alex Chen');
+  const [username, setUsername] = useState('sujay');
+  const [fullName, setFullName] = useState('Sujay Sudhir');
   const [entries, setEntries] = useState<Entry[]>([
-    { id: 'e1', content: 'Learning Model Context Protocol (MCP).', contributor: 'You', visibility: 'Private', starred: false, time: 'Just now' },
-    { id: 'e2', content: 'Building Memact address protocol beta.', contributor: 'You', visibility: 'Public', starred: true, time: '2h ago' },
-    { id: 'e3', content: 'Tokyo subway architecture research & essay.', contributor: 'Claude', visibility: 'Private', starred: false, time: '3h ago' },
-    { id: 'e4', content: 'Sofia says I am funny.', contributor: 'Sofia M.', visibility: 'Friends', starred: true, time: 'Yesterday' },
-    { id: 'e5', content: 'Minimalist typography and industrial brutalism.', contributor: 'You', visibility: 'Public', starred: false, time: '3 days ago' },
-    { id: 'e6', content: 'Run the Golden Gate trail.', contributor: 'You', visibility: 'Public', starred: false, time: '4 days ago' }
+    { id: 'e1', content: 'I am building Memact', contributor: 'You', visibility: 'Private', starred: true, time: 'Just now' },
+    { id: 'e2', content: 'I love Vibe Coding', contributor: 'You', visibility: 'Private', starred: false, time: 'Just now' }
   ]);
+
+  // Auth session listener
+  useEffect(() => {
+    if (!supabase) return;
+
+    const loadUserData = async (userId: string) => {
+      try {
+        const { data: profile } = await supabase
+          .from('memact_profiles')
+          .select('*')
+          .eq('id', userId)
+          .single();
+
+        if (profile) {
+          setUsername(profile.username);
+          setFullName(profile.full_name);
+
+          const { data: dbContributions } = await supabase
+            .from('memact_contributions')
+            .select('*')
+            .eq('user_id', userId)
+            .eq('status', 'approved');
+
+          if (dbContributions) {
+            setEntries(
+              dbContributions
+                .filter((c: any) => c.content && c.content.trim())
+                .map((c: any) => ({
+                  id: c.id,
+                  content: c.content,
+                  contributor: c.contributor_name,
+                  visibility: toUiVisibility(c.visibility),
+                  starred: c.is_starred,
+                  time: formatTimeAgo(c.created_at)
+                }))
+            );
+          }
+          setPage('identity');
+        } else {
+          setPage('onboarding');
+        }
+      } catch (err) {
+        console.error("Error loading user data from Supabase:", err);
+      }
+    };
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        const provider = session.user.app_metadata.provider;
+        if (provider === 'email') {
+          localStorage.setItem('memact_last_auth', 'native');
+        } else if (provider) {
+          localStorage.setItem('memact_last_auth', provider);
+        }
+        loadUserData(session.user.id);
+      }
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (session) {
+        const provider = session.user.app_metadata.provider;
+        if (provider === 'email') {
+          localStorage.setItem('memact_last_auth', 'native');
+        } else if (provider) {
+          localStorage.setItem('memact_last_auth', provider);
+        }
+        loadUserData(session.user.id);
+      } else {
+        setUsername('sujay');
+        setFullName('Sujay Sudhir');
+        // Reset to mock entries when logged out
+        setEntries([
+          { id: 'e1', content: 'I am building Memact', contributor: 'You', visibility: 'Private', starred: true, time: 'Just now' },
+          { id: 'e2', content: 'I love Vibe Coding', contributor: 'You', visibility: 'Private', starred: false, time: 'Just now' }
+        ]);
+        setPage('landing');
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   useEffect(() => {
     const html = document.documentElement;
@@ -58,7 +155,12 @@ export default function App() {
       )}
       {page === 'identity' && (
         <IdentityView
-          onBack={() => setPage('landing')}
+          onBack={() => {
+            if (supabase) {
+              supabase.auth.signOut();
+            }
+            setPage('landing');
+          }}
           onPublicView={() => setPage('public')}
           isDark={isDark}
           onToggleDark={toggleDark}
@@ -66,6 +168,8 @@ export default function App() {
           fullName={fullName}
           entries={entries}
           onUpdateEntries={setEntries}
+          isClaimed={isClaimed}
+          onUpgradeToManaged={() => setIsClaimed(false)}
         />
       )}
       {page === 'public'   && (
@@ -85,11 +189,19 @@ export default function App() {
       {page === 'auth'     && (
         <Auth
           onBack={() => setPage('landing')}
-          onSuccess={() => {
-            if (authMode === 'signup') {
-              setPage('onboarding');
-            } else {
+          onSuccess={(isClaimedSignUp, email, userHandle) => {
+            if (isClaimedSignUp) {
+              setIsClaimed(true);
+              setUsername(userHandle || 'alex');
+              setFullName(email ? email.split('@')[0] : 'Alex Chen');
               setPage('identity');
+            } else {
+              setIsClaimed(false);
+              if (authMode === 'signup') {
+                setPage('onboarding');
+              } else {
+                setPage('identity');
+              }
             }
           }}
           isDark={isDark}
@@ -101,13 +213,61 @@ export default function App() {
       {page === 'onboarding' && (
         <Onboarding
           onBack={() => setPage('auth')}
-          onComplete={(user, name, focus, focusVis, prefs, prefsVis) => {
+          onComplete={async (user, name, focus, focusVis, prefs, prefsVis) => {
             setUsername(user);
             setFullName(name);
-            setEntries([
-              { id: 'e1', content: focus, contributor: 'You', visibility: focusVis, starred: true, time: 'Just now' },
-              { id: 'e2', content: prefs, contributor: 'You', visibility: prefsVis, starred: false, time: 'Just now' }
-            ]);
+
+            if (supabase) {
+              try {
+                const { data: { session } } = await supabase.auth.getSession();
+                const authUser = session?.user;
+                if (authUser) {
+                  await supabase.from('memact_profiles').insert({
+                    id: authUser.id,
+                    username: user,
+                    full_name: name
+                  });
+
+                  const contributionsToInsert = [];
+                  if (focus.trim()) {
+                    contributionsToInsert.push({
+                      user_id: authUser.id,
+                      content: focus.trim(),
+                      contributor_type: 'user',
+                      contributor_name: name,
+                      status: 'approved',
+                      visibility: toDbVisibility(focusVis),
+                      is_starred: true
+                    });
+                  }
+                  if (prefs.trim()) {
+                    contributionsToInsert.push({
+                      user_id: authUser.id,
+                      content: prefs.trim(),
+                      contributor_type: 'user',
+                      contributor_name: name,
+                      status: 'approved',
+                      visibility: toDbVisibility(prefsVis),
+                      is_starred: false
+                    });
+                  }
+                  if (contributionsToInsert.length > 0) {
+                    await supabase.from('memact_contributions').insert(contributionsToInsert);
+                  }
+                }
+              } catch (err) {
+                console.error("Error completing onboarding in Supabase:", err);
+              }
+            }
+
+            const initialEntries = [];
+            if (focus.trim()) {
+              initialEntries.push({ id: 'e1', content: focus.trim(), contributor: 'You', visibility: focusVis, starred: true, time: 'Just now' });
+            }
+            if (prefs.trim()) {
+              initialEntries.push({ id: 'e2', content: prefs.trim(), contributor: 'You', visibility: prefsVis, starred: false, time: 'Just now' });
+            }
+            setEntries(initialEntries);
             setPage('identity');
           }}
           isDark={isDark}
@@ -115,13 +275,7 @@ export default function App() {
           initialEmail={initialEmail}
         />
       )}
-      {page === 'faq'      && (
-        <FaqPage
-          onBack={() => setPage('landing')}
-          isDark={isDark}
-          onToggleDark={toggleDark}
-        />
-      )}
+
     </>
   );
 }
