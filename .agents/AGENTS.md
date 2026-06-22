@@ -31,3 +31,6 @@ Do not revive retired repo flows.
 Do not bring back Intent as core product.
 Do not treat Capture, Inference, Extension, or Playground as current core.
 Do not make Memact an AI-wrapper product.
+
+# Commit Guidelines
+- Never commit or push changes as one giant commit. Break up changes into smaller, logical, and granular commits based on features or components modified.
