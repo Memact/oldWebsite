@@ -67,6 +67,25 @@ def fix_label_typos(repo, item_num, current_labels, item_type="issue"):
         else:
             print(f"  -> Failed to correct labels: {res_add.stderr.strip()}")
 
+def post_github_comment(repo, pr_num, body_msg):
+    """
+    Safely post a comment to a PR/issue using a temporary file to avoid shell truncation issues on Windows.
+    """
+    try:
+        temp_comment_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), f"temp_comment_{repo}_{pr_num}.md")
+        with open(temp_comment_path, "w", encoding="utf-8") as f:
+            f.write(body_msg)
+            
+        cmd_comment = f'gh pr comment {pr_num} -R Memact/{repo} -F "{temp_comment_path}"'
+        subprocess.run(cmd_comment, shell=True, capture_output=True)
+        
+        # Clean up
+        if os.path.exists(temp_comment_path):
+            os.remove(temp_comment_path)
+    except Exception as e:
+        print(f"Error posting comment to PR #{pr_num}: {e}")
+
+
 # Fetch all Context PRs (open and closed) to match dummy PRs
 context_prs = []
 print("Fetching all PRs from Memact/Context to match dummy PRs...")
@@ -162,8 +181,7 @@ for repo in repos:
                             print(f"    [SUCCESS] Labeled PR #{pr_num} with: {label_str}")
                             # Post engagement comment
                             body_msg = f"**SSoC26 Labeling:** This Pull Request has been automatically linked to the corresponding issue labels: `{label_str}`! Thank you for contributing!"
-                            cmd_comment = f'gh pr comment {pr_num} -R Memact/{repo} -b "{body_msg}"'
-                            subprocess.run(cmd_comment, shell=True, capture_output=True)
+                            post_github_comment(repo, pr_num, body_msg)
                         else:
                             print(f"    [FAILED] Could not label PR #{pr_num}: {res_pr_label.stderr.strip()}")
                 else:
@@ -201,14 +219,17 @@ for repo in repos:
                             # Check for references to the sub-repo and PR/issue number
                             ref_pattern = rf'(?:memact/)?{repo.lower()}#{pr_num}\b'
                             url_pattern = rf'github\.com/memact/{repo.lower()}/pull/{pr_num}\b'
+                            repo_pat = re.escape(repo.lower())
+                            robust_pattern = rf'{repo_pat}\s*(?:pr|issue|pull)?\s*#?\s*{pr_num}\b'
                             
                             matches_ref = False
-                            if re.search(ref_pattern, c_combined) or re.search(url_pattern, c_combined):
+                            if re.search(ref_pattern, c_combined) or re.search(url_pattern, c_combined) or re.search(robust_pattern, c_combined):
                                 matches_ref = True
                             else:
                                 for issue_num in referenced_issues:
                                     issue_ref_pattern = rf'(?:memact/)?{repo.lower()}#{issue_num}\b'
-                                    if re.search(issue_ref_pattern, c_combined):
+                                    robust_issue_pattern = rf'{repo_pat}\s*(?:pr|issue|pull)?\s*#?\s*{issue_num}\b'
+                                    if re.search(issue_ref_pattern, c_combined) or re.search(robust_issue_pattern, c_combined):
                                         matches_ref = True
                                         break
                                         
@@ -230,6 +251,7 @@ for repo in repos:
                         
                         # Apply labels to the dummy PR
                         c_pr_labels = [l["name"] for l in dummy_pr.get("labels", [])]
+                        fix_label_typos("Context", dummy_num, c_pr_labels, item_type="pr")
                         labels_to_add_to_dummy = [l for l in labels_to_add_dummy if l not in c_pr_labels]
                         
                         if labels_to_add_to_dummy:
@@ -250,8 +272,7 @@ for repo in repos:
                         already_success_commented = any(success_msg_prefix in b for b in comment_bodies)
                         if not already_success_commented:
                             body_msg = f"{success_msg_prefix} (#[Context#{dummy_num}](https://github.com/Memact/Context/pull/{dummy_num})) and have verified its linkage. Thank you!"
-                            cmd_comment = f'gh pr comment {pr_num} -R Memact/{repo} -b "{body_msg}"'
-                            subprocess.run(cmd_comment, shell=True, capture_output=True)
+                            post_github_comment(repo, pr_num, body_msg)
                             print(f"    [COMMENT] Posted dummy PR success comment on PR #{pr_num}.")
                     else:
                         # Warning comment if no dummy PR exists
@@ -259,8 +280,7 @@ for repo in repos:
                         already_warned = any(warning_msg_prefix in b for b in comment_bodies)
                         if not already_warned:
                             body_msg = f"{warning_msg_prefix} in the main [Context](https://github.com/Memact/Context) repository yet.\n\nBecause this contribution is in a sub-repository, you **must** open a dummy PR in `Memact/Context` linking to this PR (e.g., by referencing `Memact/{repo}#{pr_num}` in the title or description) for your contribution to be tracked and counted. Thank you!"
-                            cmd_comment = f'gh pr comment {pr_num} -R Memact/{repo} -b "{body_msg}"'
-                            subprocess.run(cmd_comment, shell=True, capture_output=True)
+                            post_github_comment(repo, pr_num, body_msg)
                             print(f"    [COMMENT] Posted dummy PR warning comment on PR #{pr_num}.")
                             
     except Exception as e:
