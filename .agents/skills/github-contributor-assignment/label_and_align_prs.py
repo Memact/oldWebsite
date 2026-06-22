@@ -115,7 +115,7 @@ for repo in repos:
                 fix_label_typos(repo, num, labels, item_type="issue")
         
         # 2. Fetch all open PRs in the repo
-        cmd_prs = f'gh pr list -R Memact/{repo} --state open --limit 100 --json number,title,body,labels'
+        cmd_prs = f'gh pr list -R Memact/{repo} --state open --limit 100 --json number,title,body,labels,author'
         res_prs = subprocess.run(cmd_prs, shell=True, capture_output=True, text=True, encoding='utf-8')
         if res_prs.returncode == 0 and res_prs.stdout:
             prs = json.loads(res_prs.stdout)
