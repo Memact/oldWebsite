@@ -14,9 +14,9 @@
     "npm": ">=10"
   },
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview",
+    "dev": "npm --prefix \"Design Memact Product Experience\" run dev",
+    "build": "npm --prefix \"Design Memact Product Experience\" run build",
+    "preview": "npm --prefix \"Design Memact Product Experience\" run preview",
     "test": "node --test"
   },
   "dependencies": {

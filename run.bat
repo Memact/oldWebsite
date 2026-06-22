@@ -38,9 +38,9 @@ if not exist "capture\node_modules" (
   if errorlevel 1 goto :fail
 )
 
-if not exist "interface\node_modules" (
+if not exist "Design Memact Product Experience\node_modules" (
   echo Installing Website dependencies...
-  call npm --prefix interface install
+  call npm --prefix "Design Memact Product Experience" install
   if errorlevel 1 goto :fail
 )
 
