@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Moon, Sun, X, Check, Plus, Globe, Eye, EyeOff, Trash2, Star, Sparkles, User, Settings, Lock, Users, ChevronDown } from 'lucide-react';
+import { Moon, Sun, X, Check, Plus, Globe, Eye, EyeOff, Trash2, Star, Sparkles, User, Settings, Lock, Users, ChevronDown, CornerDownLeft } from 'lucide-react';
 import textLogoLight from '../../imports/text_logo_nobg_light.png';
 import textLogoDark  from '../../imports/text_logo_nobg_dark.png';
 import { Entry } from '../App';
@@ -373,13 +373,24 @@ export function IdentityView({
 
             {/* Input to add entries directly */}
             <form onSubmit={handleAddCustomEntry} className="flex flex-col sm:flex-row gap-2.5 bg-card border border-border p-2 rounded-sm shadow-[0_4px_16px_rgba(0,0,0,0.01)] items-stretch sm:items-center w-full">
-              <input
-                type="text"
-                value={newEntryText}
-                onChange={(e) => setNewEntryText(e.target.value)}
-                placeholder="Write something..."
-                className="flex-1 w-full bg-secondary border border-border px-3.5 py-2.5 text-xs outline-none rounded-sm text-foreground placeholder:text-muted-foreground/35 font-medium"
-              />
+              <div className="relative flex-1 w-full">
+                <input
+                  type="text"
+                  value={newEntryText}
+                  onChange={(e) => setNewEntryText(e.target.value)}
+                  placeholder="Write something..."
+                  className="w-full bg-secondary border border-border pl-3.5 pr-9 py-2.5 text-xs outline-none rounded-sm text-foreground placeholder:text-muted-foreground/35 font-medium transition-all"
+                />
+                {newEntryText.trim().length > 0 && (
+                  <button
+                    type="submit"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 hover:bg-foreground/5 text-muted-foreground hover:text-foreground rounded-sm transition-all animate-[fadeIn_0.15s_ease-out]"
+                    aria-label="Submit entry"
+                  >
+                    <CornerDownLeft size={11} className="stroke-[2.5]" />
+                  </button>
+                )}
+              </div>
 
               <div className="flex items-center gap-2 justify-end sm:justify-start w-full sm:w-auto shrink-0 relative">
                 {/* Form visibility selector */}
