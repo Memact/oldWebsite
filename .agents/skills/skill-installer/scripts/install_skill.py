@@ -42,7 +42,7 @@ from detect_skills import detect
 
 # ── Configuration ──────────────────────────────────────────────────────────
 
-SKILLS_ROOT = Path(r"C:\Users\renat\skills")
+SKILLS_ROOT = SCRIPT_DIR.parent.parent.resolve()
 CLAUDE_SKILLS = SKILLS_ROOT / ".claude" / "skills"
 INSTALLER_DIR = SKILLS_ROOT / "skill-installer"
 DATA_DIR = INSTALLER_DIR / "data"

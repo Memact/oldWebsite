@@ -25,9 +25,9 @@ import re
 import zipfile
 from pathlib import Path
 
-# ── Configuration ──────────────────────────────────────────────────────────
-
-SKILLS_ROOT = Path(r"C:\Users\renat\skills")
+# Resolve paths relative to this script's location
+SCRIPT_DIR = Path(__file__).resolve().parent
+SKILLS_ROOT = SCRIPT_DIR.parent.parent.resolve()
 DEFAULT_OUTPUT = Path(os.path.expanduser("~")) / "Desktop"
 
 # Directories to exclude from ZIP

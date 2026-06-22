@@ -21,9 +21,9 @@ import re
 from pathlib import Path
 from datetime import datetime
 
-# ── Configuration ──────────────────────────────────────────────────────────
-
-SKILLS_ROOT = Path(r"C:\Users\renat\skills")
+# Resolve paths relative to this script's location
+SCRIPT_DIR = Path(__file__).resolve().parent
+SKILLS_ROOT = SCRIPT_DIR.parent.parent.resolve()
 USER_HOME = Path(os.path.expanduser("~"))
 TEMP_DIR = Path(os.environ.get("TEMP", os.environ.get("TMP", str(USER_HOME / "AppData" / "Local" / "Temp"))))
 

@@ -37,7 +37,9 @@ FORBIDDEN_PATTERNS = [
 MAX_SIZE_MB = 50
 MIN_DESCRIPTION_LENGTH = 50
 
-SKILLS_ROOT = Path(r"C:\Users\renat\skills")
+# Resolve paths relative to this script's location
+SCRIPT_DIR = Path(__file__).resolve().parent
+SKILLS_ROOT = SCRIPT_DIR.parent.parent.resolve()
 REGISTRY_PATH = SKILLS_ROOT / "agent-orchestrator" / "data" / "registry.json"
 
 
