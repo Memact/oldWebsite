@@ -67,6 +67,17 @@ def fix_label_typos(repo, item_num, current_labels, item_type="issue"):
         else:
             print(f"  -> Failed to correct labels: {res_add.stderr.strip()}")
 
+# Fetch all Context PRs (open and closed) to match dummy PRs
+context_prs = []
+print("Fetching all PRs from Memact/Context to match dummy PRs...")
+cmd_context_prs = 'gh pr list -R Memact/Context --state all --limit 150 --json number,title,body,author,labels,url'
+res_context_prs = subprocess.run(cmd_context_prs, shell=True, capture_output=True, text=True, encoding='utf-8')
+if res_context_prs.returncode == 0 and res_context_prs.stdout:
+    context_prs = json.loads(res_context_prs.stdout)
+    print(f"Loaded {len(context_prs)} Context PRs for dummy PR matching.")
+else:
+    print(f"Warning: Failed to fetch Context PRs: {res_context_prs.stderr}")
+
 for repo in repos:
     try:
         print(f"\nProcessing Memact/{repo}...")
@@ -107,6 +118,7 @@ for repo in repos:
                 # Deduplicate and convert to integers
                 referenced_issues = list(set(int(num) for num in issue_refs))
                 
+                labels_to_apply = []
                 if referenced_issues:
                     print(f"    Linked issue references found: {referenced_issues}")
                     
@@ -124,7 +136,6 @@ for repo in repos:
                                 linked_labels.extend([l["name"] for l in view_data.get("labels", [])])
                     
                     # Extract difficulty labels and SSoC26 tags
-                    labels_to_apply = []
                     for lbl in linked_labels:
                         lbl_lower = lbl.lower()
                         if lbl_lower == "ssoc26" and "SSoC26" not in pr_labels:
@@ -163,7 +174,95 @@ for repo in repos:
                         cmd_pr_label = f'gh pr edit {pr_num} -R Memact/{repo} --add-label "SSoC26"'
                         subprocess.run(cmd_pr_label, shell=True, capture_output=True)
                         print(f"    [SUCCESS] Added SSoC26 label to PR #{pr_num} based on title reference.")
+                        labels_to_apply.append("SSoC26")
+                
+                # --- Dummy PR Automation Check ---
+                if repo not in ["Context", ".github"]:
+                    pr_author = pr.get("author", {}).get("login", "")
+                    print(f"    Checking dummy PR requirement for author @{pr_author}...")
+                    
+                    # Fetch comments on the actual PR to check if we already commented
+                    cmd_comments = f'gh pr view {pr_num} -R Memact/{repo} --json comments'
+                    res_comments = subprocess.run(cmd_comments, shell=True, capture_output=True, text=True, encoding='utf-8')
+                    comments = []
+                    if res_comments.returncode == 0 and res_comments.stdout:
+                        comments = json.loads(res_comments.stdout).get("comments", [])
+                    comment_bodies = [c["body"] for c in comments]
+                    
+                    # Identify dummy PR
+                    dummy_pr = None
+                    for c_pr in context_prs:
+                        c_author = c_pr.get("author", {}).get("login", "")
+                        if c_author and c_author.lower() == pr_author.lower():
+                            c_title = c_pr.get("title", "") or ""
+                            c_body = c_pr.get("body", "") or ""
+                            c_combined = f"{c_title} \n {c_body}".lower()
+                            
+                            # Check for references to the sub-repo and PR/issue number
+                            ref_pattern = rf'(?:memact/)?{repo.lower()}#{pr_num}\b'
+                            url_pattern = rf'github\.com/memact/{repo.lower()}/pull/{pr_num}\b'
+                            
+                            matches_ref = False
+                            if re.search(ref_pattern, c_combined) or re.search(url_pattern, c_combined):
+                                matches_ref = True
+                            else:
+                                for issue_num in referenced_issues:
+                                    issue_ref_pattern = rf'(?:memact/)?{repo.lower()}#{issue_num}\b'
+                                    if re.search(issue_ref_pattern, c_combined):
+                                        matches_ref = True
+                                        break
+                                        
+                            if matches_ref or (repo.lower() in c_combined and f"#{pr_num}" in c_combined):
+                                dummy_pr = c_pr
+                                break
+                                
+                    # Determine SSoC26 & difficulty labels to apply to the dummy PR
+                    labels_to_add_dummy = []
+                    for lbl in list(set(pr_labels + labels_to_apply)):
+                        if lbl == "SSoC26" or lbl in ALLOWED_DIFFICULTIES:
+                            labels_to_add_dummy.append(lbl)
+                    if "SSoC26" not in labels_to_add_dummy:
+                        labels_to_add_dummy.append("SSoC26")
                         
+                    if dummy_pr:
+                        dummy_num = dummy_pr["number"]
+                        print(f"    [FOUND] Corresponding dummy PR: Memact/Context#{dummy_num}")
+                        
+                        # Apply labels to the dummy PR
+                        c_pr_labels = [l["name"] for l in dummy_pr.get("labels", [])]
+                        labels_to_add_to_dummy = [l for l in labels_to_add_dummy if l not in c_pr_labels]
+                        
+                        if labels_to_add_to_dummy:
+                            for lbl in labels_to_add_to_dummy:
+                                col = LABEL_COLORS.get(lbl, "ededed")
+                                subprocess.run(f'gh label create "{lbl}" -R Memact/Context --color "{col}"', shell=True, capture_output=True)
+                                
+                            label_str = ",".join(labels_to_add_to_dummy)
+                            cmd_dummy_label = f'gh pr edit {dummy_num} -R Memact/Context --add-label "{label_str}"'
+                            res_dummy = subprocess.run(cmd_dummy_label, shell=True, capture_output=True, text=True, encoding='utf-8')
+                            if res_dummy.returncode == 0:
+                                print(f"    [SUCCESS] Labeled dummy PR Memact/Context#{dummy_num} with: {label_str}")
+                            else:
+                                print(f"    [FAILED] Could not label dummy PR Memact/Context#{dummy_num}: {res_dummy.stderr.strip()}")
+                                
+                        # Comment success on the actual PR
+                        success_msg_prefix = "**SSoC26 Success:** We found your dummy PR in [Context]"
+                        already_success_commented = any(success_msg_prefix in b for b in comment_bodies)
+                        if not already_success_commented:
+                            body_msg = f"{success_msg_prefix} (#[Context#{dummy_num}](https://github.com/Memact/Context/pull/{dummy_num})) and have verified its linkage. Thank you!"
+                            cmd_comment = f'gh pr comment {pr_num} -R Memact/{repo} -b "{body_msg}"'
+                            subprocess.run(cmd_comment, shell=True, capture_output=True)
+                            print(f"    [COMMENT] Posted dummy PR success comment on PR #{pr_num}.")
+                    else:
+                        # Warning comment if no dummy PR exists
+                        warning_msg_prefix = "**SSoC26 Warning:** We noticed that you haven't created a corresponding dummy PR"
+                        already_warned = any(warning_msg_prefix in b for b in comment_bodies)
+                        if not already_warned:
+                            body_msg = f"{warning_msg_prefix} in the main [Context](https://github.com/Memact/Context) repository yet.\n\nBecause this contribution is in a sub-repository, you **must** open a dummy PR in `Memact/Context` linking to this PR (e.g., by referencing `Memact/{repo}#{pr_num}` in the title or description) for your contribution to be tracked and counted. Thank you!"
+                            cmd_comment = f'gh pr comment {pr_num} -R Memact/{repo} -b "{body_msg}"'
+                            subprocess.run(cmd_comment, shell=True, capture_output=True)
+                            print(f"    [COMMENT] Posted dummy PR warning comment on PR #{pr_num}.")
+                            
     except Exception as e:
         print(f"Error checking Memact/{repo}: {e}")
 
