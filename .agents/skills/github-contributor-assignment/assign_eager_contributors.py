@@ -43,8 +43,8 @@ for repo in repos:
             issues_data = json.loads(res_issues.stdout)
             for issue in issues_data:
                 for a in issue.get("assignees", []):
-                    login = a["login"]
-                    active_assignments[login] = active_assignments.get(login, 0) + 1
+                    login_lower = a["login"].lower()
+                    active_assignments[login_lower] = active_assignments.get(login_lower, 0) + 1
     except Exception as e:
         print(f"Error during pre-scan of Memact/{repo}: {e}")
 
@@ -141,8 +141,8 @@ for repo in repos:
                 if creator and creator.lower() not in ["keepsloading", "github-actions", "memact"]:
                     if creator.lower() in ["prasiddhi-105", "archita-29"]:
                         print(f"  -> Skipping creator assignment to @{creator} (prasiddhi/archita blocklist).")
-                    elif active_assignments.get(creator, 0) >= 2:
-                        print(f"  -> Skipping creator assignment to @{creator} (already has {active_assignments.get(creator)} active assignments).")
+                    elif active_assignments.get(creator.lower(), 0) >= 2:
+                        print(f"  -> Skipping creator assignment to @{creator} (already has {active_assignments[creator.lower()]} active assignments).")
                     else:
                         target_assignee = creator
                         print(f"  -> Created by contributor. Target assignee: @{target_assignee}")
@@ -170,8 +170,8 @@ for repo in repos:
                                 if author.lower() in ["prasiddhi-105", "archita-29"]:
                                     print(f"  -> Skipping commenter @{author} (prasiddhi/archita blocklist).")
                                     continue
-                                if active_assignments.get(author, 0) >= 2:
-                                    print(f"  -> Skipping commenter @{author} (already has {active_assignments.get(author)} active assignments).")
+                                if active_assignments.get(author.lower(), 0) >= 2:
+                                    print(f"  -> Skipping commenter @{author} (already has {active_assignments[author.lower()]} active assignments).")
                                     continue
                                 target_assignee = author
                                 print(f"  -> First requester in comments: @{target_assignee}")
@@ -184,9 +184,9 @@ for repo in repos:
                     res_assign = subprocess.run(cmd_assign, shell=True, capture_output=True, text=True, encoding='utf-8')
                     if res_assign.returncode == 0:
                         print(f"  [SUCCESS] Assigned Memact/{repo}#{num} to @{target_assignee}")
-                        active_assignments[target_assignee] = active_assignments.get(target_assignee, 0) + 1
+                        active_assignments[target_assignee.lower()] = active_assignments.get(target_assignee.lower(), 0) + 1
                         # Comment on the issue notifying them
-                        body_msg = f"@[SUCCESS] @{target_assignee} maintainer assignment: this issue is yours for SSoC26! Looking forward to your PR!"
+                        body_msg = f"Hey @{target_assignee} 👋 You've been assigned this issue as part of SSoC26! Looking forward to your PR. Feel free to ask questions if you get stuck. Good luck!"
                         cmd_msg = f'gh issue comment {num} -R Memact/{repo} -b "{body_msg}"'
                         subprocess.run(cmd_msg, shell=True, capture_output=True, text=True, encoding='utf-8')
                     else:
