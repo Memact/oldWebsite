@@ -151,6 +151,33 @@ export class SupabaseAccessClient {
     return data && typeof data === "object" ? data : {}
   }
 
+  async contributions() {
+    return this.rpc("memact_list_contributions")
+  }
+
+  async approveContribution(_session, id, body = {}) {
+    return this.rpc("memact_approve_contribution", {
+      contribution_id_input: id,
+      text_override_input: body?.text || null
+    })
+  }
+
+  async rejectContribution(_session, id) {
+    return this.rpc("memact_reject_contribution", { contribution_id_input: id })
+  }
+
+  async editContribution(_session, id, body = {}) {
+    return this.rpc("memact_edit_contribution", {
+      contribution_id_input: id,
+      text_input: body?.text || ""
+    })
+  }
+
+  async deleteContribution(_session, id) {
+    return this.rpc("memact_delete_contribution", { contribution_id_input: id })
+  }
+
+
   async createApiKeyFallback(body) {
     const { data: userData, error: userError } = await this.supabase.auth.getUser()
     if (userError) throw mapSupabaseRpcError(userError)

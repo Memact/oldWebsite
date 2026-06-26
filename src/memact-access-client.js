@@ -14,71 +14,28 @@ export class AccessClient {
       : new HttpAccessClient(baseUrl)
   }
 
-  health(...args) {
-    return this.impl.health(...args)
-  }
+  health(...args) { return this.impl.health(...args) }
+  policy(...args) { return this.impl.policy(...args) }
+  signup(...args) { return this.impl.signup(...args) }
+  signin(...args) { return this.impl.signin(...args) }
+  me(...args) { return this.impl.me(...args) }
+  dashboard(...args) { return this.impl.dashboard(...args) }
+  apps(...args) { return this.impl.apps(...args) }
+  createApp(...args) { return this.impl.createApp(...args) }
+  deleteApp(...args) { return this.impl.deleteApp(...args) }
+  apiKeys(...args) { return this.impl.apiKeys(...args) }
+  createApiKey(...args) { return this.impl.createApiKey(...args) }
+  revokeApiKey(...args) { return this.impl.revokeApiKey(...args) }
+  consents(...args) { return this.impl.consents(...args) }
+  grantConsent(...args) { return this.impl.grantConsent(...args) }
+  getConnectApp(...args) { return this.impl.getConnectApp(...args) }
+  connectApp(...args) { return this.impl.connectApp(...args) }
+  verifyApiKey(...args) { return this.impl.verifyApiKey(...args) }
 
-  policy(...args) {
-    return this.impl.policy(...args)
-  }
-
-  signup(...args) {
-    return this.impl.signup(...args)
-  }
-
-  signin(...args) {
-    return this.impl.signin(...args)
-  }
-
-  me(...args) {
-    return this.impl.me(...args)
-  }
-
-  dashboard(...args) {
-    return this.impl.dashboard(...args)
-  }
-
-  apps(...args) {
-    return this.impl.apps(...args)
-  }
-
-  createApp(...args) {
-    return this.impl.createApp(...args)
-  }
-
-  deleteApp(...args) {
-    return this.impl.deleteApp(...args)
-  }
-
-  apiKeys(...args) {
-    return this.impl.apiKeys(...args)
-  }
-
-  createApiKey(...args) {
-    return this.impl.createApiKey(...args)
-  }
-
-  revokeApiKey(...args) {
-    return this.impl.revokeApiKey(...args)
-  }
-
-  consents(...args) {
-    return this.impl.consents(...args)
-  }
-
-  grantConsent(...args) {
-    return this.impl.grantConsent(...args)
-  }
-
-  getConnectApp(...args) {
-    return this.impl.getConnectApp(...args)
-  }
-
-  connectApp(...args) {
-    return this.impl.connectApp(...args)
-  }
-
-  verifyApiKey(...args) {
-    return this.impl.verifyApiKey(...args)
-  }
+  // ── Contributions (address page claims) ──────────────────
+  contributions(session) { return this.impl.contributions(session) }
+  approveContribution(session, id, body) { return this.impl.approveContribution(session, id, body) }
+  rejectContribution(session, id) { return this.impl.rejectContribution(session, id) }
+  editContribution(session, id, body) { return this.impl.editContribution(session, id, body) }
+  deleteContribution(session, id) { return this.impl.deleteContribution(session, id) }
 }

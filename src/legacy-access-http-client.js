@@ -111,6 +111,27 @@ export class HttpAccessClient {
     return result
   }
 
+  contributions(session) {
+    return this.get("/v1/contributions", session)
+  }
+
+  approveContribution(session, id, body = {}) {
+    return this.post(`/v1/contributions/${encodeURIComponent(id)}/approve`, body, session)
+  }
+
+  rejectContribution(session, id) {
+    return this.post(`/v1/contributions/${encodeURIComponent(id)}/reject`, {}, session)
+  }
+
+  editContribution(session, id, body = {}) {
+    return this.post(`/v1/contributions/${encodeURIComponent(id)}/edit`, body, session)
+  }
+
+  deleteContribution(session, id) {
+    return this.post(`/v1/contributions/${encodeURIComponent(id)}/delete`, {}, session)
+  }
+
+
   async get(path, session = "") {
     return this.request(path, { method: "GET", session })
   }
