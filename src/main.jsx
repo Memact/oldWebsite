@@ -11,12 +11,14 @@ import { getAuthRedirectUrl, isSupabaseConfigured, requireSupabase, supabase, SU
 import { hasDuplicateAppName } from "./app-name.js"
 import { defaultCategoriesForPolicy, defaultScopesForPolicy, normalizeSelectedCategories, normalizeSelectedScopes } from "./access-policy.js"
 import { detectAuthFlowFromUrl } from "./auth-flow-utils.js"
+import { AddressPage } from "./address-page.jsx"
 
 const ACCESS_ROUTE = "/Access"
 const ACCOUNT_ROUTE = "/Account"
 const HELP_ROUTE = "/Help"
 const CONNECT_ROUTE = "/connect"
-const KNOWN_PORTAL_ROUTES = new Set(["/", ACCESS_ROUTE, ACCOUNT_ROUTE, HELP_ROUTE, CONNECT_ROUTE])
+const ADDRESS_ROUTE = "/address"
+const KNOWN_PORTAL_ROUTES = new Set(["/", ACCESS_ROUTE, ACCOUNT_ROUTE, HELP_ROUTE, CONNECT_ROUTE, ADDRESS_ROUTE])
 
 function resolvePortalPathname(raw) {
   if (!raw || raw === "/") return "/"
@@ -810,6 +812,8 @@ function App() {
           onApprove={handleConnectApprove}
           onCancel={handleConnectCancel}
         />
+      ) : session && pathname === ADDRESS_ROUTE ? (
+        <AddressPage client={client} session={session} user={user} />
       ) : session ? (
         <Dashboard
           activeTab={dashboardTab}
